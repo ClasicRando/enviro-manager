@@ -17,3 +17,6 @@ plugins {
 }
 
 rootProject.name = "enviro-manager"
+include("web")
+include("core")
+include("conductor-worker")
