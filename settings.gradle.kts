@@ -3,6 +3,13 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    val ktorVersion: String by settings
+    val kotlinVersion: String by settings
+
+    plugins {
+        kotlin("jvm") version kotlinVersion
+        id("io.ktor.plugin") version ktorVersion
+    }
 }
 
 plugins {
