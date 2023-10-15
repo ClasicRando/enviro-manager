@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm")
     application
     id("com.google.devtools.ksp")
+    id("com.github.johnrengelman.shadow")
 }
 
 val conductorVersion: String by project
