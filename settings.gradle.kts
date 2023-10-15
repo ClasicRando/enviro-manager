@@ -5,10 +5,12 @@ pluginManagement {
     }
     val ktorVersion: String by settings
     val kotlinVersion: String by settings
+    val kspVersion: String by settings
 
     plugins {
         kotlin("jvm") version kotlinVersion
         id("io.ktor.plugin") version ktorVersion
+        id("com.google.devtools.ksp") version kspVersion
     }
 }
 
@@ -20,3 +22,4 @@ rootProject.name = "enviro-manager"
 include("web")
 include("core")
 include("conductor-worker")
+include("conductor-worker-ksp")

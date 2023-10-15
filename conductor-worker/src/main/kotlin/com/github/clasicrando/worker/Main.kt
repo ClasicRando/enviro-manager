@@ -1,6 +1,7 @@
 package com.github.clasicrando.worker
 
 import com.github.clasicrando.logging.logger
+import com.github.clasicrando.worker.ksp.GeneratedWorker
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer
 import com.netflix.conductor.client.http.TaskClient
 import io.github.oshai.kotlinlogging.KLogger
@@ -11,18 +12,13 @@ fun main(args: Array<String>) {
     val taskClient = TaskClient()
     taskClient.setRootURI("http://localhost:8080/api/")
 
-    val workerNamePrefix = ""
-    val task1Name = "task_1"
-    val workerThreadCount = mapOf(
-        task1Name to 1
+    val workers = listOf<GeneratedWorker>(
+        Task1Worker,
     )
-    val worker1 = SampleWorker(task1Name)
-
-    val workers = listOf(worker1)
+    val workerThreadCount = workers.associate { it.taskThreadCountEntry() }
     var configurer: TaskRunnerConfigurer? = null
     try {
         configurer = TaskRunnerConfigurer.Builder(taskClient, workers)
-            .withWorkerNamePrefix(workerNamePrefix)
             .withTaskThreadCount(workerThreadCount)
             .build()
         configurer.init()
