@@ -7,8 +7,10 @@ plugins {
 val ktorVersion: String by project
 
 dependencies {
+    implementation(project(":core"))
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
 }
 
 application {
