@@ -1,4 +1,4 @@
-insert into em.provinces as p (prov_code, country_code, name) values
+insert into em.provinces as p (country_code, prov_code, name) values
 ('US','AL','Alabama'),
 ('US','AK','Alaska'),
 ('US','AZ','Arizona'),

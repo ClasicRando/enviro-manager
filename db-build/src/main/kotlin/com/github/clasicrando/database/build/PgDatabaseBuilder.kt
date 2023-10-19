@@ -109,7 +109,33 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
             return
         }
 
+        if (databaseRefresh) {
+            val insertDirectory = databaseDirectory.resolve("inserts")
+            if (insertDirectory.notExists()) {
+                log.atError {
+                    message = "Could not find database inserts directory"
+                    payload = mapOf("directory" to insertDirectory)
+                }
+                return
+            }
 
+            val orderContents = insertDirectory.resolve("order.json")
+                .readText()
+            val files = Json.decodeFromString<List<String>>(orderContents)
+            for (file in files) {
+                val path = insertDirectory.resolve(file)
+                try {
+                    val fileContents = path.readText()
+                    executeAnonymousBlock(fileContents)
+                } catch (ex: Throwable) {
+                    log.atError {
+                        message = "Error during insert file execution"
+                        payload = mapOf("file" to path.fileName)
+                        cause = ex
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun runDbBuildEntry(directory: Path, dbBuildEntry: DbBuildEntry) {
