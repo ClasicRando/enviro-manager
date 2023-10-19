@@ -1,4 +1,4 @@
-insert into pipeline.pipelines as p (name, workflow_definition_name, pipeline_state) values
+insert into pipeline.workflows as p (name, workflow_definition_name, pipeline_state) values
 ('Default Collection', 'default-data-collection', 'collection'),
 ('Default Load', 'default-data-load', 'load'),
 ('Default Check', 'default-data-check', 'check'),

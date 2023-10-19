@@ -18,8 +18,8 @@ returns uuid
 security definer
 language sql
 as $$
-insert into users.users as u (full_name,username,password)
-values($1,$2,crypt($3, gen_salt('bf')))
+insert into em.users as u (full_name, username, password)
+values($1, $2, crypt($3, gen_salt('bf')))
 returning u.user_id
 $$;
 

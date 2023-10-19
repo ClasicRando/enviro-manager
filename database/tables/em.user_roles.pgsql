@@ -1,4 +1,4 @@
-create table if not exists users.user_roles (
+create table if not exists em.user_roles (
     user_id uuid not null references em.users(user_id)
         on update cascade
         on delete cascade,

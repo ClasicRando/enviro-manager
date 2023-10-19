@@ -5,6 +5,7 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
+        mavenLocal()
     }
     group = "com.github.clasicrando"
     version = "0.1"
@@ -13,13 +14,26 @@ allprojects {
 subprojects {
     apply(plugin = "kotlin")
 
-    val kotlinTestVersion: String by project
     val kotlinLoggingVersion: String by project
+    val slfj4Version: String by project
     val logbackVersion: String by project
+    val kotlinxCoroutineVersion: String by project
+    val kotlinxSerializationVersion: String by project
+    val kodeinVersion: String by project
+    val kotlinTestVersion: String by project
 
     dependencies {
         implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
+        implementation("org.slf4j:slf4j-api:$slfj4Version")
         implementation("ch.qos.logback:logback-classic:$logbackVersion")
+        // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutineVersion")
+        // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$kotlinxSerializationVersion")
+        // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$kotlinxSerializationVersion")
+        // https://mvnrepository.com/artifact/org.kodein.di/kodein-di-jvm
+        implementation("org.kodein.di:kodein-di-jvm:$kodeinVersion")
         testImplementation(kotlin("test", version = kotlinTestVersion))
     }
 

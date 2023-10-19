@@ -1,0 +1,328 @@
+{
+  "entries": [
+    {
+      "name": "schemas/data_check",
+      "dependencies": []
+    },
+    {
+      "name": "schemas/audit",
+      "dependencies": []
+    },
+    {
+      "name": "schemas/em",
+      "dependencies": []
+    },
+    {
+      "name": "schemas/pipeline",
+      "dependencies": []
+    },
+    {
+      "name": "functions/audit.if_modified_func",
+      "dependencies": [
+        "tables/audit.logged_actions",
+        "types/audit.audit_action"
+      ]
+    },
+    {
+      "name": "functions/data_check.check_array_not_blank_or_empty",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty"
+      ]
+    },
+    {
+      "name": "functions/data_check.check_not_blank_or_empty",
+      "dependencies": []
+    },
+    {
+      "name": "functions/em.create_data_source",
+      "dependencies": [
+        "tables/em.data_sources"
+      ]
+    },
+    {
+      "name": "functions/em.create_user",
+      "dependencies": [
+        "tables/em.users"
+      ]
+    },
+    {
+      "name": "functions/em.validate_user",
+      "dependencies": [
+        "tables/em.users"
+      ]
+    },
+    {
+      "name": "procedures/audit.audit_table",
+      "dependencies": [
+        "functions/audit.if_modified_func"
+      ]
+    },
+    {
+      "name": "procedures/em.add_user_role",
+      "dependencies": [
+        "tables/em.user_roles",
+        "tables/em.users"
+      ]
+    },
+    {
+      "name": "procedures/em.add_user_roles",
+      "dependencies": [
+        "tables/em.user_roles",
+        "tables/em.users"
+      ]
+    },
+    {
+      "name": "procedures/em.create_data_source_contact",
+      "dependencies": [
+        "tables/em.data_source_contacts"
+      ]
+    },
+    {
+      "name": "procedures/em.delete_data_source_contact",
+      "dependencies": [
+        "tables/em.data_source_contacts"
+      ]
+    },
+    {
+      "name": "procedures/em.update_data_source_contact",
+      "dependencies": [
+        "tables/em.data_source_contacts"
+      ]
+    },
+    {
+      "name": "procedures/em.reset_password",
+      "dependencies": [
+        "tables/em.users"
+      ]
+    },
+    {
+      "name": "procedures/em.revoke_user_role",
+      "dependencies": [
+        "tables/em.user_roles"
+      ]
+    },
+    {
+      "name": "procedures/em.update_data_source",
+      "dependencies": [
+        "tables/em.data_sources"
+      ]
+    },
+    {
+      "name": "procedures/em.update_user",
+      "dependencies": [
+        "tables/em.users"
+      ]
+    },
+    {
+      "name": "tables/audit.logged_actions",
+      "dependencies": [
+        "types/audit.audit_action"
+      ]
+    },
+    {
+      "name": "tables/em.applications",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty"
+      ]
+    },
+    {
+      "name": "tables/em.countries",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table"
+      ]
+    },
+    {
+      "name": "tables/em.data_source_contacts",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/em.data_sources"
+      ]
+    },
+    {
+      "name": "tables/em.data_sources",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/em.provinces",
+        "tables/em.countries",
+        "tables/em.users",
+        "tables/pipeline.record_warehouse_types",
+        "tables/pipeline.workflows"
+      ]
+    },
+    {
+      "name": "tables/em.plotting_method_types",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table"
+      ]
+    },
+    {
+      "name": "tables/em.provinces",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/em.countries"
+      ]
+    },
+    {
+      "name": "tables/em.user_roles",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/em.users"
+      ]
+    },
+    {
+      "name": "tables/em.users",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table"
+      ]
+    },
+    {
+      "name": "tables/pipeline.collect_types",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table"
+      ]
+    },
+    {
+      "name": "tables/pipeline.file_types",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.loader_types"
+      ]
+    },
+    {
+      "name": "tables/pipeline.generated_table_columns",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.source_tables"
+      ]
+    },
+    {
+      "name": "tables/pipeline.loader_types",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table"
+      ]
+    },
+    {
+      "name": "tables/pipeline.pipeline_runs",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/em.data_sources",
+        "tables/em.users",
+        "tables/pipeline.pipeline_states",
+        "types/pipeline.merge_type"
+      ]
+    },
+    {
+      "name": "tables/pipeline.pipeline_states",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table"
+      ]
+    },
+    {
+      "name": "tables/pipeline.plotting_fields",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.source_tables"
+      ]
+    },
+    {
+      "name": "tables/pipeline.plotting_methods",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.source_tables",
+        "tables/pipeline.pipeline_runs",
+        "tables/em.plotting_method_types"
+      ]
+    },
+    {
+      "name": "tables/pipeline.record_warehouse_types",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table"
+      ]
+    },
+    {
+      "name": "tables/pipeline.source_table_columns",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.source_tables"
+      ]
+    },
+    {
+      "name": "tables/pipeline.source_table_relationships",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.source_tables"
+      ]
+    },
+    {
+      "name": "tables/pipeline.source_tables",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.pipeline_runs",
+        "tables/pipeline.collect_types",
+        "tables/pipeline.loader_types"
+      ]
+    },
+    {
+      "name": "tables/pipeline.workflows",
+      "dependencies": [
+        "functions/data_check.check_not_blank_or_empty",
+        "procedures/audit.audit_table",
+        "tables/pipeline.pipeline_states"
+      ]
+    },
+    {
+      "name": "types/audit.audit_action",
+      "dependencies": []
+    },
+    {
+      "name": "types/pipeline.merge_type",
+      "dependencies": []
+    },
+    {
+      "name": "views/audit.v_tables_list",
+      "dependencies": []
+    },
+    {
+      "name": "views/em.v_data_sources",
+      "dependencies": [
+        "tables/em.data_sources",
+        "tables/em.provinces",
+        "tables/em.users",
+        "tables/pipeline.record_warehouse_types",
+        "tables/pipeline.workflows"
+      ]
+    },
+    {
+      "name": "views/em.v_users",
+      "dependencies": [
+        "tables/em.users",
+        "tables/em.user_roles"
+      ]
+    },
+    {
+      "name": "views/pipeline.v_generated_table_columns",
+      "dependencies": [
+        "tables/pipeline.generated_table_columns"
+      ]
+    }
+  ]
+}

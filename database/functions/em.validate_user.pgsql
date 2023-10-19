@@ -25,4 +25,4 @@ where
 $$;
 
 revoke all on function em.validate_user from public;
-grant execute on function em.validate_user to we_web;
+grant execute on function em.validate_user to em_web;
