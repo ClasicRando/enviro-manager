@@ -1,6 +1,6 @@
 create table if not exists em.data_sources (
     ds_id bigint primary key generated always as identity,
-    code text not null,
+    code text not null check (data_check.check_not_blank_or_empty(code)) unique,
     prov text references em.provinces (prov_code) match simple
         on update cascade
         on delete restrict,

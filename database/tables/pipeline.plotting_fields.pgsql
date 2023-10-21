@@ -1,5 +1,5 @@
 create table if not exists pipeline.plotting_fields (
-    st_id bigint primary key references pipeline.source_tables (st_id) match simple
+    st_id bigint references pipeline.source_tables (st_id) match simple
         on update cascade
         on delete cascade,
     merge_key text check(data_check.check_not_blank_or_empty(merge_key)),

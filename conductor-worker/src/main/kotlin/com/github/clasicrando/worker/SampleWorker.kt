@@ -4,7 +4,7 @@ import com.github.clasicrando.worker.ksp.Worker
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskResult
 
-@Worker("task_1", 1)
+@Worker(taskDefName = "task_1", threadCount = 1)
 fun task1(task: Task): TaskResult {
     val result = TaskResult(task)
     result.status = TaskResult.Status.COMPLETED

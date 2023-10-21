@@ -37,7 +37,7 @@ create table if not exists audit.logged_actions (
     -- 't' if audit event is from an FOR EACH STATEMENT trigger, 'f' for FOR EACH ROW
     statement_only boolean not null,
     -- UUID of the user who execute the change
-    user_id text
+    user_id uuid
 );
 
 create index if not exists logged_actions_relid_idx on audit.logged_actions(relid);

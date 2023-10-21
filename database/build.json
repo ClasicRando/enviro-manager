@@ -264,14 +264,6 @@
       ]
     },
     {
-      "name": "tables/pipeline.source_table_relationships",
-      "dependencies": [
-        "functions/data_check.check_not_blank_or_empty",
-        "procedures/audit.audit_table",
-        "tables/pipeline.source_tables"
-      ]
-    },
-    {
       "name": "tables/pipeline.source_tables",
       "dependencies": [
         "functions/data_check.check_not_blank_or_empty",
@@ -319,9 +311,18 @@
       ]
     },
     {
-      "name": "views/pipeline.v_generated_table_columns",
+      "name": "tables/em.report_table_columns",
       "dependencies": [
-        "tables/pipeline.generated_table_columns"
+        "tables/pipeline.generated_table_columns",
+        "tables/pipeline.source_tables",
+        "tables/pipeline.source_table_columns",
+        "tables/em.report_tables"
+      ]
+    },
+    {
+      "name": "tables/em.report_tables",
+      "dependencies": [
+        "tables/pipeline.source_tables"
       ]
     }
   ]

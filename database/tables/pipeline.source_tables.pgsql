@@ -10,7 +10,6 @@ create table if not exists pipeline.source_tables (
     qualified boolean not null default true,
     delimiter varchar(1) check (data_check.check_not_blank_or_empty(delimiter::text)),
     encoding text not null default 'utf8'::text check (data_check.check_not_blank_or_empty(encoding)),
-    sub_table text check (data_check.check_not_blank_or_empty(sub_table)),
     record_count integer not null default 0,
     file_id text not null check (file_id ~ '^F\d+$'),
     url text check (data_check.check_not_blank_or_empty(url)),
