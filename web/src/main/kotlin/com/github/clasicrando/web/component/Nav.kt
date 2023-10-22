@@ -80,7 +80,7 @@ private fun UL.userContext(userFullName: String?) {
         ul(classes = "dropdown-menu") {
             li {
                a(classes = "dropdown-item", href = "/logout") {
-                   hxBoost(true)
+                   hxBoost = true
                    +"Logout"
                }
             }
@@ -107,7 +107,7 @@ fun DIV.mainNav(user: User? = null) {
                 style = "--bs-scroll-height: 100px"
                 li(classes = "nav-item") {
                     a(classes = "nav-link", href = "/") {
-                        hxBoost(true)
+                        hxBoost = true
                         +"Home"
                     }
                 }

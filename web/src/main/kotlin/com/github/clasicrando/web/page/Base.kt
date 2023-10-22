@@ -9,7 +9,7 @@ import io.ktor.server.html.insert
 import io.ktor.utils.io.charsets.name
 import kotlinx.html.*
 
-class Base(
+open class Base(
     private val user: User? = null,
     private val stylesheetHref: String? = null,
     private val pageTitle: String? = null
