@@ -193,9 +193,10 @@ document.addEventListener('closeModal', (e) => {
 });
 
 document.addEventListener('createToast', (e) => {
-    const message = e.detail?.message;
+    const message = e.detail?.value;
     if (typeof message !== "string") {
         console.log('Could not create toast', e);
+        return;
     }
     const toast = new Toast(message);
     toast.show();

@@ -8,6 +8,7 @@ pluginManagement {
     val ktorVersion: String by settings
     val kspVersion: String by settings
     val shadowJarVersion: String by settings
+    val ktlintPluginVersion: String by settings
 
     plugins {
         kotlin("jvm") version kotlinVersion
@@ -15,6 +16,7 @@ pluginManagement {
         id("io.ktor.plugin") version ktorVersion
         id("com.google.devtools.ksp") version kspVersion
         id("com.github.johnrengelman.shadow") version shadowJarVersion
+        id("org.jlleitschuh.gradle.ktlint") version ktlintPluginVersion
     }
 }
 

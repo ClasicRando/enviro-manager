@@ -7,7 +7,7 @@ import kotlinx.html.HtmlTagMarker
 import kotlinx.html.TagConsumer
 import kotlinx.html.visitAndFinalize
 
-class NoScript(consumer: TagConsumer<*>)
+class NOSCRIPT(consumer: TagConsumer<*>)
     : HTMLTag(
         tagName = "noscript",
         consumer = consumer,
@@ -17,6 +17,6 @@ class NoScript(consumer: TagConsumer<*>)
     ), HtmlInlineTag
 
 @HtmlTagMarker
-fun HTML.noscript(content: String): Unit {
-    NoScript(this.consumer).visitAndFinalize(this.consumer) { +content }
+fun HTML.noscript(content: String) {
+    NOSCRIPT(this.consumer).visitAndFinalize(this.consumer) { +content }
 }

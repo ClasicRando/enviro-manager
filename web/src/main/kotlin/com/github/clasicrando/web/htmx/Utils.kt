@@ -8,6 +8,9 @@ private const val HX_ON = "hx-on"
 private const val HX_TRIGGER = "hx-trigger"
 private const val HX_GET = "hx-get"
 private const val HX_POST = "hx-post"
+private const val HX_PUT = "hx-put"
+private const val HX_PATCH = "hx-patch"
+private const val HX_DELETE = "hx-delete"
 private const val HX_INDICATOR = "hx-indicator"
 private const val HX_TARGET = "hx-target"
 
@@ -39,6 +42,24 @@ var FlowContent.hxPost
     get() = attributes[HX_POST]
     set(value) {
         value?.let { attributes[HX_POST] = value }
+    }
+
+var FlowContent.hxPut
+    get() = attributes[HX_PUT]
+    set(value) {
+        value?.let { attributes[HX_PUT] = value }
+    }
+
+var FlowContent.hxPatch
+    get() = attributes[HX_PATCH]
+    set(value) {
+        value?.let { attributes[HX_PATCH] = value }
+    }
+
+var FlowContent.hxDelete
+    get() = attributes[HX_DELETE]
+    set(value) {
+        value?.let { attributes[HX_DELETE] = value }
     }
 
 var FlowContent.hxIndicator

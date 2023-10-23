@@ -1,5 +1,8 @@
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+
 plugins {
     kotlin("jvm")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 allprojects {
@@ -13,6 +16,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     val kotlinLoggingVersion: String by project
     val slfj4Version: String by project
@@ -29,9 +33,13 @@ subprojects {
         // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutineVersion")
         // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$kotlinxSerializationVersion")
+        implementation(
+            "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$kotlinxSerializationVersion",
+        )
         // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$kotlinxSerializationVersion")
+        implementation(
+            "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$kotlinxSerializationVersion",
+        )
         // https://mvnrepository.com/artifact/org.kodein.di/kodein-di-jvm
         implementation("org.kodein.di:kodein-di-jvm:$kodeinVersion")
         testImplementation(kotlin("test", version = kotlinTestVersion))
@@ -39,6 +47,14 @@ subprojects {
 
     kotlin {
         jvmToolchain(11)
+    }
+
+    ktlint {
+        version.set("1.0.1")
+        reporters {
+            reporter(ReporterType.JSON)
+            reporter(ReporterType.HTML)
+        }
     }
 
     tasks.test {
@@ -50,17 +66,24 @@ subprojects {
                 org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED,
             )
             showStandardStreams = true
-            afterSuite(KotlinClosure2<TestDescriptor,TestResult,Unit>({ descriptor, result ->
-                if (descriptor.parent == null) {
-                    println("\nTest Result: ${result.resultType}")
-                    println("""
-                    Test summary: ${result.testCount} tests, 
-                    ${result.successfulTestCount} succeeded, 
-                    ${result.failedTestCount} failed, 
-                    ${result.skippedTestCount} skipped
-                """.trimIndent().replace("\n", ""))
-                }
-            }))
+            afterSuite(
+                KotlinClosure2<TestDescriptor, TestResult, Unit>(
+                    { descriptor, result ->
+                        if (descriptor.parent == null) {
+                            println("\nTest Result: ${result.resultType}")
+                            val message =
+                                """
+                                    Test summary: ${result.testCount} tests,
+                                    ${result.successfulTestCount} succeeded,
+                                    ${result.failedTestCount} failed,
+                                    ${result.skippedTestCount} skipped
+                                """.trimIndent()
+                                    .replace("\n", "")
+                            println(message)
+                        }
+                    },
+                ),
+            )
         }
         useJUnitPlatform()
     }

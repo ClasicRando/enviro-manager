@@ -9,7 +9,7 @@ enum class Role(val dbValue: String, val description: String) : Encode {
     Admin(dbValue = "admin", description = "All privileges granted"),
     CreateDataSource(
         dbValue = "create-data-source",
-        description = "Enables a user to create a new data source"
+        description = "Enables a user to create a new data source",
     ),
     CreatePipelineRun(
         dbValue = "create-pipeline-run",
@@ -30,7 +30,7 @@ enum class Role(val dbValue: String, val description: String) : Encode {
     PipelineQA(
         dbValue = "pipeline-qa",
         description = "Enables a user to execute a quality assurance check on data pipeline loads",
-    );
+    ),;
 
     override fun encode(preparedStatement: PreparedStatement, parameterIndex: Int) {
         preparedStatement.setString(parameterIndex, this.dbValue)

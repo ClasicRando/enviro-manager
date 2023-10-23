@@ -1,6 +1,7 @@
 package com.github.clasicrando.web.page
 
 import com.github.clasicrando.models.User
+import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.component.dataTable
 import kotlinx.html.th
 import kotlinx.html.tr
@@ -11,7 +12,7 @@ class Home(user: User) : Base(user) {
             dataTable(
                 id = "dataSources",
                 caption = "Data Sources",
-                dataSource = "/api/data-sources",
+                dataSource = apiV1Url("data-sources"),
             ) {
                 tr {
                     th { +"Id" }
@@ -25,6 +26,7 @@ class Home(user: User) : Base(user) {
                     th { +"Created" }
                     th { +"Updated By" }
                     th { +"Last Updated" }
+                    th { +"Actions" }
                 }
             }
         }

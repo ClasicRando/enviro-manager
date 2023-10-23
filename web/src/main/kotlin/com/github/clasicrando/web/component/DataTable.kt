@@ -2,13 +2,17 @@ package com.github.clasicrando.web.component
 
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
+import com.github.clasicrando.web.htmx.hxDelete
 import com.github.clasicrando.web.htmx.hxGet
 import com.github.clasicrando.web.htmx.hxIndicator
 import com.github.clasicrando.web.htmx.hxOn
+import com.github.clasicrando.web.htmx.hxPatch
 import com.github.clasicrando.web.htmx.hxPost
+import com.github.clasicrando.web.htmx.hxPut
 import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxTrigger
+import io.ktor.http.HttpMethod
 import io.ktor.server.html.insert
 import kotlinx.html.ButtonType
 import kotlinx.html.FlowContent
@@ -30,39 +34,31 @@ import kotlinx.html.tbody
 import kotlinx.html.td
 import kotlinx.html.thead
 import kotlinx.html.tr
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.OffsetDateTime
-import java.time.OffsetTime
-import java.time.format.DateTimeFormatter
 
 @HtmlTagMarker
 fun TR.dataCell(value: Any?) {
-    val content = when (value) {
-        null -> "-"
-        is Iterable<*> -> value.joinToString()
-        is Array<*> -> value.joinToString()
-        is OffsetDateTime -> value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        is OffsetTime -> value.format(DateTimeFormatter.ISO_OFFSET_TIME)
-        is LocalDateTime -> value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        is LocalDate -> value.format(DateTimeFormatter.ISO_LOCAL_DATE)
-        is LocalTime -> value.format(DateTimeFormatter.ISO_LOCAL_TIME)
-        else -> value.toString()
+    td {
+        +value.displayValue()
     }
-    +content
 }
 
 fun FlowContent.rowAction(
     title: String,
-    apiUrl: String,
+    url: String,
     icon: String,
+    httpMethod: HttpMethod = HttpMethod.Post,
     target: String? = null,
     swap: HxSwap? = null,
     style: String? = null,
 ) {
     button(classes = "btn btn-primary me-1") {
-        hxPost = apiUrl
+        when (httpMethod) {
+            HttpMethod.Get -> hxGet = url
+            HttpMethod.Post -> hxPost = url
+            HttpMethod.Put -> hxPut = url
+            HttpMethod.Patch -> hxPatch = url
+            HttpMethod.Delete -> hxDelete = url
+        }
         attributes["title"] = title
         hxTarget = target
         hxSwap(swap)

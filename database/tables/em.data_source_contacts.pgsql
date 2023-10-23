@@ -4,7 +4,7 @@ create table if not exists em.data_source_contacts (
         on update cascade
         on delete cascade,
     name text not null check(data_check.check_not_blank_or_empty(name)),
-    email text not null check(data_check.check_not_blank_or_empty(email)),
+    email text check(data_check.check_not_blank_or_empty(email)),
     website text check(data_check.check_not_blank_or_empty(website)),
     type text check(data_check.check_not_blank_or_empty(type)),
     notes text check(data_check.check_not_blank_or_empty(notes))

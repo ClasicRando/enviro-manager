@@ -27,9 +27,10 @@ class WorkerProcessor(
 
     inner class Visitor : KSVisitorVoid() {
         override fun visitValueParameter(valueParameter: KSValueParameter, data: Unit) {
-            val parameterType = valueParameter.type
-                .resolve()
-                .declaration
+            val parameterType =
+                valueParameter.type
+                    .resolve()
+                    .declaration
             val simpleName = parameterType.simpleName.asString()
             val packageName = parameterType.packageName.asString()
             check(simpleName == "Task" && packageName == "com.netflix.conductor.common.metadata.tasks") {
@@ -70,27 +71,29 @@ class WorkerProcessor(
                 packageName = parentClassPackage,
                 fileName = "${titleCaseName}Worker",
             )
-            file.appendText("""
+            file.appendText(
+                """
+                @file:Suppress("ktlint")
                 package $parentClassPackage
-                
+
                 import com.github.clasicrando.worker.ksp.GeneratedWorker
                 import com.netflix.conductor.common.metadata.tasks.Task
                 import com.netflix.conductor.common.metadata.tasks.TaskResult
-                
+
                 object $workerClassName : GeneratedWorker {
                     override val threadCount = $threadCount
-                
+
                     override fun getTaskDefName(): String {
                         return "${taskDefName.replace("\"", "\"\"")}"
                     }
-                    
+
                     override fun execute(task: Task?): TaskResult {
                         requireNotNull(task) { "Worker received a null task" }
                         return $functionName(task)
                     }
-                }
-                
-            """.trimIndent())
+                }""".trimIndent()
+            )
+            file.appendText("\n")
         }
 
         private fun OutputStream.appendText(str: String) {

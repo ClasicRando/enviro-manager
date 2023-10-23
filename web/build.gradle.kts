@@ -7,6 +7,7 @@ plugins {
 
 val postgresqlJdbcVersion: String by project
 val ktorVersion: String by project
+val kodeinVersion: String by project
 
 dependencies {
     implementation(project(":core"))
@@ -17,6 +18,8 @@ dependencies {
     ksp("com.github.snappy:snappy:0.1")
     // https://mvnrepository.com/artifact/org.postgresql/postgresql
     implementation("org.postgresql:postgresql:$postgresqlJdbcVersion")
+    // https://mvnrepository.com/artifact/org.kodein.di/kodein-di-jvm
+    implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:$kodeinVersion")
 }
 
 application {
