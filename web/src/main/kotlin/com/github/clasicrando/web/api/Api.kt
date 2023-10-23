@@ -15,35 +15,42 @@ import java.sql.Connection
 
 private const val API_V1_PREFIX = "/api/v1"
 
-fun apiV1Url(extra: String, queryParams: Map<String, String> = mapOf()): String = buildString {
-    append(API_V1_PREFIX)
-    append('/')
-    append(extra.trim('/'))
-    for ((key, value) in queryParams) {
-        append(key)
-        append('=')
-        append(URLEncoder.encode(value, Charsets.UTF_8))
-    }
-}
-
-fun Route.api() = route(API_V1_PREFIX) {
-    dataSources()
-}
-
-private fun Route.dataSources() = route("/data-sources") {
-    get {
-        val connection: Connection by closestDI().instance()
-        val dataSources = connection.use {
-            sqlCommand("select * from em.v_data_sources")
-                .querySuspend<DataSource>(connection)
-                .toList()
+fun apiV1Url(
+    extra: String,
+    queryParams: Map<String, String> = mapOf(),
+): String =
+    buildString {
+        append(API_V1_PREFIX)
+        append('/')
+        append(extra.trim('/'))
+        for ((key, value) in queryParams) {
+            append(key)
+            append('=')
+            append(URLEncoder.encode(value, Charsets.UTF_8))
         }
-        call.respondHtmx {
-            addHtml {
-                for (ds in dataSources) {
-                    dataSourceRow(ds)
+    }
+
+fun Route.api() =
+    route(API_V1_PREFIX) {
+        dataSources()
+    }
+
+private fun Route.dataSources() =
+    route("/data-sources") {
+        get {
+            val connection: Connection by closestDI().instance()
+            val dataSources =
+                connection.use {
+                    sqlCommand("select * from em.v_data_sources")
+                        .querySuspend<DataSource>(connection)
+                        .toList()
+                }
+            call.respondHtmx {
+                addHtml {
+                    for (ds in dataSources) {
+                        dataSourceRow(ds)
+                    }
                 }
             }
         }
     }
-}

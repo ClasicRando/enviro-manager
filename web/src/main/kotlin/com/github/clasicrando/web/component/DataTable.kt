@@ -130,7 +130,7 @@ inline fun FlowContent.dataTable(
     dataSource: String,
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
-    crossinline header: THEAD.() -> Unit
+    crossinline header: THEAD.() -> Unit,
 ) {
     val bodyId = "${id}Body"
     val hasSearch = search && dataSource.isNotBlank()
@@ -143,14 +143,21 @@ inline fun FlowContent.dataTable(
                         placeholder = "Search"
                         name = "search"
                         hxTrigger = "keyup changed delay:500ms"
-                        hxPost = "${dataSource}/search"
+                        hxPost = "$dataSource/search"
                         hxIndicator = ".htmx-indicator"
                         hxTarget = bodyId
                         attributes["aria-label"] = "Search"
                     }
                 }
             }
-            div(classes = if (hasSearch) { "btn-group" } else "btn-group ms-auto") {
+            div(
+                classes =
+                    if (hasSearch) {
+                        "btn-group"
+                    } else {
+                        "btn-group ms-auto"
+                    },
+            ) {
                 if (dataSource.isNotBlank()) {
                     button(type = ButtonType.button, classes = "btn btn-secondary") {
                         hxGet = dataSource
@@ -180,9 +187,8 @@ inline fun FlowContent.dataTable(
             caption {
                 +caption
                 div(classes = "spinner-border htmx-indicator") {
-                   role = "status"
+                    role = "status"
                 }
-
             }
             thead(block = header)
             tbody {

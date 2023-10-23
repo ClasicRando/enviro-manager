@@ -7,15 +7,26 @@ import io.ktor.server.html.Placeholder
 import io.ktor.server.html.Template
 import io.ktor.server.html.insert
 import io.ktor.utils.io.charsets.name
-import kotlinx.html.*
+import kotlinx.html.FlowContent
+import kotlinx.html.HTML
+import kotlinx.html.body
+import kotlinx.html.div
+import kotlinx.html.head
+import kotlinx.html.id
+import kotlinx.html.lang
+import kotlinx.html.link
+import kotlinx.html.meta
+import kotlinx.html.script
+import kotlinx.html.title
 
 open class Base(
     private val user: User? = null,
     private val stylesheetHref: String? = null,
-    private val pageTitle: String? = null
+    private val pageTitle: String? = null,
 ) : Template<HTML> {
     val innerContent = Placeholder<FlowContent>()
 
+    @Suppress("ktlint:standard:max-line-length")
     override fun HTML.apply() {
         lang = "en-US"
         head {
@@ -58,7 +69,7 @@ open class Base(
                 id = "modals"
             }
             div(classes = "d-none") {
-                id="noDisplay"
+                id = "noDisplay"
             }
         }
     }

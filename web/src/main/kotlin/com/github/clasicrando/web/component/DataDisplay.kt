@@ -8,7 +8,6 @@ import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxTrigger
 import kotlinx.html.ButtonType
 import kotlinx.html.DIV
-import kotlinx.html.FIELDSET
 import kotlinx.html.FlowContent
 import kotlinx.html.TBODY
 import kotlinx.html.THEAD
@@ -45,7 +44,12 @@ fun <T> HtmxContentCollector.dataDisplayTable(
     }
 }
 
-fun DIV.dataField(fieldId: String, label: String, columnWidth: Int, data: Any) {
+fun DIV.dataField(
+    fieldId: String,
+    label: String,
+    columnWidth: Int,
+    data: Any,
+) {
     label(classes = "col-sm-1 col-form-label") {
         +label
         htmlFor = fieldId
@@ -58,7 +62,11 @@ fun DIV.dataField(fieldId: String, label: String, columnWidth: Int, data: Any) {
     }
 }
 
-fun FlowContent.dataDisplay(displayId: String, title: String, dataUrl: String) {
+fun FlowContent.dataDisplay(
+    displayId: String,
+    title: String,
+    dataUrl: String,
+) {
     div {
         div(classes = "btn-toolbar mt-1") {
             role = "toolbar"

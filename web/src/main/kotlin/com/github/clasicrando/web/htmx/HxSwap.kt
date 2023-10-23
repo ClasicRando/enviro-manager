@@ -13,25 +13,28 @@ data class HxSwap(
     val settleTime: Int = 20,
     val settleTimeUnit: DurationUnit = DurationUnit.MILLISECONDS,
 ) : Placeholder<FlowContent>() {
-    override fun toString(): String = buildString {
-        append(swapType.value)
-        if (swapTime != 0 || swapTimeUnit != DurationUnit.MILLISECONDS) {
-            val swapUnitName = when (swapTimeUnit) {
-                DurationUnit.MILLISECONDS -> "ms"
-                DurationUnit.SECONDS -> "s"
-                else -> error("Use of DurationUnit other than ms or s")
+    override fun toString(): String =
+        buildString {
+            append(swapType.value)
+            if (swapTime != 0 || swapTimeUnit != DurationUnit.MILLISECONDS) {
+                val swapUnitName =
+                    when (swapTimeUnit) {
+                        DurationUnit.MILLISECONDS -> "ms"
+                        DurationUnit.SECONDS -> "s"
+                        else -> error("Use of DurationUnit other than ms or s")
+                    }
+                append("$swapType$swapUnitName")
             }
-            append("$swapType$swapUnitName")
-        }
-        if (settleTime != 0 || settleTimeUnit != DurationUnit.MILLISECONDS) {
-            val settleUnitName = when (settleTimeUnit) {
-                DurationUnit.MILLISECONDS -> "ms"
-                DurationUnit.SECONDS -> "s"
-                else -> error("Use of DurationUnit other than ms or s")
+            if (settleTime != 0 || settleTimeUnit != DurationUnit.MILLISECONDS) {
+                val settleUnitName =
+                    when (settleTimeUnit) {
+                        DurationUnit.MILLISECONDS -> "ms"
+                        DurationUnit.SECONDS -> "s"
+                        else -> error("Use of DurationUnit other than ms or s")
+                    }
+                append("$settleTime$settleUnitName")
             }
-            append("$settleTime$settleUnitName")
         }
-    }
 
     init {
         this {
@@ -62,5 +65,5 @@ enum class SwapType(val value: String) {
     BeforeEnd("beforeend"),
     AfterEnd("afterend"),
     Delete("delete"),
-    None("none")
+    None("none"),
 }

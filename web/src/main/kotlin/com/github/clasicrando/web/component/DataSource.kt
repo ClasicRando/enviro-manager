@@ -4,7 +4,6 @@ import com.github.clasicrando.models.DataSource
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HtmxContentCollector
 import io.ktor.http.HttpMethod
-import kotlinx.html.FlowContent
 import kotlinx.html.fieldSet
 import kotlinx.html.i
 import kotlinx.html.td

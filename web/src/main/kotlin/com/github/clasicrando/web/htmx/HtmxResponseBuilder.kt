@@ -39,12 +39,13 @@ class HtmxResponseBuilder {
     fun addHtml(chunk: HtmxContentCollector.() -> Unit) {
         val placeholder = Placeholder<HtmxContentCollector>()
         finishTriggers()
-        responseContent = buildString {
-            placeholder {
-                this.chunk()
+        responseContent =
+            buildString {
+                placeholder {
+                    this.chunk()
+                }
+                appendHTML().insert(placeholder)
             }
-            appendHTML().insert(placeholder)
-        }
     }
 }
 
@@ -65,6 +66,6 @@ suspend fun ApplicationCall.respondHtmx(block: HtmxResponseBuilder.() -> Unit) {
             builder.responseContent,
             ContentType.Text.Html.withCharset(Charsets.UTF_8),
             HttpStatusCode.OK,
-        )
+        ),
     )
 }

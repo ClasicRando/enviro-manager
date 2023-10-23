@@ -2,7 +2,22 @@ package com.github.clasicrando.web.component
 
 import com.github.clasicrando.models.User
 import com.github.clasicrando.web.htmx.hxBoost
-import kotlinx.html.*
+import kotlinx.html.ButtonType
+import kotlinx.html.DIV
+import kotlinx.html.HtmlTagMarker
+import kotlinx.html.UL
+import kotlinx.html.a
+import kotlinx.html.button
+import kotlinx.html.div
+import kotlinx.html.i
+import kotlinx.html.id
+import kotlinx.html.img
+import kotlinx.html.li
+import kotlinx.html.nav
+import kotlinx.html.role
+import kotlinx.html.span
+import kotlinx.html.style
+import kotlinx.html.ul
 
 private fun UL.themeSelector() {
     li(classes = "nav-item dropdown") {
@@ -79,10 +94,10 @@ private fun UL.userContext(userFullName: String?) {
         }
         ul(classes = "dropdown-menu") {
             li {
-               a(classes = "dropdown-item", href = "/logout") {
-                   hxBoost = true
-                   +"Logout"
-               }
+                a(classes = "dropdown-item", href = "/logout") {
+                    hxBoost = true
+                    +"Logout"
+                }
             }
         }
     }
@@ -114,7 +129,7 @@ fun DIV.mainNav(user: User? = null) {
             }
             ul(classes = "navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll") {
                 style = "--bs-scroll-height: 100px;"
-                userContext(userFullName =  user?.fullName)
+                userContext(userFullName = user?.fullName)
                 themeSelector()
             }
         }

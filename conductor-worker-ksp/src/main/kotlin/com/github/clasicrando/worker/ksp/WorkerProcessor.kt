@@ -26,28 +26,37 @@ class WorkerProcessor(
     }
 
     inner class Visitor : KSVisitorVoid() {
-        override fun visitValueParameter(valueParameter: KSValueParameter, data: Unit) {
+        override fun visitValueParameter(
+            valueParameter: KSValueParameter,
+            data: Unit,
+        ) {
             val parameterType =
                 valueParameter.type
                     .resolve()
                     .declaration
             val simpleName = parameterType.simpleName.asString()
             val packageName = parameterType.packageName.asString()
-            check(simpleName == "Task" && packageName == "com.netflix.conductor.common.metadata.tasks") {
+            check(simpleName == "Task" && packageName == TASK_PACKAGE_NAME) {
                 "Parameter of worker function must be a Task"
             }
         }
 
-        override fun visitTypeReference(typeReference: KSTypeReference, data: Unit) {
+        override fun visitTypeReference(
+            typeReference: KSTypeReference,
+            data: Unit,
+        ) {
             val type = typeReference.resolve().declaration
             val simpleName = type.simpleName.asString()
             val packageName = type.packageName.asString()
-            check(simpleName == "TaskResult" && packageName == "com.netflix.conductor.common.metadata.tasks") {
+            check(simpleName == "TaskResult" && packageName == TASK_PACKAGE_NAME) {
                 "Return value of worker function must be a TaskResult"
             }
         }
 
-        override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
+        override fun visitFunctionDeclaration(
+            function: KSFunctionDeclaration,
+            data: Unit,
+        ) {
             check(function.parameters.size == 1)
             function.parameters[0].accept(this, data)
             function.returnType?.accept(this, data)
@@ -56,9 +65,10 @@ class WorkerProcessor(
             val functionContainingFile = function.containingFile!!
             val parentClassPackage = functionContainingFile.packageName.asString()
 
-            val annotationValues = function.annotations.first {
-                it.shortName.asString() == Worker::class.simpleName
-            }.arguments
+            val annotationValues =
+                function.annotations.first {
+                    it.shortName.asString() == Worker::class.simpleName
+                }.arguments
             val taskDefName = annotationValues[0].value as String
             val threadCount = annotationValues[1].value as Int
 
@@ -66,11 +76,12 @@ class WorkerProcessor(
             val titleCaseName = "${functionName.first().uppercase()}${functionName.substring(1)}"
             val workerClassName = "${titleCaseName}Worker"
 
-            val file = codeGenerator.createNewFile(
-                dependencies = Dependencies(true, function.containingFile!!),
-                packageName = parentClassPackage,
-                fileName = "${titleCaseName}Worker",
-            )
+            val file =
+                codeGenerator.createNewFile(
+                    dependencies = Dependencies(true, function.containingFile!!),
+                    packageName = parentClassPackage,
+                    fileName = "${titleCaseName}Worker",
+                )
             file.appendText(
                 """
                 @file:Suppress("ktlint")
@@ -91,7 +102,8 @@ class WorkerProcessor(
                         requireNotNull(task) { "Worker received a null task" }
                         return $functionName(task)
                     }
-                }""".trimIndent()
+                }
+                """.trimIndent(),
             )
             file.appendText("\n")
         }
@@ -99,5 +111,9 @@ class WorkerProcessor(
         private fun OutputStream.appendText(str: String) {
             this.write(str.toByteArray())
         }
+    }
+
+    companion object {
+        private const val TASK_PACKAGE_NAME = "com.netflix.conductor.common.metadata.tasks"
     }
 }

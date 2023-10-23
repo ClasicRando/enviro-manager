@@ -4,5 +4,6 @@ import com.netflix.conductor.client.worker.Worker
 
 interface GeneratedWorker : Worker {
     val threadCount: Int
+
     fun taskThreadCountEntry() = taskDefName to threadCount
 }

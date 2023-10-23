@@ -13,21 +13,25 @@ import kotlin.io.path.readText
 
 class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
     private val log: KLogger by logger()
+
     private suspend fun refreshDatabase() {
-        val query = """
+        val query =
+            """
             select string_agg(schema_name,', ')
             from information_schema.schemata
             where schema_owner = current_user
-        """.trimIndent()
-        val schemaNames = sqlCommand(query).queryScalarOrNullSuspend<String>(connection)
-            ?: return
+            """.trimIndent()
+        val schemaNames =
+            sqlCommand(query).queryScalarOrNullSuspend<String>(connection)
+                ?: return
         sqlCommand("drop schema if exists $schemaNames cascade").executeSuspend(connection)
     }
 
     private fun processTypeDefinition(block: String): String {
-        val newBlock = typeRegex.replace(
-            block,
-            """
+        val newBlock =
+            typeRegex.replace(
+                block,
+                """
                 if not exists (
                     select 1
                     from pg_namespace n
@@ -38,23 +42,25 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
                 ) then
                     create type $1.$2 as $3;
                 end if;
-            """.trimIndent(),
-        )
+                """.trimIndent(),
+            )
         return "do \$body\$\n$newBlock\n\$body\$;"
     }
 
     private fun formatAnonymousBlock(block: String): String {
-        val firstWord = block.split(Regex("\\s+"))
-            .firstOrNull()
-            ?: error("Cannot format empty block")
+        val firstWord =
+            block.split(Regex("\\s+"))
+                .firstOrNull()
+                ?: error("Cannot format empty block")
         return when (firstWord) {
             "do" -> block
             "begin", "declare" -> "do \$body\$\n$block\n\$body\$;"
-            else -> if (typeRegex.matches(block)) {
-                processTypeDefinition(block)
-            } else {
-                "do \$body\$\nbegin\n$block\nend;\n\$body\$;"
-            }
+            else ->
+                if (typeRegex.matches(block)) {
+                    processTypeDefinition(block)
+                } else {
+                    "do \$body\$\nbegin\n$block\nend;\n\$body\$;"
+                }
         }
     }
 
@@ -64,8 +70,9 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
     }
 
     override suspend fun buildDatabase() {
-        val databaseTarget = sqlCommand("select current_database()")
-            .queryScalarSuspend<String>(connection)
+        val databaseTarget =
+            sqlCommand("select current_database()")
+                .queryScalarSuspend<String>(connection)
         log.atInfo {
             message = "Target specified as $databaseTarget to rebuild"
         }
@@ -95,9 +102,10 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
             return
         }
 
-        val jsonFile = databaseDirectory.resolve("build.json")
-            .bufferedReader()
-            .readText()
+        val jsonFile =
+            databaseDirectory.resolve("build.json")
+                .bufferedReader()
+                .readText()
         val dbBuild = Json.decodeFromString<DbBuild>(jsonFile)
         try {
             dbBuild.run(databaseDirectory, this)
@@ -119,8 +127,9 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
                 return
             }
 
-            val orderContents = insertDirectory.resolve("order.json")
-                .readText()
+            val orderContents =
+                insertDirectory.resolve("order.json")
+                    .readText()
             val files = Json.decodeFromString<List<String>>(orderContents)
             for (file in files) {
                 val path = insertDirectory.resolve(file)
@@ -138,10 +147,14 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
         }
     }
 
-    override suspend fun runDbBuildEntry(directory: Path, dbBuildEntry: DbBuildEntry) {
-        val fileName = dbBuildEntry.name
-            .takeIf { it.endsWith(".pgsql") }
-            ?: "${dbBuildEntry.name}.pgsql"
+    override suspend fun runDbBuildEntry(
+        directory: Path,
+        dbBuildEntry: DbBuildEntry,
+    ) {
+        val fileName =
+            dbBuildEntry.name
+                .takeIf { it.endsWith(".pgsql") }
+                ?: "${dbBuildEntry.name}.pgsql"
         val path = directory.resolve(fileName)
         val block = path.readText()
         try {
