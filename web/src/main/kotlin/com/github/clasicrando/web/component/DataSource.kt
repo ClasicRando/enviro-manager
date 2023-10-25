@@ -1,6 +1,7 @@
 package com.github.clasicrando.web.component
 
 import com.github.clasicrando.models.DataSource
+import com.github.clasicrando.models.DataSourceWithContacts
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HtmxContentCollector
 import io.ktor.http.HttpMethod
@@ -36,10 +37,10 @@ fun HtmxContentCollector.dataSourceRow(dataSource: DataSource) {
     }
 }
 
-fun HtmxContentCollector.dataSourceDisplay(dataSource: DataSource) {
+fun HtmxContentCollector.dataSourceDisplay(data: DataSourceWithContacts) {
     fieldSet {
         row {
-            dataField(fieldId = "dsId", label = "ID", columnWidth = 2, data = dataSource.dsId)
+            dataField(fieldId = "dsId", label = "ID", columnWidth = 2, data = data.dataSource.dsId)
         }
     }
     dataDisplayTable(
@@ -54,7 +55,7 @@ fun HtmxContentCollector.dataSourceDisplay(dataSource: DataSource) {
                 th { +"Notes" }
             }
         },
-        items = dataSource.contacts,
+        items = data.contacts,
         rowBuilder = { contact ->
             tr {
                 dataCell(contact.contactId)

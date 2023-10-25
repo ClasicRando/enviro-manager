@@ -26,5 +26,4 @@ data class DataSource(
     val loadWorkflow: String,
     val checkWorkflow: String,
     val qaWorkflow: String,
-    val contacts: List<DataSourceContact> = emptyList(),
 )

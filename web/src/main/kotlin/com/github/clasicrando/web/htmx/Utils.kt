@@ -13,6 +13,8 @@ private const val HX_PATCH = "hx-patch"
 private const val HX_DELETE = "hx-delete"
 private const val HX_INDICATOR = "hx-indicator"
 private const val HX_TARGET = "hx-target"
+private const val HX_EXT = "hx-ext"
+private const val HTMX_JSON_ENCODING_EXT = "json-enc"
 
 var A.hxBoost
     get() = attributes[HX_BOOST]?.toBoolean()
@@ -72,4 +74,17 @@ var FlowContent.hxTarget
     get() = attributes[HX_TARGET]
     set(value) {
         value?.let { attributes[HX_TARGET] = value }
+    }
+
+var FlowContent.htmxJsonEncoding
+    get() = attributes[HX_EXT]?.contains(HTMX_JSON_ENCODING_EXT) ?: false
+    set(value) {
+        val ext = attributes[HX_EXT] ?: ""
+        val containsExtension = ext.contains(HTMX_JSON_ENCODING_EXT)
+        when {
+            value && containsExtension -> return
+            value -> attributes[HX_EXT] = "$ext,json-enc".trim(',')
+            !value && containsExtension -> ext.replace("json-enc", "").trim(',')
+            else -> return
+        }
     }

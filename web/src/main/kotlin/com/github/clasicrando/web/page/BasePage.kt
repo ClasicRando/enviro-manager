@@ -19,7 +19,7 @@ import kotlinx.html.meta
 import kotlinx.html.script
 import kotlinx.html.title
 
-open class Base(
+open class BasePage(
     private val user: User? = null,
     private val stylesheetHref: String? = null,
     private val pageTitle: String? = null,

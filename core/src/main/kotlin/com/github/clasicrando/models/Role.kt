@@ -45,7 +45,7 @@ enum class Role(val dbValue: String, val description: String) : Encode {
             fieldName: String,
         ): Role? {
             val roleName = row.getStringNullable(fieldName) ?: return null
-            return enumValues<Role>().firstOrNull { it.dbValue == roleName }
+            return Role.entries.firstOrNull { it.dbValue == roleName }
         }
     }
 }

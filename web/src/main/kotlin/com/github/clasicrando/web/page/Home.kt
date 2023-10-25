@@ -6,7 +6,7 @@ import com.github.clasicrando.web.component.dataTable
 import kotlinx.html.th
 import kotlinx.html.tr
 
-class Home(user: User) : Base(user) {
+class Home(user: User) : BasePage(user) {
     init {
         innerContent {
             dataTable(

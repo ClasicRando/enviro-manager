@@ -38,7 +38,6 @@ class HtmxResponseBuilder {
 
     fun addHtml(chunk: HtmxContentCollector.() -> Unit) {
         val placeholder = Placeholder<HtmxContentCollector>()
-        finishTriggers()
         responseContent =
             buildString {
                 placeholder {
@@ -47,11 +46,16 @@ class HtmxResponseBuilder {
                 appendHTML().insert(placeholder)
             }
     }
+
+    fun finishResponse() {
+        finishTriggers()
+    }
 }
 
 suspend fun ApplicationCall.respondHtmx(block: HtmxResponseBuilder.() -> Unit) {
     val builder = HtmxResponseBuilder()
     builder.block()
+    builder.finishResponse()
     builder.triggerData?.let {
         response.headers.append("HX-Trigger", it.toString())
     }
@@ -68,4 +72,9 @@ suspend fun ApplicationCall.respondHtmx(block: HtmxResponseBuilder.() -> Unit) {
             HttpStatusCode.OK,
         ),
     )
+}
+
+suspend fun ApplicationCall.respondHtmxLocation(location: String) {
+    response.headers.append("HX-Location", location)
+    respond(HttpStatusCode.OK)
 }
