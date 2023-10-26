@@ -7,5 +7,5 @@ import org.snappy.ksp.symbols.RowParser
 data class DataSourceWithContacts(
     @Flatten
     val dataSource: DataSource,
-    val contacts: List<DataSourceContact>,
+    val contacts: List<DataSourceContact>?,
 )

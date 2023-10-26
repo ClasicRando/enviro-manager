@@ -12,9 +12,9 @@ import kotlinx.html.FlowContent
 import kotlinx.html.TBODY
 import kotlinx.html.THEAD
 import kotlinx.html.button
-import kotlinx.html.caption
 import kotlinx.html.div
 import kotlinx.html.h3
+import kotlinx.html.h5
 import kotlinx.html.hr
 import kotlinx.html.i
 import kotlinx.html.id
@@ -32,8 +32,8 @@ fun <T> HtmxContentCollector.dataDisplayTable(
     rowBuilder: TBODY.(T) -> Unit,
 ) {
     div(classes = "table-responsive-sm") {
-        table(classes = "table table-stripped caption-top") {
-            caption { +caption }
+        h5(classes = "mt-4") { +caption }
+        table(classes = "table table-stripped") {
             thead(block = header)
             tbody {
                 for (item in items) {
@@ -44,19 +44,34 @@ fun <T> HtmxContentCollector.dataDisplayTable(
     }
 }
 
-fun DIV.dataField(
+inline fun FlowContent.dataGroup(
+    title: String,
+    topMargin: UInt = 2u,
+    crossinline content: DIV.() -> Unit,
+) {
+    h5(classes = "mt-$topMargin") {
+        +title
+    }
+    hr()
+    div {
+        content()
+    }
+}
+
+fun FlowContent.dataField(
     fieldId: String,
     label: String,
     columnWidth: Int,
-    data: Any,
+    data: Any?,
 ) {
-    label(classes = "col-sm-1 col-form-label") {
-        +label
+    label(classes = "col-sm-1 col-form-label text-center") {
         htmlFor = fieldId
+        +label
     }
     div(classes = "col-sm-$columnWidth") {
         input(classes = "data-field form-control") {
             value = data.displayValue()
+            readonly = true
             id = fieldId
         }
     }
@@ -67,6 +82,7 @@ fun FlowContent.dataDisplay(
     title: String,
     dataUrl: String,
 ) {
+    val contentId = "dataDisplay$displayId"
     div {
         div(classes = "btn-toolbar mt-1") {
             role = "toolbar"
@@ -76,7 +92,7 @@ fun FlowContent.dataDisplay(
                     attributes["title"] = "Refresh"
                     hxGet = dataUrl
                     hxTrigger = "click, load"
-                    hxTarget = "#$displayId"
+                    hxTarget = "#$contentId"
                     hxSwap(SwapType.InnerHtml)
                     i(classes = "fa-solid fa-refresh")
                 }
@@ -84,7 +100,7 @@ fun FlowContent.dataDisplay(
         }
         hr(classes = "border border-primary border-3 opacity-75 mt-1")
         div(classes = "my-1") {
-            id = displayId
+            id = contentId
         }
     }
 }

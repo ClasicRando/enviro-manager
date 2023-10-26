@@ -1,11 +1,10 @@
 package com.github.clasicrando.web.page
 
 import com.github.clasicrando.web.component.loginForm
+import kotlinx.html.FlowContent
 
 class LoginPage : BasePage(pageTitle = "Login") {
-    init {
-        innerContent {
-            loginForm()
-        }
+    override fun FlowContent.innerContent() {
+        loginForm()
     }
 }

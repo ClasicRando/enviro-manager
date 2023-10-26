@@ -5,18 +5,20 @@ import kotlinx.html.FlowContent
 import kotlin.time.DurationUnit
 
 private const val HX_SWAP = "hx-swap"
+private const val DEFAULT_SWAP_TIME = 0
+private const val DEFAULT_SETTLE_TIME = 20
 
 data class HxSwap(
     val swapType: SwapType,
-    val swapTime: Int = 0,
+    val swapTime: Int = DEFAULT_SWAP_TIME,
     val swapTimeUnit: DurationUnit = DurationUnit.MILLISECONDS,
-    val settleTime: Int = 20,
+    val settleTime: Int = DEFAULT_SETTLE_TIME,
     val settleTimeUnit: DurationUnit = DurationUnit.MILLISECONDS,
 ) : Placeholder<FlowContent>() {
     override fun toString(): String =
         buildString {
             append(swapType.value)
-            if (swapTime != 0 || swapTimeUnit != DurationUnit.MILLISECONDS) {
+            if (swapTime != DEFAULT_SWAP_TIME || swapTimeUnit != DurationUnit.MILLISECONDS) {
                 val swapUnitName =
                     when (swapTimeUnit) {
                         DurationUnit.MILLISECONDS -> "ms"
@@ -25,7 +27,7 @@ data class HxSwap(
                     }
                 append("$swapType$swapUnitName")
             }
-            if (settleTime != 0 || settleTimeUnit != DurationUnit.MILLISECONDS) {
+            if (settleTime != DEFAULT_SETTLE_TIME || settleTimeUnit != DurationUnit.MILLISECONDS) {
                 val settleUnitName =
                     when (settleTimeUnit) {
                         DurationUnit.MILLISECONDS -> "ms"
@@ -38,7 +40,7 @@ data class HxSwap(
 
     init {
         this {
-            attributes[HX_SWAP] = this.toString()
+            attributes[HX_SWAP] = this@HxSwap.toString()
         }
     }
 }

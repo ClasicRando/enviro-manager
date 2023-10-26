@@ -39,8 +39,127 @@ fun HtmxContentCollector.dataSourceRow(dataSource: DataSource) {
 
 fun HtmxContentCollector.dataSourceDisplay(data: DataSourceWithContacts) {
     fieldSet {
-        row {
-            dataField(fieldId = "dsId", label = "ID", columnWidth = 2, data = data.dataSource.dsId)
+        dataGroup(title = "Details") {
+            row {
+                dataField(
+                    fieldId = "dsId",
+                    label = "ID",
+                    columnWidth = 1,
+                    data = data.dataSource.dsId,
+                )
+                dataField(
+                    fieldId = "code",
+                    label = "Code",
+                    columnWidth = 1,
+                    data = data.dataSource.code,
+                )
+                dataField(
+                    fieldId = "prov",
+                    label = "Province",
+                    columnWidth = 1,
+                    data = data.dataSource.province,
+                )
+                dataField(
+                    fieldId = "country",
+                    label = "Country",
+                    columnWidth = 1,
+                    data = data.dataSource.country,
+                )
+                dataField(
+                    fieldId = "provLevel",
+                    label = "Prov Level?",
+                    columnWidth = 1,
+                    data = data.dataSource.provLevel,
+                )
+                dataField(
+                    fieldId = "searchRadius",
+                    label = "Search Radius",
+                    columnWidth = 1,
+                    data = data.dataSource.searchRadius,
+                )
+            }
+            row {
+                dataField(
+                    fieldId = "filesLocation",
+                    label = "Files Location",
+                    columnWidth = 3,
+                    data = data.dataSource.filesLocation,
+                )
+                dataField(
+                    fieldId = "reportingType",
+                    label = "Reporting Type",
+                    columnWidth = 1,
+                    data = data.dataSource.reportingType,
+                )
+                dataField(
+                    fieldId = "recordWarehouseType",
+                    label = "Record Warehouse Type",
+                    columnWidth = 1,
+                    data = data.dataSource.recordWarehouseType,
+                )
+                dataField(
+                    fieldId = "assignedUser",
+                    label = "Assigned User",
+                    columnWidth = 3,
+                    data = data.dataSource.assignedUser,
+                )
+            }
+            row {
+                dataField(
+                    fieldId = "createdBy",
+                    label = "Created By",
+                    columnWidth = 5,
+                    data = data.dataSource.createdBy,
+                )
+                dataField(
+                    fieldId = "created",
+                    label = "Created",
+                    columnWidth = 5,
+                    data = data.dataSource.created,
+                )
+            }
+            row {
+                dataField(
+                    fieldId = "updatedBy",
+                    label = "Updated By",
+                    columnWidth = 5,
+                    data = data.dataSource.updatedBy,
+                )
+                dataField(
+                    fieldId = "lastUpdated",
+                    label = "Last Updated",
+                    columnWidth = 5,
+                    data = data.dataSource.lastUpdated,
+                )
+            }
+        }
+        dataGroup(title = "Workflows", topMargin = 4u) {
+            row {
+                dataField(
+                    fieldId = "collectionWorkflow",
+                    label = "Collection",
+                    columnWidth = 2,
+                    data = data.dataSource.collectionWorkflow,
+                )
+                dataField(
+                    fieldId = "loadWorkflow",
+                    label = "Load",
+                    columnWidth = 2,
+                    data = data.dataSource.loadWorkflow,
+                )
+                dataField(
+                    fieldId = "checkWorkflow",
+                    label = "Check",
+                    columnWidth = 2,
+                    data = data.dataSource.checkWorkflow,
+                )
+                dataField(
+                    fieldId = "qaWorkflow",
+                    label = "QA",
+                    columnWidth = 2,
+                    data = data.dataSource.qaWorkflow,
+                )
+            }
         }
     }
     dataDisplayTable(
@@ -55,7 +174,7 @@ fun HtmxContentCollector.dataSourceDisplay(data: DataSourceWithContacts) {
                 th { +"Notes" }
             }
         },
-        items = data.contacts,
+        items = data.contacts ?: emptyList(),
         rowBuilder = { contact ->
             tr {
                 dataCell(contact.contactId)

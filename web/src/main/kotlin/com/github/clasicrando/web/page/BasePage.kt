@@ -3,9 +3,7 @@ package com.github.clasicrando.web.page
 import com.github.clasicrando.models.User
 import com.github.clasicrando.web.component.mainNav
 import com.github.clasicrando.web.element.noscript
-import io.ktor.server.html.Placeholder
 import io.ktor.server.html.Template
-import io.ktor.server.html.insert
 import io.ktor.utils.io.charsets.name
 import kotlinx.html.FlowContent
 import kotlinx.html.HTML
@@ -19,12 +17,12 @@ import kotlinx.html.meta
 import kotlinx.html.script
 import kotlinx.html.title
 
-open class BasePage(
+abstract class BasePage(
     private val user: User? = null,
     private val stylesheetHref: String? = null,
     private val pageTitle: String? = null,
 ) : Template<HTML> {
-    val innerContent = Placeholder<FlowContent>()
+    abstract fun FlowContent.innerContent()
 
     @Suppress("ktlint:standard:max-line-length")
     override fun HTML.apply() {
@@ -60,7 +58,7 @@ open class BasePage(
         body(classes = "p-3 m-0 border-0") {
             div(classes = "container-fluid") {
                 mainNav(user = user)
-                insert(innerContent)
+                innerContent()
             }
             div(classes = "toast-container top-0 end-0 p-3") {
                 id = "toasts"
