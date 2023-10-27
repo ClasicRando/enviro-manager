@@ -1,7 +1,10 @@
 package com.github.clasicrando.web
 
-import com.github.clasicrando.di.diContainer
+import com.github.clasicrando.datasources.DataSourcesDao
+import com.github.clasicrando.datasources.PgDataSourcesDao
 import com.github.clasicrando.requests.LoginRequest
+import com.github.clasicrando.users.PgUsersDao
+import com.github.clasicrando.users.UsersDao
 import com.github.clasicrando.web.api.api
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.htmx.respondHtmx
@@ -30,21 +33,30 @@ import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import org.apache.commons.dbcp2.BasicDataSource
 import org.kodein.di.bindEagerSingleton
 import org.kodein.di.bindProvider
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
-import org.snappy.command.sqlCommand
-import java.sql.Connection
-import java.util.UUID
+import org.postgresql.PGConnection
+import javax.sql.DataSource
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("UNUSED")
 fun Application.module() {
     di {
-        extend(diContainer)
+        bindEagerSingleton<DataSource> {
+            BasicDataSource().apply {
+                defaultAutoCommit = true
+                url = System.getenv("EM_DB_URL")
+            }
+        }
+        bindProvider<PGConnection> {
+            val dataSource: DataSource by di.instance()
+            dataSource.connection.unwrap(PGConnection::class.java)
+        }
         bindEagerSingleton {
             val redisHost =
                 System.getenv("EM_REDIS_URL")
@@ -52,7 +64,13 @@ fun Application.module() {
             newClient(Endpoint.from(redisHost))
         }
         bindProvider<SessionStorage> {
-            RedisSessionStorage(this.di)
+            RedisSessionStorage(di)
+        }
+        bindProvider<DataSourcesDao> {
+            PgDataSourcesDao(di)
+        }
+        bindProvider<UsersDao> {
+            PgUsersDao(di)
         }
     }
     install(ContentNegotiation) {
@@ -83,14 +101,8 @@ fun Application.module() {
         }
         post(apiV1Url("/users/login")) {
             val loginRequest = call.receive<LoginRequest>()
-            val connection: Connection by closestDI().instance()
-            val userId =
-                connection.use {
-                    sqlCommand("select em.validate_user(?, ?)")
-                        .bind(loginRequest.username)
-                        .bind(loginRequest.password)
-                        .queryScalarOrNullSuspend<UUID>(it)
-                }
+            val dao: UsersDao by closestDI().instance()
+            val userId = dao.validateUser(loginRequest)
             if (userId == null) {
                 call.respondHtmx {
                     addCreateToastEvent("Invalid username or password")

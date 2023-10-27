@@ -1,4 +1,4 @@
-package com.github.clasicrando.models
+package com.github.clasicrando.datasources.model
 
 import org.snappy.ksp.symbols.Flatten
 import org.snappy.ksp.symbols.RowParser

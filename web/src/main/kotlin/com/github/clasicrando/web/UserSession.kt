@@ -1,6 +1,6 @@
 package com.github.clasicrando.web
 
+import com.github.clasicrando.users.model.UserId
 import io.ktor.server.auth.Principal
-import java.util.UUID
 
-data class UserSession(val userId: UUID) : Principal
+data class UserSession(val userId: UserId) : Principal

@@ -1,6 +1,6 @@
 package com.github.clasicrando.web.page
 
-import com.github.clasicrando.models.User
+import com.github.clasicrando.users.model.User
 import kotlinx.html.FlowContent
 import kotlinx.html.p
 

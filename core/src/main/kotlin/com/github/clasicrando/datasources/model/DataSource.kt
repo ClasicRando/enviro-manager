@@ -1,4 +1,4 @@
-package com.github.clasicrando.models
+package com.github.clasicrando.datasources.model
 
 import org.snappy.ksp.symbols.Rename
 import org.snappy.ksp.symbols.RowParser
@@ -6,7 +6,7 @@ import java.time.OffsetDateTime
 
 @RowParser
 data class DataSource(
-    val dsId: Long,
+    val dsId: DsId,
     val code: String,
     @Rename("prov")
     val province: String?,

@@ -1,4 +1,4 @@
-package com.github.clasicrando.models
+package com.github.clasicrando.users.model
 
 import org.snappy.decode.Decoder
 import org.snappy.postgresql.array.toList

@@ -1,6 +1,6 @@
 package com.github.clasicrando.web.component
 
-import com.github.clasicrando.models.User
+import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.htmx.hxBoost
 import kotlinx.html.ButtonType
 import kotlinx.html.DIV

@@ -1,11 +1,10 @@
-package com.github.clasicrando.models
+package com.github.clasicrando.users.model
 
 import org.snappy.ksp.symbols.RowParser
-import java.util.UUID
 
 @RowParser
 data class User(
-    val userId: UUID,
+    val userId: UserId,
     val username: String,
     val fullName: String,
     val roles: List<Role>,

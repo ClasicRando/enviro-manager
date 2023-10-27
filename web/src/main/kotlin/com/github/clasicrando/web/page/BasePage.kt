@@ -1,6 +1,6 @@
 package com.github.clasicrando.web.page
 
-import com.github.clasicrando.models.User
+import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.component.mainNav
 import com.github.clasicrando.web.element.noscript
 import io.ktor.server.html.Template

@@ -1,7 +1,7 @@
 package com.github.clasicrando.web.component
 
-import com.github.clasicrando.models.DataSource
-import com.github.clasicrando.models.DataSourceWithContacts
+import com.github.clasicrando.datasources.model.DataSource
+import com.github.clasicrando.datasources.model.DataSourceWithContacts
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HtmxContentCollector
 import io.ktor.http.HttpMethod

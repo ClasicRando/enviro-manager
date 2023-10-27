@@ -10,6 +10,7 @@ val postgresqlJdbcVersion: String by project
 val ktorVersion: String by project
 val kodeinVersion: String by project
 val kredsVersion: String by project
+val apacheCommonsDbcpVersion: String by project
 
 dependencies {
     implementation(project(":core"))
@@ -27,6 +28,8 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresqlJdbcVersion")
     // https://mvnrepository.com/artifact/org.kodein.di/kodein-di-jvm
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:$kodeinVersion")
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2
+    implementation("org.apache.commons:commons-dbcp2:$apacheCommonsDbcpVersion")
 }
 
 application {

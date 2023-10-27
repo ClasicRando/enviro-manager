@@ -1,11 +1,11 @@
-package com.github.clasicrando.models
+package com.github.clasicrando.datasources.model
 
 import org.snappy.postgresql.type.PgType
 
 @PgType(name = "em.data_source_contacts", arrayType = true)
 data class DataSourceContact(
-    val contactId: Long,
-    val dsId: Long,
+    val contactId: ContactId,
+    val dsId: DsId,
     val name: String,
     val email: String?,
     val website: String?,
