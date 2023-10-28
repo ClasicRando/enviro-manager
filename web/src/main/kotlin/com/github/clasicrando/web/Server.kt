@@ -96,7 +96,15 @@ fun Application.module() {
     }
     install(Authentication) {
         session<UserSession>("auth-session") {
-            validate { it }
+            validate {
+                val dao: UsersDao by closestDI().instance()
+                val user = dao.getById(it.userId)
+                if (user == null) {
+                    null
+                } else {
+                    it
+                }
+            }
             challenge("/login")
         }
     }
