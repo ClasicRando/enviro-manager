@@ -1,11 +1,13 @@
 package com.github.clasicrando.web.component
 
+import com.github.clasicrando.web.MAIN_CONTENT_ID
+import com.github.clasicrando.web.htmx.HtmxContentCollector
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.hxDelete
 import com.github.clasicrando.web.htmx.hxGet
 import com.github.clasicrando.web.htmx.hxIndicator
-import com.github.clasicrando.web.htmx.hxOn
+import com.github.clasicrando.web.htmx.hxOnClick
 import com.github.clasicrando.web.htmx.hxPatch
 import com.github.clasicrando.web.htmx.hxPost
 import com.github.clasicrando.web.htmx.hxPut
@@ -60,7 +62,7 @@ fun FlowContent.rowAction(
             HttpMethod.Delete -> hxDelete = url
         }
         attributes["title"] = title
-        hxTarget = target
+        hxTarget = target ?: "#$MAIN_CONTENT_ID"
         hxSwap(swap)
         i(classes = "fa-solid $icon") {
             style?.let { this.style = it }
@@ -79,7 +81,7 @@ fun <T> TBODY.rowWithDetails(
     tr {
         td {
             button(classes = "btn btn-primary") {
-                this.hxOn = "click: toggleDisplay(document.getElementById('$escapedDetailsId'))"
+                this.hxOnClick = "toggleDisplay(document.getElementById('$escapedDetailsId'))"
                 i(classes = "fa-solid fa-plus")
             }
         }
@@ -124,15 +126,15 @@ data class ExtraButton(
     val swap: HxSwap? = null,
 )
 
-inline fun FlowContent.dataTable(
-    id: String,
+inline fun <T> HtmxContentCollector.dataTable(
     caption: String,
     dataSource: String,
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
     crossinline header: THEAD.() -> Unit,
+    items: List<T>,
+    crossinline rowBuilder: TBODY.(T) -> Unit,
 ) {
-    val bodyId = "${id}Body"
     val hasSearch = search && dataSource.isNotBlank()
     div(classes = "table-responsive-sm") {
         div(classes = "btn-toolbar mt-1") {
@@ -145,7 +147,7 @@ inline fun FlowContent.dataTable(
                         hxTrigger = "keyup changed delay:500ms"
                         hxPost = "$dataSource/search"
                         hxIndicator = ".htmx-indicator"
-                        hxTarget = bodyId
+                        hxTarget = "#$MAIN_CONTENT_ID"
                         attributes["aria-label"] = "Search"
                     }
                 }
@@ -161,8 +163,8 @@ inline fun FlowContent.dataTable(
                 if (dataSource.isNotBlank()) {
                     button(type = ButtonType.button, classes = "btn btn-secondary") {
                         hxGet = dataSource
-                        hxTrigger = "load, click"
-                        hxTarget = "#$bodyId"
+                        hxTrigger = "click"
+                        hxTarget = "#$MAIN_CONTENT_ID"
                         hxSwap(SwapType.InnerHtml)
                         hxIndicator = ".htmx-indicator"
                         i(classes = "fa-solid fa-refresh")
@@ -192,7 +194,9 @@ inline fun FlowContent.dataTable(
             }
             thead(block = header)
             tbody {
-                this.id = bodyId
+                for (item in items) {
+                    rowBuilder(item)
+                }
             }
         }
     }

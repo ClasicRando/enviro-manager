@@ -7,11 +7,10 @@ import com.github.clasicrando.users.PgUsersDao
 import com.github.clasicrando.users.UsersDao
 import com.github.clasicrando.web.api.api
 import com.github.clasicrando.web.api.apiV1Url
+import com.github.clasicrando.web.component.loginForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.htmx.respondHtmxLocation
-import com.github.clasicrando.web.page.LoginPage
 import com.github.clasicrando.web.page.pages
-import com.github.clasicrando.web.page.respondHtmlPage
 import com.github.clasicrando.web.session.RedisSessionStorage
 import io.github.crackthecodeabhi.kreds.connection.Endpoint
 import io.github.crackthecodeabhi.kreds.connection.newClient
@@ -25,11 +24,13 @@ import io.ktor.server.auth.session
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
+import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.sessions.SessionStorage
 import io.ktor.server.sessions.Sessions
+import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
@@ -40,12 +41,14 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.postgresql.PGConnection
+import org.snappy.SnappyMapper
 import javax.sql.DataSource
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("UNUSED")
 fun Application.module() {
+    SnappyMapper.loadCache()
     di {
         bindEagerSingleton<DataSource> {
             BasicDataSource().apply {
@@ -97,7 +100,21 @@ fun Application.module() {
             api()
         }
         get("/login") {
-            call.respondHtmlPage(LoginPage())
+            call.respondBasePage(
+                contentUrl = apiV1Url("/login"),
+                pageTitle = "Login",
+            )
+        }
+        get("/logout") {
+            call.sessions.clear<UserSession>()
+            call.respondRedirect(url = "/login")
+        }
+        get(apiV1Url("/login")) {
+            call.respondHtmx {
+                addHtml {
+                    loginForm()
+                }
+            }
         }
         post(apiV1Url("/users/login")) {
             val loginRequest = call.receive<LoginRequest>()

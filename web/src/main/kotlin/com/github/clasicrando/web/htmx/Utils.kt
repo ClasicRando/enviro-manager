@@ -5,6 +5,7 @@ import kotlinx.html.FlowContent
 
 private const val HX_BOOST = "hx-boost"
 private const val HX_ON = "hx-on"
+private const val HX_ON_CLICK = "hx-on:click"
 private const val HX_TRIGGER = "hx-trigger"
 private const val HX_GET = "hx-get"
 private const val HX_POST = "hx-post"
@@ -22,10 +23,10 @@ var A.hxBoost
         value?.let { attributes[HX_BOOST] = if (it) "true" else "false" }
     }
 
-var FlowContent.hxOn
-    get() = attributes[HX_ON]
+var FlowContent.hxOnClick
+    get() = attributes[HX_ON_CLICK]
     set(value) {
-        value?.let { attributes[HX_ON] = value }
+        value?.let { attributes[HX_ON_CLICK] = value }
     }
 
 var FlowContent.hxTrigger

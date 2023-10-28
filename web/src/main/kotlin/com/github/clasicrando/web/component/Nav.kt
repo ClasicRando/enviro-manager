@@ -126,6 +126,12 @@ fun DIV.mainNav(user: User? = null) {
                         +"Home"
                     }
                 }
+                li(classes = "nav-item") {
+                    a(classes = "nav-link", href = "/data-sources") {
+                        hxBoost = true
+                        +"Data Sources"
+                    }
+                }
             }
             ul(classes = "navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll") {
                 style = "--bs-scroll-height: 100px;"
