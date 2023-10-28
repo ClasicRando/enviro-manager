@@ -19,14 +19,14 @@ class PgDataSourcesDao(override val di: DI) : DIAware, DataSourcesDao {
         return dataSource.useConnection {
             sqlCommand(
                 """
-                    select
-                        ds.ds_id, ds.code, ds.prov, ds.country, ds.prov_level, ds.description,
-                        ds.files_location, ds.comments, ds.search_radius, ds.reporting_type,
-                        ds.record_warehouse_type, ds.assigned_user, ds.created_by, ds.created,
-                        ds.updated_by, ds.last_updated, ds.collection_workflow, ds.load_workflow,
-                        ds.check_workflow, ds.qa_workflow
-                    from em.v_data_sources ds
-                    where ds.ds_id = ?
+                select
+                    ds.ds_id, ds.code, ds.prov, ds.country, ds.prov_level, ds.description,
+                    ds.files_location, ds.comments, ds.search_radius, ds.reporting_type,
+                    ds.record_warehouse_type, ds.assigned_user, ds.created_by, ds.created,
+                    ds.updated_by, ds.last_updated, ds.collection_workflow, ds.load_workflow,
+                    ds.check_workflow, ds.qa_workflow
+                from em.v_data_sources ds
+                where ds.ds_id = ?
                 """.trimIndent(),
             )
                 .bind(dsId)
@@ -38,14 +38,14 @@ class PgDataSourcesDao(override val di: DI) : DIAware, DataSourcesDao {
         return dataSource.useConnection {
             sqlCommand(
                 """
-                    select
-                        ds.ds_id, ds.code, ds.prov, ds.country, ds.prov_level, ds.description,
-                        ds.files_location, ds.comments, ds.search_radius, ds.reporting_type,
-                        ds.record_warehouse_type, ds.assigned_user, ds.created_by, ds.created,
-                        ds.updated_by, ds.last_updated, ds.collection_workflow, ds.load_workflow,
-                        ds.check_workflow, ds.qa_workflow, ds.contacts
-                    from em.v_data_sources_with_contacts ds
-                    where ds.ds_id = ?
+                select
+                    ds.ds_id, ds.code, ds.prov, ds.country, ds.prov_level, ds.description,
+                    ds.files_location, ds.comments, ds.search_radius, ds.reporting_type,
+                    ds.record_warehouse_type, ds.assigned_user, ds.created_by, ds.created,
+                    ds.updated_by, ds.last_updated, ds.collection_workflow, ds.load_workflow,
+                    ds.check_workflow, ds.qa_workflow, ds.contacts
+                from em.v_data_sources_with_contacts ds
+                where ds.ds_id = ?
                 """.trimIndent(),
             )
                 .bind(dsId)
@@ -57,13 +57,13 @@ class PgDataSourcesDao(override val di: DI) : DIAware, DataSourcesDao {
         return dataSource.useConnection {
             sqlCommand(
                 """
-                    select
-                        ds.ds_id, ds.code, ds.prov, ds.country, ds.prov_level, ds.description,
-                        ds.files_location, ds.comments, ds.search_radius, ds.reporting_type,
-                        ds.record_warehouse_type, ds.assigned_user, ds.created_by, ds.created,
-                        ds.updated_by, ds.last_updated, ds.collection_workflow, ds.load_workflow,
-                        ds.check_workflow, ds.qa_workflow
-                    from em.v_data_sources ds
+                select
+                    ds.ds_id, ds.code, ds.prov, ds.country, ds.prov_level, ds.description,
+                    ds.files_location, ds.comments, ds.search_radius, ds.reporting_type,
+                    ds.record_warehouse_type, ds.assigned_user, ds.created_by, ds.created,
+                    ds.updated_by, ds.last_updated, ds.collection_workflow, ds.load_workflow,
+                    ds.check_workflow, ds.qa_workflow
+                from em.v_data_sources ds
                 """.trimIndent(),
             )
                 .querySuspend<DataSource>(this)
@@ -71,7 +71,11 @@ class PgDataSourcesDao(override val di: DI) : DIAware, DataSourcesDao {
         }
     }
 
-    override suspend fun update(currentUser: UserId, dsId: DsId, request: UpdateDateSourceRequest) {
+    override suspend fun update(
+        currentUser: UserId,
+        dsId: DsId,
+        request: UpdateDateSourceRequest,
+    ) {
         dataSource.useConnection {
             sqlCommand("call em.update_data_source(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                 .bind(dsId)

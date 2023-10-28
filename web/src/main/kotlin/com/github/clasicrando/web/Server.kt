@@ -134,9 +134,11 @@ fun Application.module() {
         bindRedisSessionComponent()
     }
     install(ContentNegotiation) {
-        json(Json {
-            ignoreUnknownKeys = true
-        })
+        json(
+            Json {
+                ignoreUnknownKeys = true
+            },
+        )
     }
     install(StatusPages) {
         configure()

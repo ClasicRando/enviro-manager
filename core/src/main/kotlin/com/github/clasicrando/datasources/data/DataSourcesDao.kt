@@ -13,5 +13,9 @@ interface DataSourcesDao {
 
     suspend fun getAll(): List<DataSource>
 
-    suspend fun update(currentUser: UserId, dsId: DsId, request: UpdateDateSourceRequest)
+    suspend fun update(
+        currentUser: UserId,
+        dsId: DsId,
+        request: UpdateDateSourceRequest,
+    )
 }
