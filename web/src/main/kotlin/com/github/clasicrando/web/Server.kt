@@ -14,6 +14,7 @@ import com.github.clasicrando.web.page.pages
 import com.github.clasicrando.web.session.RedisSessionStorage
 import io.github.crackthecodeabhi.kreds.connection.Endpoint
 import io.github.crackthecodeabhi.kreds.connection.newClient
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
@@ -23,8 +24,11 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.session
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.header
 import io.ktor.server.request.receive
 import io.ktor.server.response.respondRedirect
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -79,6 +83,17 @@ fun Application.module() {
     install(ContentNegotiation) {
         json()
     }
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            if (call.request.header("HX-Request") == "true") {
+                call.respondHtmx {
+                    addCreateToastEvent("Error: ${cause.message}")
+                }
+                return@exception
+            }
+            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+        }
+    }
     install(Authentication) {
         session<UserSession>("auth-session") {
             validate { it }
@@ -99,6 +114,7 @@ fun Application.module() {
             pages()
             api()
         }
+
         get("/login") {
             call.respondBasePage(
                 contentUrl = apiV1Url("/login"),

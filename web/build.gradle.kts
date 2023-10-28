@@ -21,6 +21,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-sessions:$ktorVersion")
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.github.crackthecodeabhi:kreds:$kredsVersion")
     implementation("com.github.snappy:snappy:0.1")
     ksp("com.github.snappy:snappy:0.1")
