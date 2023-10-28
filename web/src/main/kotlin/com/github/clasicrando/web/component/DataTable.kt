@@ -1,7 +1,6 @@
 package com.github.clasicrando.web.component
 
 import com.github.clasicrando.web.MAIN_CONTENT_ID
-import com.github.clasicrando.web.htmx.HtmxContentCollector
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.hxDelete
@@ -24,9 +23,10 @@ import kotlinx.html.InputType
 import kotlinx.html.TBODY
 import kotlinx.html.THEAD
 import kotlinx.html.TR
+import kotlinx.html.TagConsumer
 import kotlinx.html.button
-import kotlinx.html.caption
 import kotlinx.html.div
+import kotlinx.html.h5
 import kotlinx.html.i
 import kotlinx.html.id
 import kotlinx.html.input
@@ -129,14 +129,34 @@ data class ExtraButton(
     val swap: HxSwap? = null,
 )
 
-inline fun <T> HtmxContentCollector.dataTable(
-    caption: String,
-    dataSource: String,
+inline fun <I> FlowContent.dataTable(
+    title: String,
+    dataSource: String = "",
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
     crossinline header: THEAD.() -> Unit,
-    items: List<T>,
-    crossinline rowBuilder: TBODY.(T) -> Unit,
+    items: List<I>,
+    crossinline rowBuilder: TBODY.(I) -> Unit,
+) {
+    consumer.dataTable(
+        title = title,
+        dataSource = dataSource,
+        search = search,
+        extraButtons = extraButtons,
+        header = header,
+        items = items,
+        rowBuilder = rowBuilder,
+    )
+}
+
+inline fun <I, T, C : TagConsumer<T>> C.dataTable(
+    title: String,
+    dataSource: String = "",
+    search: Boolean = false,
+    extraButtons: List<ExtraButton> = emptyList(),
+    crossinline header: THEAD.() -> Unit,
+    items: List<I>,
+    crossinline rowBuilder: TBODY.(I) -> Unit,
 ) {
     val hasSearch = search && dataSource.isNotBlank()
     div(classes = "table-responsive-sm") {
@@ -188,9 +208,9 @@ inline fun <T> HtmxContentCollector.dataTable(
                 }
             }
         }
-        table(classes = "table table-stripped caption-top") {
-            caption {
-                +caption
+        table(classes = "table table-stripped") {
+            h5 {
+                +title
                 div(classes = "spinner-border htmx-indicator") {
                     role = "status"
                 }

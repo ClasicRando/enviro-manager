@@ -49,7 +49,7 @@ private fun Route.getAllDataSources() =
         call.respondHtmx {
             addHtml {
                 dataTable(
-                    caption = "Data Sources",
+                    title = "Data Sources",
                     dataSource = call.request.uri,
                     header = {
                         tr {

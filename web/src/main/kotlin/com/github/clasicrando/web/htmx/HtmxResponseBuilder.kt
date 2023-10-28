@@ -5,8 +5,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.withCharset
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.html.Placeholder
-import io.ktor.server.html.insert
 import io.ktor.server.response.respond
 import kotlinx.html.TagConsumer
 import kotlinx.html.stream.appendHTML
@@ -38,13 +36,11 @@ class HtmxResponseBuilder {
     }
 
     inline fun addHtml(crossinline chunk: HtmxContentCollector.() -> Unit) {
-        val placeholder = Placeholder<HtmxContentCollector>()
         responseContent =
             buildString {
-                placeholder {
-                    this.chunk()
+                appendHTML(prettyPrint = false).apply {
+                    chunk()
                 }
-                appendHTML().insert(placeholder)
             }
     }
 

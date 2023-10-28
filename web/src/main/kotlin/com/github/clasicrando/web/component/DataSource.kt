@@ -325,8 +325,8 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
             }
         }
     }
-    dataDisplayTable(
-        caption = "Contacts",
+    dataTable(
+        title = "Contacts",
         header = {
             tr {
                 th { +"Contact ID" }

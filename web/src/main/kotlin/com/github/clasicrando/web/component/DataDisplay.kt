@@ -1,7 +1,6 @@
 package com.github.clasicrando.web.component
 
 import com.github.clasicrando.web.MAIN_CONTENT_ID
-import com.github.clasicrando.web.htmx.HtmxContentCollector
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxGet
@@ -15,6 +14,7 @@ import kotlinx.html.FlowContent
 import kotlinx.html.InputType
 import kotlinx.html.TBODY
 import kotlinx.html.THEAD
+import kotlinx.html.TagConsumer
 import kotlinx.html.button
 import kotlinx.html.div
 import kotlinx.html.form
@@ -202,7 +202,7 @@ fun FlowContent.dataDisplayField(
     }
 }
 
-inline fun HtmxContentCollector.dataDisplay(
+inline fun <T, C : TagConsumer<T>> C.dataDisplay(
     title: String,
     dataUrl: String,
     editUrl: String? = null,
@@ -240,7 +240,7 @@ inline fun HtmxContentCollector.dataDisplay(
     }
 }
 
-inline fun HtmxContentCollector.dataEdit(
+inline fun <T, C : TagConsumer<T>> C.dataEdit(
     title: String,
     patchUrl: String,
     cancelUrl: String,
