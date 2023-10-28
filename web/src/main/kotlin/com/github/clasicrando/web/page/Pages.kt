@@ -1,17 +1,12 @@
 package com.github.clasicrando.web.page
 
-import com.github.clasicrando.users.UsersDao
-import com.github.clasicrando.users.model.User
-import com.github.clasicrando.web.UserSession
+import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.respondBasePage
-import io.ktor.server.application.ApplicationCall
+import com.github.clasicrando.web.userOrRedirect
 import io.ktor.server.application.call
-import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import io.ktor.server.sessions.get
-import io.ktor.server.sessions.sessions
 import io.ktor.server.util.getOrFail
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
@@ -20,16 +15,6 @@ fun Route.pages() {
     index()
     dataSources()
     dataSource()
-}
-
-private suspend fun ApplicationCall.userOrRedirect(dao: UsersDao): User? {
-    val userSession = sessions.get<UserSession>()!!
-    val user = dao.getById(userId = userSession.userId)
-    if (user == null) {
-        respondRedirect("/login")
-        return null
-    }
-    return user
 }
 
 private fun Route.index() =

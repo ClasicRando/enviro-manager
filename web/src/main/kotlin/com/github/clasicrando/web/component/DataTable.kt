@@ -10,6 +10,7 @@ import com.github.clasicrando.web.htmx.hxIndicator
 import com.github.clasicrando.web.htmx.hxOnClick
 import com.github.clasicrando.web.htmx.hxPatch
 import com.github.clasicrando.web.htmx.hxPost
+import com.github.clasicrando.web.htmx.hxPushUrl
 import com.github.clasicrando.web.htmx.hxPut
 import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTarget
@@ -52,6 +53,7 @@ fun FlowContent.rowAction(
     target: String? = null,
     swap: HxSwap? = null,
     style: String? = null,
+    pushUrl: String? = null,
 ) {
     button(classes = "btn btn-primary me-1") {
         when (httpMethod) {
@@ -63,6 +65,7 @@ fun FlowContent.rowAction(
         }
         attributes["title"] = title
         hxTarget = target ?: "#$MAIN_CONTENT_ID"
+        hxPushUrl = pushUrl
         hxSwap(swap)
         i(classes = "fa-solid $icon") {
             style?.let { this.style = it }

@@ -220,7 +220,8 @@
         "tables/em.data_sources",
         "tables/em.users",
         "tables/pipeline.pipeline_states",
-        "types/pipeline.merge_type"
+        "types/pipeline.merge_type",
+        "tables/pipeline.workflow_runs"
       ]
     },
     {
@@ -323,6 +324,25 @@
       "name": "tables/em.report_tables",
       "dependencies": [
         "tables/pipeline.source_tables"
+      ]
+    },
+    {
+      "name": "tables/pipeline.workflow_runs",
+      "dependencies": [
+        "tables/pipeline.workflows"
+      ]
+    },
+    {
+      "name": "views/pipeline.v_record_warehouse_types",
+      "dependencies": [
+        "tables/pipeline.record_warehouse_types"
+      ]
+    },
+    {
+      "name": "views/em.v_data_sources_with_contacts",
+      "dependencies": [
+        "views/em.v_data_sources",
+        "tables/em.data_source_contacts"
       ]
     }
   ]

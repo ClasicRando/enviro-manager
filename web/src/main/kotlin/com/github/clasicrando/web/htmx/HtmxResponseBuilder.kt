@@ -22,6 +22,7 @@ class HtmxResponseBuilder {
     var triggerData: JsonObject? = null
     var target: String? = null
     var swap: HxSwap? = null
+    var redirect: String? = null
     var responseContent: String = ""
 
     fun addCreateToastEvent(message: String) {
@@ -36,7 +37,7 @@ class HtmxResponseBuilder {
         triggerData = JsonObject(triggers)
     }
 
-    fun addHtml(chunk: HtmxContentCollector.() -> Unit) {
+    inline fun addHtml(crossinline chunk: HtmxContentCollector.() -> Unit) {
         val placeholder = Placeholder<HtmxContentCollector>()
         responseContent =
             buildString {
@@ -64,6 +65,9 @@ suspend fun ApplicationCall.respondHtmx(block: HtmxResponseBuilder.() -> Unit) {
     }
     builder.swap?.let {
         response.headers.append("HX-Swap", it.toString())
+    }
+    builder.redirect?.let {
+        response.headers.append("HX-Redirect", it)
     }
     respond(
         TextContent(

@@ -1,4 +1,4 @@
-package com.github.clasicrando.datasources.model
+package com.github.clasicrando.workflows.model
 
 import kotlinx.serialization.Serializable
 import org.snappy.decode.Decoder
@@ -8,7 +8,7 @@ import java.sql.PreparedStatement
 
 @Serializable
 @JvmInline
-value class DsId(val value: Long) : Encode {
+value class WorkflowId(val value: Long) : Encode {
     override fun encode(
         preparedStatement: PreparedStatement,
         parameterIndex: Int,
@@ -20,12 +20,12 @@ value class DsId(val value: Long) : Encode {
         return value.toString()
     }
 
-    companion object : Decoder<DsId> {
+    companion object : Decoder<WorkflowId> {
         override fun decodeNullable(
             row: SnappyRow,
             fieldName: String,
-        ): DsId? {
-            return row.getLongNullable(fieldName)?.let { DsId(it) }
+        ): WorkflowId? {
+            return row.getLongNullable(fieldName)?.let { WorkflowId(it) }
         }
     }
 }

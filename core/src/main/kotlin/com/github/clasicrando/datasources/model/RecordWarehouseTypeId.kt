@@ -8,24 +8,24 @@ import java.sql.PreparedStatement
 
 @Serializable
 @JvmInline
-value class DsId(val value: Long) : Encode {
+value class RecordWarehouseTypeId(val value: Short) : Encode {
     override fun encode(
         preparedStatement: PreparedStatement,
         parameterIndex: Int,
     ) {
-        preparedStatement.setLong(parameterIndex, value)
+        preparedStatement.setShort(parameterIndex, value)
     }
 
     override fun toString(): String {
         return value.toString()
     }
 
-    companion object : Decoder<DsId> {
+    companion object : Decoder<RecordWarehouseTypeId> {
         override fun decodeNullable(
             row: SnappyRow,
             fieldName: String,
-        ): DsId? {
-            return row.getLongNullable(fieldName)?.let { DsId(it) }
+        ): RecordWarehouseTypeId? {
+            return row.getShortNullable(fieldName)?.let { RecordWarehouseTypeId(it) }
         }
     }
 }

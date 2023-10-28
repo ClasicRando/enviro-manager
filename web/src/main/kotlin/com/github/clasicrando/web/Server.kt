@@ -1,34 +1,36 @@
 package com.github.clasicrando.web
 
-import com.github.clasicrando.datasources.DataSourcesDao
-import com.github.clasicrando.datasources.PgDataSourcesDao
+import com.github.clasicrando.di.bindDaoComponents
+import com.github.clasicrando.di.bindDatabaseComponents
+import com.github.clasicrando.logging.logger
 import com.github.clasicrando.requests.LoginRequest
-import com.github.clasicrando.users.PgUsersDao
-import com.github.clasicrando.users.UsersDao
+import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.web.api.api
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.component.loginForm
+import com.github.clasicrando.web.di.bindRedisSessionComponent
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.htmx.respondHtmxLocation
 import com.github.clasicrando.web.page.pages
-import com.github.clasicrando.web.session.RedisSessionStorage
-import io.github.crackthecodeabhi.kreds.connection.Endpoint
-import io.github.crackthecodeabhi.kreds.connection.newClient
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.AuthenticationConfig
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.session
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.header
 import io.ktor.server.request.receive
+import io.ktor.server.request.uri
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -38,75 +40,109 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
-import org.apache.commons.dbcp2.BasicDataSource
-import org.kodein.di.bindEagerSingleton
-import org.kodein.di.bindProvider
+import kotlinx.serialization.json.Json
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
-import org.postgresql.PGConnection
 import org.snappy.SnappyMapper
-import javax.sql.DataSource
+
+val serverLogger by logger()
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+
+private fun StatusPagesConfig.configure() {
+    exception<Throwable> { call, cause ->
+        serverLogger.atInfo {
+            message = "Unhandled error at ${call.request.uri}"
+            this.cause = cause
+        }
+        if (call.request.header("HX-Request") == "true") {
+            call.respondHtmx {
+                val currentUrl = call.request.header("HX-Current-URL")
+                addCreateToastEvent("Error: ${cause.message}")
+                redirect = currentUrl ?: "/"
+            }
+            return@exception
+        }
+        call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+    }
+}
+
+private fun AuthenticationConfig.configureSession() {
+    session<UserSession>("auth-session") {
+        validate {
+            val dao: UsersDao by closestDI().instance()
+            val user = dao.getById(it.userId)
+            if (user == null) {
+                null
+            } else {
+                it
+            }
+        }
+        challenge("/login")
+    }
+}
+
+fun Route.loginPage() {
+    get("/login") {
+        call.respondBasePage(
+            contentUrl = apiV1Url("/login"),
+            pageTitle = "Login",
+        )
+    }
+}
+
+fun Route.logoutPage() {
+    get("/logout") {
+        call.sessions.clear<UserSession>()
+        call.respondRedirect(url = "/login")
+    }
+}
+
+fun Route.apiLoginContent() {
+    get(apiV1Url("/login")) {
+        call.respondHtmx {
+            addHtml {
+                loginForm()
+            }
+        }
+    }
+}
+
+fun Route.apiLoginAction() {
+    post(apiV1Url("/users/login")) {
+        val loginRequest = call.receive<LoginRequest>()
+        val dao: UsersDao by closestDI().instance()
+        val userId = dao.validateUser(loginRequest)
+        if (userId == null) {
+            call.respondHtmx {
+                addCreateToastEvent("Invalid username or password")
+            }
+            return@post
+        }
+        call.sessions.set(UserSession(userId))
+        call.respondHtmxLocation("/")
+    }
+}
 
 @Suppress("UNUSED")
 fun Application.module() {
     SnappyMapper.loadCache()
     di {
-        bindEagerSingleton<DataSource> {
-            BasicDataSource().apply {
-                defaultAutoCommit = true
-                url = System.getenv("EM_DB_URL")
-            }
-        }
-        bindProvider<PGConnection> {
-            val dataSource: DataSource by di.instance()
-            dataSource.connection.unwrap(PGConnection::class.java)
-        }
-        bindEagerSingleton {
-            val redisHost =
-                System.getenv("EM_REDIS_URL")
-                    ?: error("Could not find EM_REDIS_URL environment variable")
-            newClient(Endpoint.from(redisHost))
-        }
-        bindProvider<SessionStorage> {
-            RedisSessionStorage(di)
-        }
-        bindProvider<DataSourcesDao> {
-            PgDataSourcesDao(di)
-        }
-        bindProvider<UsersDao> {
-            PgUsersDao(di)
-        }
+        bindDatabaseComponents()
+        bindDaoComponents()
+        bindRedisSessionComponent()
     }
     install(ContentNegotiation) {
-        json()
+        json(Json {
+            ignoreUnknownKeys = true
+        })
     }
     install(StatusPages) {
-        exception<Throwable> { call, cause ->
-            if (call.request.header("HX-Request") == "true") {
-                call.respondHtmx {
-                    addCreateToastEvent("Error: ${cause.message}")
-                }
-                return@exception
-            }
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
-        }
+        configure()
     }
     install(Authentication) {
-        session<UserSession>("auth-session") {
-            validate {
-                val dao: UsersDao by closestDI().instance()
-                val user = dao.getById(it.userId)
-                if (user == null) {
-                    null
-                } else {
-                    it
-                }
-            }
-            challenge("/login")
-        }
+        configureSession()
     }
     install(Sessions) {
         val sessionStorage: SessionStorage by this@module.closestDI().instance()
@@ -123,35 +159,9 @@ fun Application.module() {
             api()
         }
 
-        get("/login") {
-            call.respondBasePage(
-                contentUrl = apiV1Url("/login"),
-                pageTitle = "Login",
-            )
-        }
-        get("/logout") {
-            call.sessions.clear<UserSession>()
-            call.respondRedirect(url = "/login")
-        }
-        get(apiV1Url("/login")) {
-            call.respondHtmx {
-                addHtml {
-                    loginForm()
-                }
-            }
-        }
-        post(apiV1Url("/users/login")) {
-            val loginRequest = call.receive<LoginRequest>()
-            val dao: UsersDao by closestDI().instance()
-            val userId = dao.validateUser(loginRequest)
-            if (userId == null) {
-                call.respondHtmx {
-                    addCreateToastEvent("Invalid username or password")
-                }
-                return@post
-            }
-            call.sessions.set(UserSession(userId))
-            call.respondHtmxLocation("/")
-        }
+        loginPage()
+        logoutPage()
+        apiLoginContent()
+        apiLoginAction()
     }
 }

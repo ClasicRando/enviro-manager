@@ -14,6 +14,7 @@ private const val HX_PATCH = "hx-patch"
 private const val HX_DELETE = "hx-delete"
 private const val HX_INDICATOR = "hx-indicator"
 private const val HX_TARGET = "hx-target"
+private const val HX_PUSH_URL = "hx-push-url"
 private const val HX_EXT = "hx-ext"
 private const val HTMX_JSON_ENCODING_EXT = "json-enc"
 
@@ -75,6 +76,12 @@ var FlowContent.hxTarget
     get() = attributes[HX_TARGET]
     set(value) {
         value?.let { attributes[HX_TARGET] = value }
+    }
+
+var FlowContent.hxPushUrl
+    get() = attributes[HX_PUSH_URL]
+    set(value) {
+        value?.let { attributes[HX_PUSH_URL] = value }
     }
 
 var FlowContent.htmxJsonEncoding

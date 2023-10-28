@@ -1,27 +1,42 @@
 package com.github.clasicrando.web.api
 
-import com.github.clasicrando.datasources.DataSourcesDao
+import com.github.clasicrando.datasources.data.DataSourcesDao
+import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.model.DsId
+import com.github.clasicrando.requests.UpdateDateSourceRequest
+import com.github.clasicrando.users.data.UsersDao
+import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.web.component.dataDisplay
 import com.github.clasicrando.web.component.dataEdit
 import com.github.clasicrando.web.component.dataSourceDisplay
+import com.github.clasicrando.web.component.dataSourceEdit
 import com.github.clasicrando.web.component.dataSourceRow
 import com.github.clasicrando.web.component.dataTable
+import com.github.clasicrando.web.htmx.SwapType
+import com.github.clasicrando.web.htmx.hxGet
+import com.github.clasicrando.web.htmx.hxSwap
+import com.github.clasicrando.web.htmx.hxTrigger
 import com.github.clasicrando.web.htmx.respondHtmx
+import com.github.clasicrando.web.userSessionOrRedirect
+import com.github.clasicrando.workflows.data.WorkflowsDao
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.route
 import io.ktor.server.util.getOrFail
+import kotlinx.html.div
 import kotlinx.html.th
 import kotlinx.html.tr
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
+const val DATA_SOURCE_API_BASE_URL = "/data-sources"
+
 fun Route.dataSources() =
-    route("/data-sources") {
+    route(DATA_SOURCE_API_BASE_URL) {
         getAllDataSources()
         getDataSource()
         editDataSource()
@@ -75,8 +90,8 @@ private fun Route.getDataSource() =
             addHtml {
                 dataDisplay(
                     title = "Data Source Details",
-                    dataUrl = apiV1Url("/data-sources/$dsId"),
-                    editUrl = apiV1Url("/data-sources/edit/$dsId"),
+                    dataUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId"),
+                    editUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/edit/$dsId"),
                 ) {
                     dataSourceDisplay(dataSourceWithContacts)
                 }
@@ -89,29 +104,51 @@ private fun Route.editDataSource() =
         get {
             val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
             val dataSourcesDao: DataSourcesDao by closestDI().instance()
-            val dataSourceWithContacts = dataSourcesDao.getByIdWithContacts(dsId)
-            if (dataSourceWithContacts == null) {
+            val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
+            val usersDao: UsersDao by closestDI().instance()
+            val workflowsDao: WorkflowsDao by closestDI().instance()
+            val dataSource = dataSourcesDao.getById(dsId)
+            if (dataSource == null) {
                 call.respondHtmx {
                     addCreateToastEvent("No data source for ds_id = $dsId")
                 }
                 return@get
             }
-            val pathUrl = apiV1Url("/data-sources/edit/${dataSourceWithContacts.dataSource.dsId}")
-            val cancelUrl = apiV1Url("/data-sources/${dataSourceWithContacts.dataSource.dsId}")
+            val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
+            val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
+            val workflows = workflowsDao.getAll()
             call.respondHtmx {
                 addHtml {
                     dataEdit(
-                        editId = dataSourceWithContacts.dataSource.dsId.toString(),
                         title = "Edit Data Source Details",
-                        patchUrl = pathUrl,
-                        cancelUrl = cancelUrl,
+                        patchUrl = call.request.uri,
+                        cancelUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/${dataSource.dsId}"),
                     ) {
-                        dataSourceDisplay(data = dataSourceWithContacts, edit = true)
+                        dataSourceEdit(
+                            dataSource = dataSource,
+                            recordWarehouseTypes = recordWarehouseTypes,
+                            collectionUsers = collectionUsers,
+                            workflows = workflows,
+                        )
                     }
                 }
             }
         }
         patch {
             val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+            val user = call.userSessionOrRedirect() ?: return@patch
+            val request = call.receive<UpdateDateSourceRequest>()
+            val dataSourcesDao: DataSourcesDao by closestDI().instance()
+            dataSourcesDao.update(user.userId, dsId, request)
+            call.respondHtmx {
+                addCreateToastEvent("Updated data source, id = $dsId")
+                addHtml {
+                    div {
+                        hxGet = apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId")
+                        hxTrigger = "load"
+                        hxSwap(SwapType.OuterHtml)
+                    }
+                }
+            }
         }
     }

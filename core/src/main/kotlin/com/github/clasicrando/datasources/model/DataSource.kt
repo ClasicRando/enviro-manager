@@ -12,6 +12,7 @@ data class DataSource(
     val province: String?,
     val country: String?,
     val provLevel: Boolean,
+    val description: String,
     val filesLocation: String,
     val comments: String?,
     val searchRadius: Double,
