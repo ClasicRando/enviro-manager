@@ -4,6 +4,7 @@ import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DataSourceWithContacts
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
+import com.github.clasicrando.web.api.DATA_SOURCE_API_BASE_URL
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.workflows.model.Workflow
@@ -33,13 +34,11 @@ fun TBODY.dataSourceRow(dataSource: DataSource) {
         dataCell(dataSource.updatedBy)
         dataCell(dataSource.lastUpdated)
         td {
-            val relativeUrl = "/data-sources/${dataSource.dsId}"
             rowAction(
                 title = "View Data Source",
-                url = apiV1Url(relativeUrl),
+                url = apiV1Url("/data-sources/${dataSource.dsId}"),
                 icon = "fa-right-to-bracket",
                 httpMethod = HttpMethod.Get,
-                pushUrl = relativeUrl,
             )
         }
     }
@@ -325,8 +324,17 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
             }
         }
     }
+    val addContact =
+        ExtraButton(
+            title = "New Contact",
+            apiUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/${data.dataSource.dsId}/contact/create"),
+            icon = "fa-plus",
+            httpMethod = HttpMethod.Get,
+        )
     dataTable(
         title = "Contacts",
+        extraButtons = listOf(addContact),
+        extraContainerClasses = "mt-2",
         header = {
             tr {
                 th { +"Contact ID" }

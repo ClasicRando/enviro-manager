@@ -16,6 +16,7 @@ import kotlinx.html.div
 import kotlinx.html.id
 
 const val MAIN_CONTENT_ID = "main"
+const val MAIN_CONTENT_TARGET = "#$MAIN_CONTENT_ID"
 
 suspend inline fun ApplicationCall.respondBasePage(
     contentUrl: String,

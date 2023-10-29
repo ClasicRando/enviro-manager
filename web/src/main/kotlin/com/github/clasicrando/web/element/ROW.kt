@@ -6,19 +6,26 @@ import kotlinx.html.HtmlInlineTag
 import kotlinx.html.TagConsumer
 import kotlinx.html.visitAndFinalize
 
-class ROW(classes: String = "", consumer: TagConsumer<*>) :
+class ROW(classes: String? = null, consumer: TagConsumer<*>) :
     DIV(
         initialAttributes =
             mapOf(
-                "class" to if (classes.isBlank()) "row" else "row $classes",
+                "class" to if (classes.isNullOrBlank()) "row" else "row $classes",
             ),
         consumer = consumer,
     ),
     HtmlInlineTag
 
-fun FlowContent.row(
-    classes: String = "",
-    block: DIV.() -> Unit,
+inline fun <T, C : TagConsumer<T>> C.row(
+    classes: String? = null,
+    crossinline block: DIV.() -> Unit,
+) {
+    ROW(classes, this).visitAndFinalize(this) { block() }
+}
+
+inline fun FlowContent.row(
+    classes: String? = null,
+    crossinline block: DIV.() -> Unit,
 ) {
     ROW(classes, this.consumer).visitAndFinalize(this.consumer) { block() }
 }

@@ -15,6 +15,7 @@ fun Route.pages() {
     index()
     dataSources()
     dataSource()
+    createDataSourceContact()
 }
 
 private fun Route.index() =
@@ -24,7 +25,6 @@ private fun Route.index() =
         call.respondBasePage(
             contentUrl = apiV1Url("/home"),
             user = user,
-            pageTitle = "Home",
         )
     }
 
@@ -35,7 +35,6 @@ private fun Route.dataSources() =
         call.respondBasePage(
             contentUrl = apiV1Url("/data-sources"),
             user = user,
-            pageTitle = "Data Sources",
         )
     }
 
@@ -47,6 +46,16 @@ private fun Route.dataSource() =
         call.respondBasePage(
             contentUrl = apiV1Url("/data-sources/$dsId"),
             user = user,
-            pageTitle = "Data Source",
+        )
+    }
+
+private fun Route.createDataSourceContact() =
+    get("/data-sources/{dsId}/contact/create") {
+        val dsId = call.parameters.getOrFail<Long>("dsId")
+        val dao: UsersDao by closestDI().instance()
+        val user = call.userOrRedirect(dao = dao) ?: return@get
+        call.respondBasePage(
+            contentUrl = apiV1Url("/data-sources/$dsId/contact/create"),
+            user = user,
         )
     }

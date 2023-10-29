@@ -6,16 +6,13 @@ import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
+import com.github.clasicrando.web.component.createDataSourceContactForm
 import com.github.clasicrando.web.component.dataDisplay
 import com.github.clasicrando.web.component.dataEdit
 import com.github.clasicrando.web.component.dataSourceDisplay
 import com.github.clasicrando.web.component.dataSourceEdit
 import com.github.clasicrando.web.component.dataSourceRow
 import com.github.clasicrando.web.component.dataTable
-import com.github.clasicrando.web.htmx.SwapType
-import com.github.clasicrando.web.htmx.hxGet
-import com.github.clasicrando.web.htmx.hxSwap
-import com.github.clasicrando.web.htmx.hxTrigger
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.userSessionOrRedirect
 import com.github.clasicrando.workflows.data.WorkflowsDao
@@ -25,9 +22,9 @@ import io.ktor.server.request.uri
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.util.getOrFail
-import kotlinx.html.div
 import kotlinx.html.th
 import kotlinx.html.tr
 import org.kodein.di.instance
@@ -40,6 +37,10 @@ fun Route.dataSources() =
         getAllDataSources()
         getDataSource()
         editDataSource()
+        route("/{dsId}/contact") {
+            createContactForm()
+            createContact()
+        }
     }
 
 private fun Route.getAllDataSources() =
@@ -87,11 +88,12 @@ private fun Route.getDataSource() =
             return@get
         }
         call.respondHtmx {
+            pushUrl = "/data-sources/$dsId"
             addHtml {
                 dataDisplay(
                     title = "Data Source Details",
                     dataUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId"),
-                    editUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/edit/$dsId"),
+                    editUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId/edit"),
                 ) {
                     dataSourceDisplay(dataSourceWithContacts)
                 }
@@ -100,7 +102,7 @@ private fun Route.getDataSource() =
     }
 
 private fun Route.editDataSource() =
-    route("/edit/{dsId}") {
+    route("/{dsId}/edit") {
         get {
             val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
             val dataSourcesDao: DataSourcesDao by closestDI().instance()
@@ -118,6 +120,7 @@ private fun Route.editDataSource() =
             val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
             val workflows = workflowsDao.getAll()
             call.respondHtmx {
+                pushUrl = "/data-sources/$dsId/edit"
                 addHtml {
                     dataEdit(
                         title = "Edit Data Source Details",
@@ -142,13 +145,22 @@ private fun Route.editDataSource() =
             dataSourcesDao.update(user.userId, dsId, request)
             call.respondHtmx {
                 addCreateToastEvent("Updated data source, id = $dsId")
-                addHtml {
-                    div {
-                        hxGet = apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId")
-                        hxTrigger = "load"
-                        hxSwap(SwapType.OuterHtml)
-                    }
-                }
+                addLoadProxy(apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId"))
             }
         }
+    }
+
+private fun Route.createContactForm() =
+    get("/create") {
+        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        call.respondHtmx {
+            pushUrl = "/data-sources/$dsId/contact/create"
+            addHtml {
+                createDataSourceContactForm(dsId)
+            }
+        }
+    }
+
+private fun Route.createContact() =
+    post {
     }

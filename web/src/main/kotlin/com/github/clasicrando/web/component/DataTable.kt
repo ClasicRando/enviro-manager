@@ -1,6 +1,8 @@
 package com.github.clasicrando.web.component
 
-import com.github.clasicrando.web.MAIN_CONTENT_ID
+import com.github.clasicrando.web.MAIN_CONTENT_TARGET
+import com.github.clasicrando.web.element.column
+import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.hxDelete
@@ -15,7 +17,6 @@ import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxTrigger
 import io.ktor.http.HttpMethod
-import io.ktor.server.html.insert
 import kotlinx.html.ButtonType
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlTagMarker
@@ -64,7 +65,7 @@ fun FlowContent.rowAction(
             HttpMethod.Delete -> hxDelete = url
         }
         attributes["title"] = title
-        hxTarget = target ?: "#$MAIN_CONTENT_ID"
+        hxTarget = target ?: MAIN_CONTENT_TARGET
         hxPushUrl = pushUrl
         hxSwap(swap)
         i(classes = "fa-solid $icon") {
@@ -127,6 +128,7 @@ data class ExtraButton(
     val icon: String,
     val target: String? = null,
     val swap: HxSwap? = null,
+    val httpMethod: HttpMethod = HttpMethod.Post,
 )
 
 inline fun <I> FlowContent.dataTable(
@@ -134,6 +136,7 @@ inline fun <I> FlowContent.dataTable(
     dataSource: String = "",
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
+    extraContainerClasses: String? = null,
     crossinline header: THEAD.() -> Unit,
     items: List<I>,
     crossinline rowBuilder: TBODY.(I) -> Unit,
@@ -143,6 +146,7 @@ inline fun <I> FlowContent.dataTable(
         dataSource = dataSource,
         search = search,
         extraButtons = extraButtons,
+        extraContainerClasses = extraContainerClasses,
         header = header,
         items = items,
         rowBuilder = rowBuilder,
@@ -154,67 +158,83 @@ inline fun <I, T, C : TagConsumer<T>> C.dataTable(
     dataSource: String = "",
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
+    extraContainerClasses: String? = null,
     crossinline header: THEAD.() -> Unit,
     items: List<I>,
     crossinline rowBuilder: TBODY.(I) -> Unit,
 ) {
     val hasSearch = search && dataSource.isNotBlank()
-    div(classes = "table-responsive-sm") {
-        div(classes = "btn-toolbar mt-1") {
-            role = "toolbar"
-            if (hasSearch) {
-                div(classes = "d-flex ms-auto") {
-                    input(classes = "form-control me-2", type = InputType.search) {
-                        placeholder = "Search"
-                        name = "search"
-                        hxTrigger = "keyup changed delay:500ms"
-                        hxPost = "$dataSource/search"
-                        hxIndicator = ".htmx-indicator"
-                        hxTarget = "#$MAIN_CONTENT_ID"
-                        attributes["aria-label"] = "Search"
+    val containerClasses =
+        if (extraContainerClasses.isNullOrBlank()) {
+            "table-responsive-sm"
+        } else {
+            "table-responsive-sm ${extraContainerClasses.trim()}"
+        }
+    div(classes = containerClasses) {
+        row {
+            column(size = 4) {
+                h5(classes = "text-start") {
+                    +title
+                    div(classes = "spinner-border htmx-indicator") {
+                        role = "status"
                     }
                 }
             }
-            div(
-                classes =
+            column(size = 8) {
+                div(classes = "btn-toolbar mt-1") {
+                    role = "toolbar"
                     if (hasSearch) {
-                        "btn-group"
-                    } else {
-                        "btn-group ms-auto"
-                    },
-            ) {
-                if (dataSource.isNotBlank()) {
-                    button(type = ButtonType.button, classes = "btn btn-secondary") {
-                        hxGet = dataSource
-                        hxTrigger = "click"
-                        hxTarget = "#$MAIN_CONTENT_ID"
-                        hxSwap(SwapType.InnerHtml)
-                        hxIndicator = ".htmx-indicator"
-                        i(classes = "fa-solid fa-refresh")
+                        div(classes = "d-flex ms-auto") {
+                            input(classes = "form-control me-2", type = InputType.search) {
+                                placeholder = "Search"
+                                name = "search"
+                                hxTrigger = "keyup changed delay:500ms"
+                                hxPost = "$dataSource/search"
+                                hxIndicator = ".htmx-indicator"
+                                hxTarget = MAIN_CONTENT_TARGET
+                                attributes["aria-label"] = "Search"
+                            }
+                        }
                     }
-                }
-                for (button in extraButtons) {
-                    button(type = ButtonType.button, classes = "btn btn-secondary") {
-                        hxPost = button.apiUrl
-                        hxTrigger = "click"
-                        button.target?.let {
-                            hxTarget = it
+                    div(
+                        classes =
+                            if (hasSearch) {
+                                "btn-group"
+                            } else {
+                                "btn-group ms-auto"
+                            },
+                    ) {
+                        if (dataSource.isNotBlank()) {
+                            button(type = ButtonType.button, classes = "btn btn-secondary") {
+                                hxGet = dataSource
+                                hxTrigger = "click"
+                                hxTarget = MAIN_CONTENT_TARGET
+                                hxSwap(SwapType.InnerHtml)
+                                hxIndicator = ".htmx-indicator"
+                                i(classes = "fa-solid fa-refresh")
+                            }
                         }
-                        button.swap?.let {
-                            insert(it)
+                        for (button in extraButtons) {
+                            button(type = ButtonType.button, classes = "btn btn-secondary") {
+                                when (button.httpMethod) {
+                                    HttpMethod.Get -> hxGet = button.apiUrl
+                                    HttpMethod.Post -> hxPost = button.apiUrl
+                                    HttpMethod.Put -> hxPut = button.apiUrl
+                                    HttpMethod.Patch -> hxPatch = button.apiUrl
+                                    HttpMethod.Delete -> hxDelete = button.apiUrl
+                                }
+                                hxPost = button.apiUrl
+                                hxTrigger = "click"
+                                hxTarget = button.target ?: MAIN_CONTENT_TARGET
+                                hxSwap(button.swap ?: HxSwap(swapType = SwapType.InnerHtml))
+                                i(classes = "fa-solid ${button.icon}")
+                            }
                         }
-                        i(classes = "fa-solid ${button.icon}")
                     }
                 }
             }
         }
         table(classes = "table table-stripped") {
-            h5 {
-                +title
-                div(classes = "spinner-border htmx-indicator") {
-                    role = "status"
-                }
-            }
             thead(block = header)
             tbody {
                 for (item in items) {

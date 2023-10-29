@@ -7,9 +7,9 @@ import io.ktor.http.withCharset
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
 import kotlinx.html.TagConsumer
+import kotlinx.html.div
 import kotlinx.html.stream.appendHTML
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -21,18 +21,28 @@ class HtmxResponseBuilder {
     var target: String? = null
     var swap: HxSwap? = null
     var redirect: String? = null
+    var pushUrl: String? = null
     var responseContent: String = ""
 
     fun addCreateToastEvent(message: String) {
         triggers["createToast"] = JsonPrimitive(message)
     }
 
-    fun addRefreshDataEvent() {
-        triggers["refreshData"] = JsonNull
-    }
-
     private fun finishTriggers() {
         triggerData = JsonObject(triggers)
+    }
+
+    fun addLoadProxy(url: String) {
+        responseContent =
+            buildString {
+                appendHTML(prettyPrint = false).apply {
+                    div {
+                        hxGet = url
+                        hxTrigger = "load"
+                        hxSwap(SwapType.OuterHtml)
+                    }
+                }
+            }
     }
 
     inline fun addHtml(crossinline chunk: HtmxContentCollector.() -> Unit) {
@@ -64,6 +74,9 @@ suspend fun ApplicationCall.respondHtmx(block: HtmxResponseBuilder.() -> Unit) {
     }
     builder.redirect?.let {
         response.headers.append("HX-Redirect", it)
+    }
+    builder.pushUrl?.let {
+        response.headers.append("HX-Push-Url", it)
     }
     respond(
         TextContent(

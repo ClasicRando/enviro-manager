@@ -21,14 +21,10 @@ import kotlinx.html.ul
 
 private fun UL.themeSelector() {
     li(classes = "nav-item dropdown") {
-        button(
-            classes = "btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle align-items-center",
-            type = ButtonType.button,
-        ) {
+        a(classes = "nav-link dropdown-toggle") {
             id = "bd-theme"
+            href = "#"
             attributes["aria-expanded"] = "false"
-            attributes["data-bs-toggle"] = "dropdown"
-            attributes["data-bs-display"] = "static"
             attributes["aria-label"] = "Toggle theme (dark)"
             i(classes = "fa-solid fa-moon me-1") {
                 id = "theme-selector"
@@ -133,7 +129,7 @@ fun DIV.mainNav(user: User? = null) {
                     }
                 }
             }
-            ul(classes = "navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll") {
+            ul(classes = "navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll align-items-center") {
                 style = "--bs-scroll-height: 100px;"
                 userContext(userFullName = user?.fullName)
                 themeSelector()

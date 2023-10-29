@@ -1,6 +1,6 @@
 package com.github.clasicrando.web.component
 
-import com.github.clasicrando.web.MAIN_CONTENT_ID
+import com.github.clasicrando.web.MAIN_CONTENT_TARGET
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxGet
@@ -12,8 +12,6 @@ import kotlinx.html.ButtonType
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.InputType
-import kotlinx.html.TBODY
-import kotlinx.html.THEAD
 import kotlinx.html.TagConsumer
 import kotlinx.html.button
 import kotlinx.html.div
@@ -29,35 +27,13 @@ import kotlinx.html.option
 import kotlinx.html.role
 import kotlinx.html.select
 import kotlinx.html.style
-import kotlinx.html.table
-import kotlinx.html.tbody
 import kotlinx.html.textArea
-import kotlinx.html.thead
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
-fun <T> FlowContent.dataDisplayTable(
-    caption: String,
-    header: THEAD.() -> Unit,
-    items: List<T>,
-    rowBuilder: TBODY.(T) -> Unit,
-) {
-    div(classes = "table-responsive-sm") {
-        h5(classes = "mt-4") { +caption }
-        table(classes = "table table-stripped") {
-            thead(block = header)
-            tbody {
-                for (item in items) {
-                    rowBuilder(item)
-                }
-            }
-        }
-    }
-}
 
 inline fun FlowContent.dataGroup(
     title: String,
@@ -218,7 +194,7 @@ inline fun <T, C : TagConsumer<T>> C.dataDisplay(
                         attributes["title"] = "Edit"
                         hxGet = editUrl
                         hxTrigger = "click"
-                        hxTarget = "#$MAIN_CONTENT_ID"
+                        hxTarget = MAIN_CONTENT_TARGET
                         hxSwap(SwapType.InnerHtml)
                         i(classes = "fa-solid fa-edit")
                     }
@@ -227,7 +203,7 @@ inline fun <T, C : TagConsumer<T>> C.dataDisplay(
                     attributes["title"] = "Refresh"
                     hxGet = dataUrl
                     hxTrigger = "click"
-                    hxTarget = "#$MAIN_CONTENT_ID"
+                    hxTarget = MAIN_CONTENT_TARGET
                     hxSwap(SwapType.InnerHtml)
                     i(classes = "fa-solid fa-refresh")
                 }
@@ -254,14 +230,14 @@ inline fun <T, C : TagConsumer<T>> C.dataEdit(
                 button(classes = "btn btn-secondary", type = ButtonType.button) {
                     attributes["title"] = "Cancel"
                     hxGet = cancelUrl
-                    hxTarget = "#$MAIN_CONTENT_ID"
+                    hxTarget = MAIN_CONTENT_TARGET
                     hxSwap(SwapType.InnerHtml)
                     i(classes = "fa-solid fa-xmark")
                 }
                 button(classes = "btn btn-secondary", type = ButtonType.button) {
                     attributes["title"] = "Confirm"
                     hxPatch = patchUrl
-                    hxTarget = "#$MAIN_CONTENT_ID"
+                    hxTarget = MAIN_CONTENT_TARGET
                     hxSwap(SwapType.InnerHtml)
                     htmxJsonEncoding = true
                     i(classes = "fa-solid fa-check")
