@@ -1,7 +1,6 @@
 package com.github.clasicrando.web
 
 import com.github.clasicrando.di.bindDaoComponents
-import com.github.clasicrando.di.bindDatabaseComponents
 import com.github.clasicrando.logging.logger
 import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.data.UsersDao
@@ -40,27 +39,61 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.snappy.SnappyMapper
+import java.time.Instant
 
-val serverLogger by logger()
+private val serverLogger by logger()
+private val mutex = Mutex()
+private val errorLoopCheck = mutableMapOf<String, Instant>()
+
+private fun loopCountStop(
+    currentUrl: String,
+    errorInstant: Instant,
+): Boolean {
+    val lastErrorInstant = errorLoopCheck[currentUrl]
+    if (lastErrorInstant == null) {
+        errorLoopCheck[currentUrl] = errorInstant
+        return false
+    }
+
+    errorLoopCheck[currentUrl] = errorInstant
+    return lastErrorInstant.isAfter(errorInstant.plusSeconds(-1))
+}
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 private fun StatusPagesConfig.configure() {
     exception<Throwable> { call, cause ->
-        serverLogger.atInfo {
+        serverLogger.atError {
             message = "Unhandled error at ${call.request.uri}"
             this.cause = cause
         }
         if (call.request.header("HX-Request") == "true") {
+            val currentUrl = call.request.header("HX-Current-URL")
+            val shouldShortCircuit =
+                currentUrl?.let {
+                    mutex.withLock {
+                        loopCountStop(currentUrl, Instant.now())
+                    }
+                } ?: false
             call.respondHtmx {
-                val currentUrl = call.request.header("HX-Current-URL")
                 addCreateToastEvent("Error: ${cause.message}")
-                redirect = currentUrl ?: "/"
+                redirect =
+                    if (shouldShortCircuit) {
+                        serverLogger.atError {
+                            message = "Error short circuit"
+                            payload = mapOf("url" to (currentUrl ?: ""))
+                        }
+                        "/"
+                    } else {
+                        currentUrl ?: "/"
+                    }
             }
             return@exception
         }
@@ -129,7 +162,6 @@ fun Route.apiLoginAction() {
 fun Application.module() {
     SnappyMapper.loadCache()
     di {
-        bindDatabaseComponents()
         bindDaoComponents()
         bindRedisSessionComponent()
     }

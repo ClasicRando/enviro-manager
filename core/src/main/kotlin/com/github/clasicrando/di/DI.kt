@@ -1,7 +1,9 @@
 package com.github.clasicrando.di
 
+import com.github.clasicrando.datasources.data.DataSourceContactsDao
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
+import com.github.clasicrando.datasources.data.postgres.PgDataSourceContactsDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourcesDao
 import com.github.clasicrando.datasources.data.postgres.PgRecordWarehouseTypeDao
 import com.github.clasicrando.users.data.PgUsersDao
@@ -30,6 +32,7 @@ fun DI.MainBuilder.bindDatabaseComponents() {
 }
 
 fun DI.MainBuilder.bindDaoComponents() {
+    bindDatabaseComponents()
     bindProvider<DataSourcesDao> {
         PgDataSourcesDao(di)
     }
@@ -41,5 +44,8 @@ fun DI.MainBuilder.bindDaoComponents() {
     }
     bindProvider<WorkflowsDao> {
         PgWorkflowsDao(di)
+    }
+    bindProvider<DataSourceContactsDao> {
+        PgDataSourceContactsDao(di)
     }
 }

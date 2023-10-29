@@ -1,8 +1,10 @@
 package com.github.clasicrando.web.api
 
+import com.github.clasicrando.datasources.data.DataSourceContactsDao
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.model.DsId
+import com.github.clasicrando.requests.ModifyDataSourceContactRequest
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
@@ -37,7 +39,7 @@ fun Route.dataSources() =
         getAllDataSources()
         getDataSource()
         editDataSource()
-        route("/{dsId}/contact") {
+        route("/{dsId}/contacts") {
             createContactForm()
             createContact()
         }
@@ -154,7 +156,7 @@ private fun Route.createContactForm() =
     get("/create") {
         val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
         call.respondHtmx {
-            pushUrl = "/data-sources/$dsId/contact/create"
+            pushUrl = "/data-sources/$dsId/contacts/create"
             addHtml {
                 createDataSourceContactForm(dsId)
             }
@@ -163,4 +165,14 @@ private fun Route.createContactForm() =
 
 private fun Route.createContact() =
     post {
+        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val request = call.receive<ModifyDataSourceContactRequest>()
+        val dao: DataSourceContactsDao by closestDI().instance()
+
+        dao.create(dsId, request)
+
+        call.respondHtmx {
+            addCreateToastEvent("Created new data source contact")
+            addLoadProxy(apiV1Url("/data-sources/$dsId"))
+        }
     }

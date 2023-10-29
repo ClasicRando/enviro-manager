@@ -1,15 +1,15 @@
 create or replace procedure em.create_data_source_contact(
+    ds_id bigint,
     name text,
     email text,
     website text,
     type text,
-    notes text,
-    ds_id bigint
+    notes text
 )
 security definer
 language sql
 as $$
-insert into em.data_source_contacts (name, email, website, type, notes, ds_id)
+insert into em.data_source_contacts (ds_id, name, email, website, type, notes)
 values ($1, $2, $3, $4, $5, $6)
 $$;
 

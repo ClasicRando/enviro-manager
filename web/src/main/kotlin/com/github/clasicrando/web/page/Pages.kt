@@ -50,12 +50,12 @@ private fun Route.dataSource() =
     }
 
 private fun Route.createDataSourceContact() =
-    get("/data-sources/{dsId}/contact/create") {
+    get("/data-sources/{dsId}/contacts/create") {
         val dsId = call.parameters.getOrFail<Long>("dsId")
         val dao: UsersDao by closestDI().instance()
         val user = call.userOrRedirect(dao = dao) ?: return@get
         call.respondBasePage(
-            contentUrl = apiV1Url("/data-sources/$dsId/contact/create"),
+            contentUrl = apiV1Url("/data-sources/$dsId/contacts/create"),
             user = user,
         )
     }

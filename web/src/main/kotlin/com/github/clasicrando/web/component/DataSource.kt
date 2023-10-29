@@ -327,7 +327,7 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
     val addContact =
         ExtraButton(
             title = "New Contact",
-            apiUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/${data.dataSource.dsId}/contact/create"),
+            apiUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/${data.dataSource.dsId}/contacts/create"),
             icon = "fa-plus",
             httpMethod = HttpMethod.Get,
         )
