@@ -4,7 +4,6 @@ import kotlinx.html.A
 import kotlinx.html.FlowContent
 
 private const val HX_BOOST = "hx-boost"
-private const val HX_ON = "hx-on"
 private const val HX_ON_CLICK = "hx-on:click"
 private const val HX_TRIGGER = "hx-trigger"
 private const val HX_GET = "hx-get"
@@ -15,6 +14,7 @@ private const val HX_DELETE = "hx-delete"
 private const val HX_INDICATOR = "hx-indicator"
 private const val HX_TARGET = "hx-target"
 private const val HX_PUSH_URL = "hx-push-url"
+private const val HX_CONFIRM = "hx-confirm"
 private const val HX_EXT = "hx-ext"
 private const val HTMX_JSON_ENCODING_EXT = "json-enc"
 
@@ -82,6 +82,12 @@ var FlowContent.hxPushUrl
     get() = attributes[HX_PUSH_URL]
     set(value) {
         value?.let { attributes[HX_PUSH_URL] = value }
+    }
+
+var FlowContent.hxConfirm
+    get() = attributes[HX_CONFIRM]
+    set(value) {
+        value?.let { attributes[HX_CONFIRM] = value }
     }
 
 var FlowContent.htmxJsonEncoding

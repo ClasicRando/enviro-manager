@@ -30,7 +30,10 @@ class PgDataSourceContactsDao(override val di: DI) : DIAware, DataSourceContacts
         }
     }
 
-    override suspend fun delete(contactId: ContactId, dsId: DsId) {
+    override suspend fun delete(
+        contactId: ContactId,
+        dsId: DsId,
+    ) {
         dataSource.useConnection {
             sqlCommand("call em.delete_data_source_contact(?, ?)")
                 .bind(contactId)
@@ -43,12 +46,12 @@ class PgDataSourceContactsDao(override val di: DI) : DIAware, DataSourceContacts
         return dataSource.useConnection {
             sqlCommand(
                 """
-                    select
-                        dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
-                        dsc.notes
-                    from em.v_data_source_contacts dsc
-                    where dsc.ds_id = ?
-                """.trimIndent()
+                select
+                    dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
+                    dsc.notes
+                from em.v_data_source_contacts dsc
+                where dsc.ds_id = ?
+                """.trimIndent(),
             )
                 .bind(dsId)
                 .querySuspend<DataSourceContact>(this)
@@ -60,12 +63,12 @@ class PgDataSourceContactsDao(override val di: DI) : DIAware, DataSourceContacts
         return dataSource.useConnection {
             sqlCommand(
                 """
-                    select
-                        dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
-                        dsc.notes
-                    from em.v_data_source_contacts dsc
-                    where dsc.contact_id = ?
-                """.trimIndent()
+                select
+                    dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
+                    dsc.notes
+                from em.v_data_source_contacts dsc
+                where dsc.contact_id = ?
+                """.trimIndent(),
             )
                 .bind(contactId)
                 .querySingleOrNullSuspend(this)

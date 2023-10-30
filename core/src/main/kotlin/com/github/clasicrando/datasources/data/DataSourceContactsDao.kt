@@ -21,5 +21,8 @@ interface DataSourceContactsDao {
         request: ModifyDataSourceContactRequest,
     )
 
-    suspend fun delete(contactId: ContactId, dsId: DsId)
+    suspend fun delete(
+        contactId: ContactId,
+        dsId: DsId,
+    )
 }

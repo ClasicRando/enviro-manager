@@ -15,7 +15,6 @@ import kotlinx.html.fieldSet
 import kotlinx.html.i
 import kotlinx.html.td
 import kotlinx.html.th
-import kotlinx.html.title
 import kotlinx.html.tr
 
 fun TBODY.dataSourceRow(dataSource: DataSource) {
@@ -344,7 +343,7 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
                 th { +"Website" }
                 th { +"Type" }
                 th { +"Notes" }
-                th { +"Action" }
+                th { +"Actions" }
             }
         },
         items = data.contacts ?: emptyList(),
@@ -362,6 +361,14 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
                         url = apiV1Url("/data-sources/$dsId/contacts/${contact.contactId}/edit"),
                         icon = "fa-edit",
                         httpMethod = HttpMethod.Get,
+                    )
+                    rowAction(
+                        title = "Delete",
+                        url = apiV1Url("/data-sources/$dsId/contacts/${contact.contactId}"),
+                        icon = "fa-trash",
+                        httpMethod = HttpMethod.Delete,
+                        confirmMessage =
+                            "Are you sure you want to delete this data source contact?",
                     )
                 }
             }

@@ -5,6 +5,7 @@ import com.github.clasicrando.web.element.column
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
+import com.github.clasicrando.web.htmx.hxConfirm
 import com.github.clasicrando.web.htmx.hxDelete
 import com.github.clasicrando.web.htmx.hxGet
 import com.github.clasicrando.web.htmx.hxIndicator
@@ -55,6 +56,7 @@ fun FlowContent.rowAction(
     swap: HxSwap? = null,
     style: String? = null,
     pushUrl: String? = null,
+    confirmMessage: String? = null,
 ) {
     button(classes = "btn btn-primary me-1") {
         when (httpMethod) {
@@ -68,6 +70,7 @@ fun FlowContent.rowAction(
         hxTarget = target ?: MAIN_CONTENT_TARGET
         hxPushUrl = pushUrl
         hxSwap(swap)
+        hxConfirm = confirmMessage
         i(classes = "fa-solid $icon") {
             style?.let { this.style = it }
         }

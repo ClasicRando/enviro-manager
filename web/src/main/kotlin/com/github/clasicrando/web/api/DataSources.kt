@@ -24,6 +24,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
@@ -47,6 +48,7 @@ fun Route.dataSources() =
                 route("/{contactId}") {
                     editContactForm()
                     editContact()
+                    deleteContact()
                 }
             }
         }
@@ -216,6 +218,20 @@ private fun Route.editContact() =
 
         call.respondHtmx {
             addCreateToastEvent("Updated data source contact, contact_id = $contactId")
+            addLoadProxy(apiV1Url("/data-sources/$dsId"))
+        }
+    }
+
+private fun Route.deleteContact() =
+    delete {
+        val contactId = ContactId(call.parameters.getOrFail<Long>("contactId"))
+        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val dao: DataSourceContactsDao by closestDI().instance()
+
+        dao.delete(contactId, dsId)
+
+        call.respondHtmx {
+            addCreateToastEvent("Delete data source contact, contact_id = $contactId")
             addLoadProxy(apiV1Url("/data-sources/$dsId"))
         }
     }
