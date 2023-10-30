@@ -46,7 +46,7 @@ fun <T, C : TagConsumer<T>> C.loginForm() {
             }
         }
         div { id = "errorMessage" }
-        input(classes = "btn btn-primary", type = InputType.submit) {
+        input(classes = "btn btn-primary mt-2", type = InputType.submit) {
             value = "Login"
         }
     }
