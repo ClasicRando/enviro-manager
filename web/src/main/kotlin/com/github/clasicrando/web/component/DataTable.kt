@@ -17,6 +17,7 @@ import com.github.clasicrando.web.htmx.hxPut
 import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxTrigger
+import com.github.clasicrando.web.htmx.hyperscript
 import io.ktor.http.HttpMethod
 import kotlinx.html.ButtonType
 import kotlinx.html.FlowContent
@@ -70,7 +71,16 @@ fun FlowContent.rowAction(
         hxTarget = target ?: MAIN_CONTENT_TARGET
         hxPushUrl = pushUrl
         hxSwap(swap)
-        hxConfirm = confirmMessage
+        confirmMessage?.let {
+            hxTrigger = "confirmed"
+            val message = it.replace("'", "\\'")
+            hyperscript =
+                """
+                on click
+                    call Swal.fire({title: 'Confirm', text:'$message'})
+                    if result.isConfirmed trigger confirmed
+                """.trimIndent()
+        }
         i(classes = "fa-solid $icon") {
             style?.let { this.style = it }
         }

@@ -42,11 +42,14 @@ class BasePage(
                 integrity = "sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
                 attributes["crossorigin"] = "anonymous"
             }
+            link(rel = "stylesheet", href = "/assets/sweetalert2-theme-dark.css")
             stylesheetHref?.let {
                 link(rel = "stylesheet", href = it)
             }
             script(src = "/assets/htmx.min.js") {}
             script(src = "/assets/json-enc.js") {}
+            script(src = "/assets/hyperscript.min.js") {}
+            script(src = "/assets/sweetalert2.min.js") {}
             script(type = "module", src = "/assets/utils.js") {}
             script(src = "/assets/fontawesome/js/solid.js") {
                 defer = true

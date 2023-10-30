@@ -15,6 +15,7 @@ private const val HX_INDICATOR = "hx-indicator"
 private const val HX_TARGET = "hx-target"
 private const val HX_PUSH_URL = "hx-push-url"
 private const val HX_CONFIRM = "hx-confirm"
+private const val HYPER_SCRIPT = "_"
 private const val HX_EXT = "hx-ext"
 private const val HTMX_JSON_ENCODING_EXT = "json-enc"
 
@@ -84,10 +85,10 @@ var FlowContent.hxPushUrl
         value?.let { attributes[HX_PUSH_URL] = value }
     }
 
-var FlowContent.hxConfirm
-    get() = attributes[HX_CONFIRM]
+var FlowContent.hyperscript
+    get() = attributes[HYPER_SCRIPT]
     set(value) {
-        value?.let { attributes[HX_CONFIRM] = value }
+        value?.let { attributes[HYPER_SCRIPT] = value }
     }
 
 var FlowContent.htmxJsonEncoding
