@@ -57,18 +57,23 @@ inline fun <T, C : TagConsumer<T>> C.createForm(
 }
 
 inline fun FlowContent.editForm(
+    title: String,
     patchUrl: String,
     cancelUrl: String,
     crossinline formContent: FORM.() -> Unit,
 ) {
-    consumer.editForm(patchUrl, cancelUrl, formContent)
+    consumer.editForm(title, patchUrl, cancelUrl, formContent)
 }
 
 inline fun <T, C : TagConsumer<T>> C.editForm(
+    title: String,
     patchUrl: String,
     cancelUrl: String,
     crossinline formContent: FORM.() -> Unit,
 ) {
+    h5(classes = "text-center") {
+        +title
+    }
     form(classes = "modify-form mx-auto") {
         formContent()
         row {

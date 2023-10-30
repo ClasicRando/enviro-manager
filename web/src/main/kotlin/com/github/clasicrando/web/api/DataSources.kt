@@ -3,6 +3,7 @@ package com.github.clasicrando.web.api
 import com.github.clasicrando.datasources.data.DataSourceContactsDao
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
+import com.github.clasicrando.datasources.model.ContactId
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.requests.ModifyDataSourceContactRequest
 import com.github.clasicrando.requests.UpdateDateSourceRequest
@@ -15,6 +16,7 @@ import com.github.clasicrando.web.component.dataSourceDisplay
 import com.github.clasicrando.web.component.dataSourceEdit
 import com.github.clasicrando.web.component.dataSourceRow
 import com.github.clasicrando.web.component.dataTable
+import com.github.clasicrando.web.component.editDataSourceContactForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.userSessionOrRedirect
 import com.github.clasicrando.workflows.data.WorkflowsDao
@@ -32,16 +34,21 @@ import kotlinx.html.tr
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
-const val DATA_SOURCE_API_BASE_URL = "/data-sources"
-
 fun Route.dataSources() =
-    route(DATA_SOURCE_API_BASE_URL) {
+    route("/data-sources") {
         getAllDataSources()
-        getDataSource()
-        editDataSource()
-        route("/{dsId}/contacts") {
-            createContactForm()
-            createContact()
+        route("/{dsId}") {
+            getDataSource()
+            editDataSourceForm()
+            editDataSource()
+            route("/contacts") {
+                createContactForm()
+                createContact()
+                route("/{contactId}") {
+                    editContactForm()
+                    editContact()
+                }
+            }
         }
     }
 
@@ -79,7 +86,7 @@ private fun Route.getAllDataSources() =
     }
 
 private fun Route.getDataSource() =
-    get("/{dsId}") {
+    get {
         val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
         val dataSourceWithContacts = dataSourcesDao.getByIdWithContacts(dsId)
@@ -94,8 +101,8 @@ private fun Route.getDataSource() =
             addHtml {
                 dataDisplay(
                     title = "Data Source Details",
-                    dataUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId"),
-                    editUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId/edit"),
+                    dataUrl = apiV1Url("/data-sources/$dsId"),
+                    editUrl = apiV1Url("/data-sources/$dsId/edit"),
                 ) {
                     dataSourceDisplay(dataSourceWithContacts)
                 }
@@ -103,52 +110,53 @@ private fun Route.getDataSource() =
         }
     }
 
-private fun Route.editDataSource() =
-    route("/{dsId}/edit") {
-        get {
-            val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
-            val dataSourcesDao: DataSourcesDao by closestDI().instance()
-            val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
-            val usersDao: UsersDao by closestDI().instance()
-            val workflowsDao: WorkflowsDao by closestDI().instance()
-            val dataSource = dataSourcesDao.getById(dsId)
-            if (dataSource == null) {
-                call.respondHtmx {
-                    addCreateToastEvent("No data source for ds_id = $dsId")
-                }
-                return@get
-            }
-            val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
-            val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
-            val workflows = workflowsDao.getAll()
+private fun Route.editDataSourceForm() =
+    get("/edit") {
+        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val dataSourcesDao: DataSourcesDao by closestDI().instance()
+        val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
+        val usersDao: UsersDao by closestDI().instance()
+        val workflowsDao: WorkflowsDao by closestDI().instance()
+        val dataSource = dataSourcesDao.getById(dsId)
+        if (dataSource == null) {
             call.respondHtmx {
-                pushUrl = "/data-sources/$dsId/edit"
-                addHtml {
-                    dataEdit(
-                        title = "Edit Data Source Details",
-                        patchUrl = call.request.uri,
-                        cancelUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/${dataSource.dsId}"),
-                    ) {
-                        dataSourceEdit(
-                            dataSource = dataSource,
-                            recordWarehouseTypes = recordWarehouseTypes,
-                            collectionUsers = collectionUsers,
-                            workflows = workflows,
-                        )
-                    }
+                addCreateToastEvent("No data source for ds_id = $dsId")
+            }
+            return@get
+        }
+        val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
+        val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
+        val workflows = workflowsDao.getAll()
+        call.respondHtmx {
+            pushUrl = "/data-sources/$dsId/edit"
+            addHtml {
+                val url = apiV1Url("/data-sources/${dataSource.dsId}")
+                dataEdit(
+                    title = "Edit Data Source Details",
+                    patchUrl = url,
+                    cancelUrl = url,
+                ) {
+                    dataSourceEdit(
+                        dataSource = dataSource,
+                        recordWarehouseTypes = recordWarehouseTypes,
+                        collectionUsers = collectionUsers,
+                        workflows = workflows,
+                    )
                 }
             }
         }
-        patch {
-            val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
-            val user = call.userSessionOrRedirect() ?: return@patch
-            val request = call.receive<UpdateDateSourceRequest>()
-            val dataSourcesDao: DataSourcesDao by closestDI().instance()
-            dataSourcesDao.update(user.userId, dsId, request)
-            call.respondHtmx {
-                addCreateToastEvent("Updated data source, id = $dsId")
-                addLoadProxy(apiV1Url("$DATA_SOURCE_API_BASE_URL/$dsId"))
-            }
+    }
+
+private fun Route.editDataSource() =
+    patch {
+        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val user = call.userSessionOrRedirect() ?: return@patch
+        val request = call.receive<UpdateDateSourceRequest>()
+        val dataSourcesDao: DataSourcesDao by closestDI().instance()
+        dataSourcesDao.update(user.userId, dsId, request)
+        call.respondHtmx {
+            addCreateToastEvent("Updated data source, id = $dsId")
+            addLoadProxy(apiV1Url("/data-sources/$dsId"))
         }
     }
 
@@ -173,6 +181,41 @@ private fun Route.createContact() =
 
         call.respondHtmx {
             addCreateToastEvent("Created new data source contact")
+            addLoadProxy(apiV1Url("/data-sources/$dsId"))
+        }
+    }
+
+private fun Route.editContactForm() =
+    get("/edit") {
+        val contactId = ContactId(call.parameters.getOrFail<Long>("contactId"))
+        val dao: DataSourceContactsDao by closestDI().instance()
+
+        val contact = dao.getById(contactId)
+        if (contact == null) {
+            call.respondHtmx {
+                addCreateToastEvent("No contact for contact_id = $contactId")
+            }
+            return@get
+        }
+
+        call.respondHtmx {
+            addHtml {
+                editDataSourceContactForm(contact)
+            }
+        }
+    }
+
+private fun Route.editContact() =
+    patch {
+        val contactId = ContactId(call.parameters.getOrFail<Long>("contactId"))
+        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val request = call.receive<ModifyDataSourceContactRequest>()
+        val dao: DataSourceContactsDao by closestDI().instance()
+
+        dao.update(contactId, dsId, request)
+
+        call.respondHtmx {
+            addCreateToastEvent("Updated data source contact, contact_id = $contactId")
             addLoadProxy(apiV1Url("/data-sources/$dsId"))
         }
     }

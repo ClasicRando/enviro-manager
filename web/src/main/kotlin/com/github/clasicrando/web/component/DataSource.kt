@@ -4,7 +4,6 @@ import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DataSourceWithContacts
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
-import com.github.clasicrando.web.api.DATA_SOURCE_API_BASE_URL
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.workflows.model.Workflow
@@ -16,6 +15,7 @@ import kotlinx.html.fieldSet
 import kotlinx.html.i
 import kotlinx.html.td
 import kotlinx.html.th
+import kotlinx.html.title
 import kotlinx.html.tr
 
 fun TBODY.dataSourceRow(dataSource: DataSource) {
@@ -186,6 +186,7 @@ fun FlowContent.dataSourceEdit(
 }
 
 fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
+    val dsId = data.dataSource.dsId
     fieldSet {
         dataGroup(title = "Details") {
             row {
@@ -193,7 +194,7 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
                     fieldId = "dsId",
                     label = "ID",
                     columnWidth = 1,
-                    data = data.dataSource.dsId,
+                    data = dsId,
                 )
                 dataDisplayField(
                     fieldId = "code",
@@ -327,7 +328,7 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
     val addContact =
         ExtraButton(
             title = "New Contact",
-            apiUrl = apiV1Url("$DATA_SOURCE_API_BASE_URL/${data.dataSource.dsId}/contacts/create"),
+            apiUrl = apiV1Url("data-sources/$dsId/contacts/create"),
             icon = "fa-plus",
             httpMethod = HttpMethod.Get,
         )
@@ -343,6 +344,7 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
                 th { +"Website" }
                 th { +"Type" }
                 th { +"Notes" }
+                th { +"Action" }
             }
         },
         items = data.contacts ?: emptyList(),
@@ -354,6 +356,14 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
                 dataCell(contact.website)
                 dataCell(contact.type)
                 dataCell(contact.notes)
+                td {
+                    rowAction(
+                        title = "Edit",
+                        url = apiV1Url("/data-sources/$dsId/contacts/${contact.contactId}/edit"),
+                        icon = "fa-edit",
+                        httpMethod = HttpMethod.Get,
+                    )
+                }
             }
         },
     )
