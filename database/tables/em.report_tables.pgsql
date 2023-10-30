@@ -1,9 +1,10 @@
 create table if not exists em.report_tables (
+    rt_id bigint primary key generated always as identity,
     st_id bigint not null references pipeline.source_tables (st_id) match simple
         on update cascade
         on delete cascade,
     sub_table_no smallint not null check (sub_table_no > 0),
-    parent_table bigint references pipeline.source_tables (st_id) match simple
+    parent_table_id bigint references em.report_tables (rt_id) match simple
         on update cascade
         on delete cascade,
     report_label text not null check (data_check.check_not_blank_or_empty(report_label)),
