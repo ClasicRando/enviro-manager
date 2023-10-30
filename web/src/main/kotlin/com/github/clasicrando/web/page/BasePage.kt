@@ -35,13 +35,7 @@ class BasePage(
             meta(name = "theme-color", content = "#000000")
             link(rel = "icon", href = "/assets/favicon.ico")
             link(rel = "stylesheet", href = "/assets/style.css")
-            link(
-                rel = "stylesheet",
-                href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
-            ) {
-                integrity = "sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
-                attributes["crossorigin"] = "anonymous"
-            }
+            link(rel = "stylesheet", href = "/assets/bootstrap.min.css")
             link(rel = "stylesheet", href = "/assets/sweetalert2-theme-dark.css")
             stylesheetHref?.let {
                 link(rel = "stylesheet", href = it)

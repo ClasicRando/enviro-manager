@@ -5,7 +5,6 @@ import com.github.clasicrando.web.element.column
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
-import com.github.clasicrando.web.htmx.hxConfirm
 import com.github.clasicrando.web.htmx.hxDelete
 import com.github.clasicrando.web.htmx.hxGet
 import com.github.clasicrando.web.htmx.hxIndicator
