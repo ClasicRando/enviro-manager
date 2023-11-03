@@ -1,0 +1,93 @@
+package com.github.clasicrando.web.htmx
+
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
+import io.ktor.http.withCharset
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.response.respond
+import kotlinx.html.TagConsumer
+import kotlinx.html.div
+import kotlinx.html.stream.appendHTML
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+
+typealias HtmxContentCollector = TagConsumer<StringBuilder>
+
+class HtmxResponseBuilder {
+    private val triggers: MutableMap<String, JsonElement> = mutableMapOf()
+    var triggerData: JsonObject? = null
+    var target: String? = null
+    var swap: HxSwap? = null
+    var redirect: String? = null
+    var pushUrl: String? = null
+    var responseContent: String = ""
+
+    fun addCreateToastEvent(message: String) {
+        triggers["createToast"] = JsonPrimitive(message)
+    }
+
+    private fun finishTriggers() {
+        triggerData = JsonObject(triggers)
+    }
+
+    fun addLoadProxy(url: String) {
+        responseContent =
+            buildString {
+                appendHTML(prettyPrint = false).apply {
+                    div {
+                        hxGet = url
+                        hxTrigger = "load"
+                        hxSwap(SwapType.OuterHtml)
+                    }
+                }
+            }
+    }
+
+    inline fun addHtml(crossinline chunk: HtmxContentCollector.() -> Unit) {
+        responseContent =
+            buildString {
+                appendHTML(prettyPrint = false).apply {
+                    chunk()
+                }
+            }
+    }
+
+    fun finishResponse() {
+        finishTriggers()
+    }
+}
+
+suspend fun ApplicationCall.respondHtmx(block: HtmxResponseBuilder.() -> Unit) {
+    val builder = HtmxResponseBuilder()
+    builder.block()
+    builder.finishResponse()
+    builder.triggerData?.let {
+        response.headers.append("HX-Trigger", it.toString())
+    }
+    builder.target?.let {
+        response.headers.append("HX-Retarget", it)
+    }
+    builder.swap?.let {
+        response.headers.append("HX-Swap", it.toString())
+    }
+    builder.redirect?.let {
+        response.headers.append("HX-Redirect", it)
+    }
+    builder.pushUrl?.let {
+        response.headers.append("HX-Push-Url", it)
+    }
+    respond(
+        TextContent(
+            builder.responseContent,
+            ContentType.Text.Html.withCharset(Charsets.UTF_8),
+            HttpStatusCode.OK,
+        ),
+    )
+}
+
+suspend fun ApplicationCall.respondHtmxLocation(location: String) {
+    response.headers.append("HX-Location", location)
+    respond(HttpStatusCode.OK)
+}

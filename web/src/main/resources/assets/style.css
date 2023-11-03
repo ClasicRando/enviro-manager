@@ -1,0 +1,17 @@
+.link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.data-field {
+    text-align: center;
+}
+
+.login-form {
+    width: 400px;
+}
+
+.modify-form {
+    width: 600px;
+}

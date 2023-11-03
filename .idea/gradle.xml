@@ -8,6 +8,11 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/conductor-worker" />
+            <option value="$PROJECT_DIR$/conductor-worker-ksp" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/db-build" />
+            <option value="$PROJECT_DIR$/web" />
           </set>
         </option>
       </GradleProjectSettings>

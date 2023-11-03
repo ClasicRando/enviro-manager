@@ -3,6 +3,21 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    val kotlinVersion: String by settings
+    val kotlinxSerializationPluginVersion: String by settings
+    val ktorVersion: String by settings
+    val kspVersion: String by settings
+    val shadowJarVersion: String by settings
+    val ktlintPluginVersion: String by settings
+
+    plugins {
+        kotlin("jvm") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinxSerializationPluginVersion
+        id("io.ktor.plugin") version ktorVersion
+        id("com.google.devtools.ksp") version kspVersion
+        id("com.github.johnrengelman.shadow") version shadowJarVersion
+        id("org.jlleitschuh.gradle.ktlint") version ktlintPluginVersion
+    }
 }
 
 plugins {
@@ -10,3 +25,8 @@ plugins {
 }
 
 rootProject.name = "enviro-manager"
+include("web")
+include("core")
+include("conductor-worker")
+include("conductor-worker-ksp")
+include("db-build")

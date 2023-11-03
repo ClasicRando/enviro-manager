@@ -1,0 +1,11 @@
+[
+  "em.applications.pgsql",
+  "em.countries.pgsql",
+  "em.provinces.pgsql",
+  "pipeline.collect_types.pgsql",
+  "pipeline.loader_types.pgsql",
+  "pipeline.file_types.pgsql",
+  "pipeline.pipeline_states.pgsql",
+  "pipeline.record_warehouse_types.pgsql",
+  "pipeline.workflows.pgsql"
+]

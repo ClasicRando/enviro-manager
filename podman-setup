@@ -1,0 +1,50 @@
+#!/bin/bash
+podman pull docker.io/postgis/postgis
+podman pull docker.io/redis
+
+dir="/home/$USER/enviro-manager"
+mkdir -p "$dir/postgresql"
+mkdir -p "$dir/redis"
+
+read -s -p "Postgres Password: " postgresPassword
+echo ""
+if [[ -z "${postgresPassword}" ]]; then
+    echo "No value provided for postgres password"
+    exit 1
+fi
+
+podman pod create --name enviro-manager -p 5430:5432 -p 6377:6379
+podman create --pod=enviro-manager \
+    --name enviro-manager-pg \
+    -e "POSTGRES_PASSWORD=${postgresPassword}" \
+    -v "$dir/postgresql:/var/lib/postgresql/data:Z" \
+    postgres
+podman create --pod=enviro-manager \
+    --name enviro-manager-redis \
+    -v "$dir/redis:/var/redis/data:Z" \
+    redis
+
+echo "# Postgres Set up"
+echo "podman exec -it enviro-manager-pg bash"
+echo "psql -U postgres"
+echo ""
+echo "create user em_web nosuperuser nocreatedb nocreaterole noinherit noreplication nobypassrls connection limit 20 password 'password';"
+echo "create user em_test nosuperuser nocreatedb nocreaterole noinherit noreplication nobypassrls connection limit 20 password 'password';"
+echo "create user em_admin nosuperuser createdb createrole replication password 'password' in role em_test;"
+echo "create database enviro_manager with owner = em_admin encoding = 'UTF8';"
+echo "create database enviro_manager_test with owner = em_test encoding = 'UTF8';"
+echo "\c enviro_manager;"
+echo "create extension pgcrypto;"
+echo "create extension postgis;"
+echo ""
+echo "\c enviro_manager_test;"
+echo "create extension pgcrypto;"
+echo "create extension postgis;"
+echo ""
+echo "# System Service Set up"
+echo "cd ~/.config/systemd/user"
+echo "podman generate systemd --files --name enviro-manager"
+echo "systemctl --user daemon-reload"
+echo "systemctl --user start pod-enviro-manager.service"
+echo "systemctl --user enable pod-enviro-manager.service"
+echo "loginctl enable-linger '$USER'"
