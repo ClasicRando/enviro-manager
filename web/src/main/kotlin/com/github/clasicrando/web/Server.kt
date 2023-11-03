@@ -14,6 +14,8 @@ import com.github.clasicrando.web.page.pages
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
@@ -161,6 +163,16 @@ fun Route.apiLoginAction() {
 @Suppress("UNUSED")
 fun Application.module() {
     SnappyMapper.loadCache()
+    environment.monitor.subscribe(ApplicationStarted) { application ->
+        serverLogger.atInfo {
+            message = "Server is starting up"
+        }
+    }
+    environment.monitor.subscribe(ApplicationStopped) { application ->
+        serverLogger.atInfo {
+            message = "Server is shutting down"
+        }
+    }
     di {
         bindDaoComponents()
         bindRedisSessionComponent()
