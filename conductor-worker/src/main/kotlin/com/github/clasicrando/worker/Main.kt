@@ -1,12 +1,11 @@
 package com.github.clasicrando.worker
 
-import com.github.clasicrando.logging.logger
 import com.github.clasicrando.worker.ksp.GeneratedWorker
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer
 import com.netflix.conductor.client.http.TaskClient
-import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
 
-val logger: KLogger by logger()
+val logger = KotlinLogging.logger {}
 
 fun main(args: Array<String>) {
     val taskClient = TaskClient()

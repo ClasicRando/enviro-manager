@@ -1,18 +1,17 @@
 package com.github.clasicrando.database.build
 
-import com.github.clasicrando.logging.logger
-import io.github.oshai.kotlinlogging.KLogger
+import com.github.clasicrando.jasync.query.sqlCommand
+import com.github.jasync.sql.db.Connection
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.json.Json
-import org.snappy.command.sqlCommand
 import java.nio.file.Path
-import java.sql.Connection
 import kotlin.io.path.Path
 import kotlin.io.path.bufferedReader
 import kotlin.io.path.notExists
 import kotlin.io.path.readText
 
 class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
-    private val log: KLogger by logger()
+    private val log = KotlinLogging.logger {}
 
     private suspend fun refreshDatabase() {
         val query =
@@ -22,9 +21,9 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
             where schema_owner = current_user
             """.trimIndent()
         val schemaNames =
-            sqlCommand(query).queryScalarOrNullSuspend<String>(connection)
+            sqlCommand(query).queryScalarOrNull<String>(connection)
                 ?: return
-        sqlCommand("drop schema if exists $schemaNames cascade").executeSuspend(connection)
+        sqlCommand("drop schema if exists $schemaNames cascade").execute(connection)
     }
 
     private fun processTypeDefinition(block: String): String {
@@ -66,13 +65,13 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
 
     private suspend fun executeAnonymousBlock(block: String) {
         val query = formatAnonymousBlock(block)
-        sqlCommand(query).executeSuspend(connection)
+        sqlCommand(query).execute(connection)
     }
 
     override suspend fun buildDatabase() {
         val databaseTarget =
             sqlCommand("select current_database()")
-                .queryScalarSuspend<String>(connection)
+                .queryScalar<String>(connection)
         log.atInfo {
             message = "Target specified as $databaseTarget to rebuild"
         }

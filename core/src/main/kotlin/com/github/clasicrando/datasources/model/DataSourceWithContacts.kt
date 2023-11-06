@@ -1,9 +1,9 @@
 package com.github.clasicrando.datasources.model
 
-import org.snappy.ksp.symbols.Flatten
-import org.snappy.ksp.symbols.RowParser
+import com.github.clasicrando.jasync.symbol.Flatten
+import com.github.clasicrando.jasync.symbol.ResultRow
 
-@RowParser
+@ResultRow
 data class DataSourceWithContacts(
     @Flatten
     val dataSource: DataSource,

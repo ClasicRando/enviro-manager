@@ -1,11 +1,6 @@
 package com.github.clasicrando.users.model
 
-import org.snappy.decode.Decoder
-import org.snappy.encode.Encode
-import org.snappy.rowparse.SnappyRow
-import java.sql.PreparedStatement
-
-enum class Role(val dbValue: String, val description: String) : Encode {
+enum class Role(val dbValue: String, val description: String) {
     Admin(dbValue = "admin", description = "All privileges granted"),
     CreateDataSource(
         dbValue = "create-data-source",
@@ -32,20 +27,14 @@ enum class Role(val dbValue: String, val description: String) : Encode {
         description = "Enables a user to execute a quality assurance check on data pipeline loads",
     ), ;
 
-    override fun encode(
-        preparedStatement: PreparedStatement,
-        parameterIndex: Int,
-    ) {
-        preparedStatement.setString(parameterIndex, this.dbValue)
+    override fun toString(): String {
+        return dbValue
     }
 
-    companion object : Decoder<Role> {
-        override fun decodeNullable(
-            row: SnappyRow,
-            fieldName: String,
-        ): Role? {
-            val roleName = row.getStringNullable(fieldName) ?: return null
-            return Role.entries.firstOrNull { it.dbValue == roleName }
+    companion object {
+        fun fromString(value: String): Role {
+            return Role.entries.firstOrNull { it.dbValue == value }
+                ?: error("Could not find a role for value = '$value'")
         }
     }
 }

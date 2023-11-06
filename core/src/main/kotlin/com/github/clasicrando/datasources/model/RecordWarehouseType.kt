@@ -1,8 +1,8 @@
 package com.github.clasicrando.datasources.model
 
-import org.snappy.ksp.symbols.RowParser
+import com.github.clasicrando.jasync.symbol.ResultRow
 
-@RowParser
+@ResultRow
 data class RecordWarehouseType(
     val id: RecordWarehouseTypeId,
     val name: String,

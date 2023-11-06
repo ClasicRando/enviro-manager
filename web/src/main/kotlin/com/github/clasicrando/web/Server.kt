@@ -1,7 +1,8 @@
 package com.github.clasicrando.web
 
 import com.github.clasicrando.di.bindDaoComponents
-import com.github.clasicrando.logging.logger
+import com.github.clasicrando.di.registerTypes
+import com.github.clasicrando.jasync.cache.RowParserCache
 import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.web.api.api
@@ -11,6 +12,7 @@ import com.github.clasicrando.web.di.bindRedisSessionComponent
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.htmx.respondHtmxLocation
 import com.github.clasicrando.web.page.pages
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -41,16 +43,16 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
-import org.snappy.SnappyMapper
 import java.time.Instant
 
-private val serverLogger by logger()
+private val serverLogger = KotlinLogging.logger {}
 private val mutex = Mutex()
 private val errorLoopCheck = mutableMapOf<String, Instant>()
 
@@ -162,7 +164,14 @@ fun Route.apiLoginAction() {
 
 @Suppress("UNUSED")
 fun Application.module() {
-    SnappyMapper.loadCache()
+    di {
+        bindDaoComponents()
+        bindRedisSessionComponent()
+    }
+    runBlocking {
+        closestDI().registerTypes()
+    }
+    RowParserCache.loadCache()
     environment.monitor.subscribe(ApplicationStarted) { application ->
         serverLogger.atInfo {
             message = "Server is starting up"
@@ -172,10 +181,6 @@ fun Application.module() {
         serverLogger.atInfo {
             message = "Server is shutting down"
         }
-    }
-    di {
-        bindDaoComponents()
-        bindRedisSessionComponent()
     }
     install(ContentNegotiation) {
         json(

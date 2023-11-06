@@ -23,14 +23,8 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.github.crackthecodeabhi:kreds:$kredsVersion")
-    implementation("com.github.snappy:snappy:0.1")
-    ksp("com.github.snappy:snappy:0.1")
-    // https://mvnrepository.com/artifact/org.postgresql/postgresql
-    implementation("org.postgresql:postgresql:$postgresqlJdbcVersion")
     // https://mvnrepository.com/artifact/org.kodein.di/kodein-di-jvm
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:$kodeinVersion")
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2
-    implementation("org.apache.commons:commons-dbcp2:$apacheCommonsDbcpVersion")
 }
 
 application {

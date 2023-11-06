@@ -1,11 +1,14 @@
 package com.github.clasicrando.workflows.model
 
-import org.snappy.ksp.symbols.RowParser
+import com.github.clasicrando.jasync.symbol.Rename
+import com.github.clasicrando.jasync.symbol.ResultRow
 
-@RowParser
+@ResultRow
 data class Workflow(
     val id: WorkflowId,
     val name: String,
+    @Rename("workflow_definition_name")
     val workflowDefinitionName: String,
+    @Rename("pipeline_state")
     val pipelineState: String,
 )

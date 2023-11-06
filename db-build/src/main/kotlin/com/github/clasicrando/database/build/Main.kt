@@ -1,24 +1,19 @@
 package com.github.clasicrando.database.build
 
 import com.github.clasicrando.di.bindDatabaseComponents
-import com.github.clasicrando.logging.logger
+import com.github.jasync.sql.db.Connection
 import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
-import org.kodein.di.bindProvider
 import org.kodein.di.instance
-import java.sql.Connection
-import javax.sql.DataSource
 
-val log: KLogger by logger()
+val logger: KLogger = KotlinLogging.logger {}
 
 val di =
     DI {
         bindDatabaseComponents()
-        bindProvider<Connection> {
-            val dataSource: DataSource by di.instance()
-            dataSource.connection
-        }
     }
 
 fun main() =
@@ -27,17 +22,17 @@ fun main() =
         try {
             val builder = PgDatabaseBuilder(connection)
             builder.buildDatabase()
-            log.atInfo {
+            logger.atInfo {
                 message = "Finished running database build"
             }
         } catch (ex: Throwable) {
-            log.atError {
+            logger.atError {
                 message = "Expected error building database from source"
                 cause = ex
             }
         } finally {
             try {
-                connection.close()
+                connection.disconnect().await()
             } catch (_: Throwable) {
             }
         }
