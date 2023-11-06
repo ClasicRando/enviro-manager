@@ -5,6 +5,7 @@ import com.github.clasicrando.di.registerTypes
 import com.github.clasicrando.jasync.cache.RowParserCache
 import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.data.UsersDao
+import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.web.api.api
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.component.loginForm
@@ -17,6 +18,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.ApplicationStopPreparing
 import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -24,6 +26,7 @@ import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.AuthenticationConfig
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.session
+import io.ktor.server.engine.ApplicationEngineEnvironment
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -31,6 +34,7 @@ import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.header
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -43,6 +47,8 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -51,6 +57,7 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import java.time.Instant
+import kotlin.system.exitProcess
 
 private val serverLogger = KotlinLogging.logger {}
 private val mutex = Mutex()
@@ -146,6 +153,52 @@ fun Route.apiLoginContent() {
     }
 }
 
+fun Route.shutdownServer() {
+    get("/shutdown") {
+        val usersDao: UsersDao by closestDI().instance()
+        val user = call.userOrRedirect(usersDao) ?: return@get
+
+        if (!user.hasRole(Role.Admin)) {
+            call.respondText(
+                text = "You tried to shutdown the server without admin rights. Naughty, naughty",
+                status = HttpStatusCode.Forbidden,
+            )
+            return@get
+        }
+
+        /**
+         * Code below is taken from shutdown url plugin, but I needed to add the user role check
+         * https://ktor.io/docs/shutdown-url.html
+         */
+        serverLogger.atWarn {
+            message = "Shutdown URL was called: server is going down"
+        }
+        val application = call.application
+        val environment = application.environment
+        val exitCode = 0
+
+        val latch = CompletableDeferred<Nothing>()
+        call.application.launch {
+            latch.join()
+
+            environment.monitor.raise(ApplicationStopPreparing, environment)
+            if (environment is ApplicationEngineEnvironment) {
+                environment.stop()
+            } else {
+                application.dispose()
+            }
+
+            exitProcess(exitCode)
+        }
+
+        try {
+            call.respond(HttpStatusCode.Gone)
+        } finally {
+            latch.cancel()
+        }
+    }
+}
+
 fun Route.apiLoginAction() {
     post(apiV1Url("/users/login")) {
         val loginRequest = call.receive<LoginRequest>()
@@ -208,6 +261,7 @@ fun Application.module() {
         authenticate("auth-session") {
             pages()
             api()
+            shutdownServer()
         }
 
         loginPage()
