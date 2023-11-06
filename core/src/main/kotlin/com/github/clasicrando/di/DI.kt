@@ -7,6 +7,7 @@ import com.github.clasicrando.datasources.data.postgres.PgDataSourceContactsDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourcesDao
 import com.github.clasicrando.datasources.data.postgres.PgRecordWarehouseTypeDao
 import com.github.clasicrando.datasources.model.DataSourceContactTypeParser
+import com.github.clasicrando.jasync.json.PgJsonTypeParser
 import com.github.clasicrando.jasync.type.registerType
 import com.github.clasicrando.users.data.PgUsersDao
 import com.github.clasicrando.users.data.UsersDao
@@ -62,5 +63,6 @@ fun DI.MainBuilder.bindDaoComponents() {
 suspend fun DI.registerTypes() {
     val connection: Connection by di.instance()
     val executor = connection.asSuspending.connect()
+    PgJsonTypeParser.registerType(executor)
     DataSourceContactTypeParser.registerType(executor)
 }

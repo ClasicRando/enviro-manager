@@ -11,12 +11,6 @@ abstract class AbstractFileGeneratorVisitor : KSVisitorVoid() {
         imports += import
     }
 
-    protected fun addImports(vararg imports: String) {
-        for (import in imports) {
-            addImport(import)
-        }
-    }
-
     abstract fun generateFile(codeGenerator: CodeGenerator)
 
     protected val importsSorted: List<String> get() = imports.sorted()

@@ -41,11 +41,6 @@ object RowParserCache {
         ) ?: mapOf()
     }
 
-    inline fun <reified T : Any> getOrNull(type: KType): RowParser<T>? {
-        val parser = cache[type] ?: return null
-        return parser as RowParser<T>
-    }
-
     inline fun <reified T : Any> getOrThrow(): RowParser<T> {
         val type = typeOf<T>()
         val parser = cache[type] ?: error("No cached RowParser for '$type'")
