@@ -102,3 +102,14 @@ var FlowContent.htmxJsonEncoding
             else -> return
         }
     }
+
+fun FlowContent.confirmAction(message: String) {
+    hxTrigger = "confirmed"
+    val finalMessage = message.replace("'", "\\'")
+    hyperscript =
+        """
+        on click
+            call Swal.fire({title: 'Confirm', text:'$finalMessage'})
+            if result.isConfirmed trigger confirmed
+        """.trimIndent()
+}

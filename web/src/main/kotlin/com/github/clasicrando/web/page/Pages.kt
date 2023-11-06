@@ -16,6 +16,7 @@ fun Route.pages() {
     dataSources()
     dataSource()
     createDataSourceContact()
+    adminDashboard()
 }
 
 private fun Route.index() =
@@ -56,6 +57,16 @@ private fun Route.createDataSourceContact() =
         val user = call.userOrRedirect(dao = dao) ?: return@get
         call.respondBasePage(
             contentUrl = apiV1Url("/data-sources/$dsId/contacts/create"),
+            user = user,
+        )
+    }
+
+private fun Route.adminDashboard() =
+    get("/admin-dashboard") {
+        val usersDao: UsersDao by closestDI().instance()
+        val user = call.userOrRedirect(dao = usersDao) ?: return@get
+        call.respondBasePage(
+            contentUrl = apiV1Url("/admin-dashboard"),
             user = user,
         )
     }

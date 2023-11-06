@@ -143,12 +143,13 @@ window.addEventListener('DOMContentLoaded', () => {
     enableThemeSelectors();
 });
 window.addEventListener('htmx:responseError', (e) => {
+    console.log(e);
     /** @type {XMLHttpRequest | null} */
     const request = e.detail?.xhr;
     if (request === null) return;
     const event = new Event('createToast');
     event.detail = {
-        message: request.responseText
+        value: request.responseText
             ? `${request.statusText} - ${request.responseText}`
             : request.statusText
     };

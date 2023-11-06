@@ -29,6 +29,7 @@ fun Route.api() =
     route(API_V1_PREFIX) {
         users()
         dataSources()
+        adminDashboard()
         get("/home") {
             call.respondHtmx {
                 addHtml {
