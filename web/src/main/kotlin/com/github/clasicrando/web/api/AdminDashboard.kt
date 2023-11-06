@@ -21,7 +21,7 @@ fun Route.mainDashboard() =
         call.respondHtmx {
             addHtml {
                 button(classes = "btn btn-secondary") {
-                    hxGet = "/shutdown"
+                    hxGet = "/admin-shutdown"
                     hxTarget = "#noDisplay"
                     confirmAction("Are you sure you want to shutdown the server?")
                     +"Shutdown Server"

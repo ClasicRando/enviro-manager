@@ -150,7 +150,7 @@ fun Route.apiLoginContent() {
 
 fun Route.shutdownServer() {
     val shutdown = ShutDownUrl(url = "") { 0 }
-    get("/shutdown") {
+    get("/admin-shutdown") {
         val usersDao: UsersDao by closestDI().instance()
         val user = call.userOrRedirect(usersDao) ?: return@get
 
@@ -160,6 +160,10 @@ fun Route.shutdownServer() {
                 status = HttpStatusCode.Forbidden,
             )
             return@get
+        }
+
+        serverLogger.atInfo {
+            message = "Admin user '${user.username}' sent a shutdown request"
         }
 
         /**
@@ -232,7 +236,7 @@ fun Application.module() {
         authenticate("auth-session") {
             pages()
             api()
-//            shutdownServer()
+            shutdownServer()
         }
 
         loginPage()
