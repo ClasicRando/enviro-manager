@@ -1,6 +1,6 @@
 package com.github.clasicrando.users.model
 
-import java.util.UUID
+import kotlinx.uuid.UUID
 
 @JvmInline
 value class UserId(val value: UUID) {

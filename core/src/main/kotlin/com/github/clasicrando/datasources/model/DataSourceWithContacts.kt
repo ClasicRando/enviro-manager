@@ -1,11 +1,19 @@
 package com.github.clasicrando.datasources.model
 
-import com.github.clasicrando.jasync.symbol.Flatten
-import com.github.clasicrando.jasync.symbol.ResultRow
+import io.github.clasicrando.kdbc.core.query.RowParser
+import io.github.clasicrando.kdbc.core.result.DataRow
+import io.github.clasicrando.kdbc.core.result.getAs
 
-@ResultRow
 data class DataSourceWithContacts(
-    @Flatten
     val dataSource: DataSource,
     val contacts: List<DataSourceContact>?,
-)
+) {
+    companion object : RowParser<DataSourceWithContacts> {
+        override fun fromRow(row: DataRow): DataSourceWithContacts {
+            return DataSourceWithContacts(
+                dataSource = DataSource.fromRow(row),
+                contacts = row.getAs("contacts"),
+            )
+        }
+    }
+}

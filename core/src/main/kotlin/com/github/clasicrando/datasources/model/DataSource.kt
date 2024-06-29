@@ -1,44 +1,57 @@
 package com.github.clasicrando.datasources.model
 
-import com.github.clasicrando.jasync.symbol.Rename
-import com.github.clasicrando.jasync.symbol.ResultRow
-import java.time.OffsetDateTime
+import io.github.clasicrando.kdbc.core.query.RowParser
+import io.github.clasicrando.kdbc.core.result.DataRow
+import io.github.clasicrando.kdbc.core.result.getAs
+import io.github.clasicrando.kdbc.core.result.getAsNonNull
+import kotlinx.datetime.Instant
 
-@ResultRow
 data class DataSource(
-    @Rename("ds_id")
     val dsId: DsId,
     val code: String,
-    @Rename(name = "prov")
     val province: String?,
     val country: String?,
-    @Rename("prov_level")
     val provLevel: Boolean,
     val description: String,
-    @Rename("files_location")
     val filesLocation: String,
     val comments: String?,
-    @Rename("search_radius")
     val searchRadius: Double,
-    @Rename("reporting_type")
     val reportingType: String,
-    @Rename("record_warehouse_type")
     val recordWarehouseType: String,
-    @Rename("assigned_user")
     val assignedUser: String,
-    @Rename("created_by")
     val createdBy: String,
-    val created: OffsetDateTime,
-    @Rename("updated_by")
+    val created: Instant,
     val updatedBy: String?,
-    @Rename("last_updated")
-    val lastUpdated: OffsetDateTime?,
-    @Rename("collection_workflow")
+    val lastUpdated: Instant?,
     val collectionWorkflow: String,
-    @Rename("load_workflow")
     val loadWorkflow: String,
-    @Rename("check_workflow")
     val checkWorkflow: String,
-    @Rename("qa_workflow")
     val qaWorkflow: String,
-)
+) {
+    companion object : RowParser<DataSource> {
+        override fun fromRow(row: DataRow): DataSource {
+            return DataSource(
+                dsId = DsId(row.getAsNonNull("ds_id")),
+                code = row.getAsNonNull("code"),
+                province = row.getAs("prov"),
+                country = row.getAs("country"),
+                provLevel = row.getAsNonNull("prov_level"),
+                description = row.getAsNonNull("description"),
+                filesLocation = row.getAsNonNull("files_location"),
+                comments = row.getAs("comments"),
+                searchRadius = row.getAsNonNull("search_radius"),
+                reportingType = row.getAsNonNull("reporting_type"),
+                recordWarehouseType = row.getAsNonNull("record_warehouse_type"),
+                assignedUser = row.getAsNonNull("assigned_user"),
+                createdBy = row.getAsNonNull("created_by"),
+                created = row.getAsNonNull("created"),
+                updatedBy = row.getAsNonNull("updated_by"),
+                lastUpdated = row.getAs("last_updated"),
+                collectionWorkflow = row.getAsNonNull("collection_workflow"),
+                loadWorkflow = row.getAsNonNull("load_workflow"),
+                checkWorkflow = row.getAsNonNull("check_workflow"),
+                qaWorkflow = row.getAsNonNull("qa_workflow"),
+            )
+        }
+    }
+}

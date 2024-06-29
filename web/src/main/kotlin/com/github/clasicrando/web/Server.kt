@@ -2,7 +2,6 @@ package com.github.clasicrando.web
 
 import com.github.clasicrando.di.bindDaoComponents
 import com.github.clasicrando.di.registerTypes
-import com.github.clasicrando.jasync.cache.RowParserCache
 import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
@@ -199,13 +198,12 @@ fun Application.module() {
     runBlocking {
         closestDI().registerTypes()
     }
-    RowParserCache.loadCache()
-    environment.monitor.subscribe(ApplicationStarted) { application ->
+    environment.monitor.subscribe(ApplicationStarted) {
         serverLogger.atInfo {
             message = "Server is starting up"
         }
     }
-    environment.monitor.subscribe(ApplicationStopped) { application ->
+    environment.monitor.subscribe(ApplicationStopped) {
         serverLogger.atInfo {
             message = "Server is shutting down"
         }

@@ -28,6 +28,5 @@ rootProject.name = "enviro-manager"
 include("web")
 include("core")
 include("conductor-worker")
-include("conductor-worker-ksp")
+// include("conductor-worker-ksp")
 include("db-build")
-include("jasync-ksp")

@@ -17,7 +17,7 @@ create table if not exists em.data_sources (
     created_by uuid not null references em.users (user_id) match simple
         on update cascade
         on delete restrict,
-    last_updated timestamp with time zone,
+    last_updated timestamp,
     updated_by uuid references em.users (user_id) match simple
         on update cascade
         on delete restrict,
@@ -26,7 +26,7 @@ create table if not exists em.data_sources (
         on update cascade
         on delete restrict,
     reporting_type text not null check (data_check.check_not_blank_or_empty(reporting_type)),
-    created timestamp with time zone not null default timezone('utc'::text, now()),
+    created timestamp not null default timezone('utc'::text, now()),
     collection_workflow bigint not null references pipeline.workflows (id) match simple
         on update cascade
         on delete restrict,
@@ -44,3 +44,4 @@ create table if not exists em.data_sources (
 );
 
 call audit.audit_table('em.data_sources');
+grant select, update on table em.data_sources to em_web;

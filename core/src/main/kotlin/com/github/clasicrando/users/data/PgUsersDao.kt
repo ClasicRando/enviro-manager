@@ -1,63 +1,66 @@
 package com.github.clasicrando.users.data
 
-import com.github.clasicrando.jasync.query.sqlCommand
 import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.users.model.UserId
-import com.github.jasync.sql.db.Connection
+import io.github.clasicrando.kdbc.core.query.bind
+import io.github.clasicrando.kdbc.core.query.fetchAll
+import io.github.clasicrando.kdbc.core.query.fetchFirst
+import io.github.clasicrando.kdbc.core.query.fetchScalar
+import io.github.clasicrando.kdbc.postgresql.connection.PgAsyncConnection
+import kotlinx.uuid.UUID
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import java.util.UUID
 
 class PgUsersDao(override val di: DI) : DIAware, UsersDao {
-    private val connection: Connection by di.instance()
+    private val connection: PgAsyncConnection by di.instance()
 
     override suspend fun getById(userId: UserId): User? {
-        return sqlCommand(
+        return connection.createPreparedQuery(
             """
             select u.user_id, u.username, u.full_name, u.roles
             from em.v_users u
-            where u.user_id = ?
+            where u.user_id = $1
             """.trimIndent(),
         )
-            .bind(userId)
-            .querySingleOrNull<User>(connection)
+            .bind(userId.value)
+            .fetchFirst(User)
     }
 
     override suspend fun getByUsername(username: String): User? {
-        return sqlCommand(
+        return connection.createPreparedQuery(
             """
             select u.user_id, u.username, u.full_name, u.roles
             from em.v_users u
-            where u.username = ?
+            where u.username = $1
             """.trimIndent(),
         )
             .bind(username)
-            .querySingleOrNull<User>(connection)
+            .fetchFirst(User)
     }
 
     override suspend fun validateUser(loginRequest: LoginRequest): UserId? {
         val rawValue =
-            sqlCommand("select em.validate_user(?, ?)")
+            connection.createPreparedQuery("select em.validate_user($1, $2)")
                 .bind(loginRequest.username)
                 .bind(loginRequest.password)
-                .queryScalarOrNull<UUID>(connection)
+                .fetchScalar<UUID>()
         return rawValue?.let { UserId(it) }
     }
 
     override suspend fun getWithRole(role: Role): List<User> {
-        return sqlCommand(
+        return connection.createPreparedQuery(
             """
             select u.user_id, u.username, u.full_name, u.roles
             from em.v_users u
             where
-                ? = any(u.roles)
+                $1 = any(u.roles)
                 or 'admin' = any(u.roles)
             """.trimIndent(),
         )
             .bind(role.dbValue)
-            .query<User>(connection)
+            .fetchAll(User)
     }
 }

@@ -1,7 +1,6 @@
 plugins {
     kotlin("jvm")
     application
-    id("com.google.devtools.ksp")
     id("com.github.johnrengelman.shadow")
 }
 
@@ -9,10 +8,12 @@ val conductorVersion: String by project
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":conductor-worker-ksp"))
-    ksp(project(":conductor-worker-ksp"))
-    implementation("com.netflix.conductor:conductor-client:$conductorVersion")
-    implementation("com.netflix.conductor:conductor-common:$conductorVersion")
+    // https://mvnrepository.com/artifact/org.conductoross/conductor-client
+    implementation("org.conductoross:conductor-client:$conductorVersion")
+    // https://mvnrepository.com/artifact/org.conductoross/conductor-java-sdk
+    implementation("org.conductoross:conductor-java-sdk:$conductorVersion")
+    // https://mvnrepository.com/artifact/org.conductoross/conductor-common
+    implementation("org.conductoross:conductor-common:$conductorVersion")
 }
 
 application {

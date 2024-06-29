@@ -11,3 +11,4 @@ create table if not exists em.data_source_contacts (
 );
 
 call audit.audit_table('em.data_source_contacts');
+grant select, insert, update, delete on table em.data_sources to em_web;

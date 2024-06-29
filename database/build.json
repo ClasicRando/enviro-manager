@@ -72,24 +72,6 @@
       ]
     },
     {
-      "name": "procedures/em.create_data_source_contact",
-      "dependencies": [
-        "tables/em.data_source_contacts"
-      ]
-    },
-    {
-      "name": "procedures/em.delete_data_source_contact",
-      "dependencies": [
-        "tables/em.data_source_contacts"
-      ]
-    },
-    {
-      "name": "procedures/em.update_data_source_contact",
-      "dependencies": [
-        "tables/em.data_source_contacts"
-      ]
-    },
-    {
       "name": "procedures/em.reset_password",
       "dependencies": [
         "tables/em.users"
@@ -99,12 +81,6 @@
       "name": "procedures/em.revoke_user_role",
       "dependencies": [
         "tables/em.user_roles"
-      ]
-    },
-    {
-      "name": "procedures/em.update_data_source",
-      "dependencies": [
-        "tables/em.data_sources"
       ]
     },
     {

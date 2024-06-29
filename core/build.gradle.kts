@@ -1,10 +1,15 @@
 plugins {
     kotlin("jvm")
-    id("com.google.devtools.ksp")
     kotlin("plugin.serialization")
 }
 
+val kdbcVersion: String by project
+
+repositories {
+    mavenLocal()
+}
+
 dependencies {
-    api(project(":jasync-ksp"))
-    ksp(project(":jasync-ksp"))
+    // https://mvnrepository.com/artifact/io.github.clasicrando/kdbc-postgresql
+    implementation("io.github.clasicrando:kdbc-postgresql:$kdbcVersion")
 }

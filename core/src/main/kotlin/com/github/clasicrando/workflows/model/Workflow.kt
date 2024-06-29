@@ -1,14 +1,23 @@
 package com.github.clasicrando.workflows.model
 
-import com.github.clasicrando.jasync.symbol.Rename
-import com.github.clasicrando.jasync.symbol.ResultRow
+import io.github.clasicrando.kdbc.core.query.RowParser
+import io.github.clasicrando.kdbc.core.result.DataRow
+import io.github.clasicrando.kdbc.core.result.getAsNonNull
 
-@ResultRow
 data class Workflow(
     val id: WorkflowId,
     val name: String,
-    @Rename("workflow_definition_name")
     val workflowDefinitionName: String,
-    @Rename("pipeline_state")
     val pipelineState: String,
-)
+) {
+    companion object : RowParser<Workflow> {
+        override fun fromRow(row: DataRow): Workflow {
+            return Workflow(
+                id = WorkflowId(row.getAsNonNull("id")),
+                name = row.getAsNonNull("name"),
+                workflowDefinitionName = row.getAsNonNull("workflow_definition_name"),
+                pipelineState = row.getAsNonNull("pipeline_state"),
+            )
+        }
+    }
+}

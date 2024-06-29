@@ -1,10 +1,21 @@
 package com.github.clasicrando.datasources.model
 
-import com.github.clasicrando.jasync.symbol.ResultRow
+import io.github.clasicrando.kdbc.core.query.RowParser
+import io.github.clasicrando.kdbc.core.result.DataRow
+import io.github.clasicrando.kdbc.core.result.getAsNonNull
 
-@ResultRow
 data class RecordWarehouseType(
     val id: RecordWarehouseTypeId,
     val name: String,
     val description: String,
-)
+) {
+    companion object : RowParser<RecordWarehouseType> {
+        override fun fromRow(row: DataRow): RecordWarehouseType {
+            return RecordWarehouseType(
+                id = RecordWarehouseTypeId(row.getAsNonNull("id")),
+                name = row.getAsNonNull("name"),
+                description = row.getAsNonNull("description"),
+            )
+        }
+    }
+}
