@@ -11,11 +11,10 @@ import com.github.clasicrando.users.data.PgUsersDao
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.workflows.data.PgWorkflowsDao
 import com.github.clasicrando.workflows.data.WorkflowsDao
-import io.github.clasicrando.kdbc.core.connection.AsyncConnection
-import io.github.clasicrando.kdbc.postgresql.Postgres
-import io.github.clasicrando.kdbc.postgresql.connection.PgAsyncConnection
+import io.github.clasicrando.kdbc.core.pool.PoolOptions
+import io.github.clasicrando.kdbc.core.use
 import io.github.clasicrando.kdbc.postgresql.connection.PgConnectOptions
-import kotlinx.coroutines.runBlocking
+import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
 import org.kodein.di.bindEagerSingleton
 import org.kodein.di.bindProvider
@@ -35,15 +34,13 @@ fun DI.MainBuilder.bindDatabaseComponents() {
                     ?: error("Missing EM_DB_PASSWORD env parameter"),
         )
     }
-    bindProvider<AsyncConnection> {
-        val connection: PgAsyncConnection by di.instance()
-        connection
-    }
-    bindProvider<PgAsyncConnection> {
+    bindEagerSingleton<PgAsyncConnectionPool> {
         val connectOptions: PgConnectOptions by di.instance()
-        runBlocking {
-            Postgres.asyncConnection(connectOptions)
-        }
+        val poolOptions = PoolOptions()
+        PgAsyncConnectionPool(
+            connectOptions = connectOptions,
+            poolOptions = poolOptions,
+        )
     }
 }
 
@@ -67,6 +64,8 @@ fun DI.MainBuilder.bindDaoComponents() {
 }
 
 suspend fun DI.registerTypes() {
-    val connection: PgAsyncConnection by di.instance()
-    connection.registerCompositeType<DataSourceContact>("em.data_source_contacts")
+    val pool: PgAsyncConnectionPool by di.instance()
+    pool.acquire().use { conn ->
+        conn.registerCompositeType<DataSourceContact>("em.data_source_contacts")
+    }
 }

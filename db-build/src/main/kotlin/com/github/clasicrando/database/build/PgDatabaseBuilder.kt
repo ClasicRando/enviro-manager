@@ -1,7 +1,8 @@
 package com.github.clasicrando.database.build
 
-import com.github.clasicrando.jasync.query.sqlCommand
-import com.github.jasync.sql.db.Connection
+import io.github.clasicrando.kdbc.core.query.executeClosing
+import io.github.clasicrando.kdbc.core.query.fetchScalar
+import io.github.clasicrando.kdbc.postgresql.connection.PgAsyncConnection
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
@@ -10,7 +11,7 @@ import kotlin.io.path.bufferedReader
 import kotlin.io.path.notExists
 import kotlin.io.path.readText
 
-class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
+class PgDatabaseBuilder(private val connection: PgAsyncConnection) : DatabaseBuilder {
     private val log = KotlinLogging.logger {}
 
     private suspend fun refreshDatabase() {
@@ -21,9 +22,11 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
             where schema_owner = current_user
             """.trimIndent()
         val schemaNames =
-            sqlCommand(query).queryScalarOrNull<String>(connection)
+            connection.createPreparedQuery(query)
+                .fetchScalar<String>()
                 ?: return
-        sqlCommand("drop schema if exists $schemaNames cascade").execute(connection)
+        connection.createQuery("drop schema if exists $schemaNames cascade")
+            .executeClosing()
     }
 
     private fun processTypeDefinition(block: String): String {
@@ -65,13 +68,13 @@ class PgDatabaseBuilder(private val connection: Connection) : DatabaseBuilder {
 
     private suspend fun executeAnonymousBlock(block: String) {
         val query = formatAnonymousBlock(block)
-        sqlCommand(query).execute(connection)
+        connection.createQuery(query).executeClosing()
     }
 
     override suspend fun buildDatabase() {
         val databaseTarget =
-            sqlCommand("select current_database()")
-                .queryScalar<String>(connection)
+            connection.createQuery("select current_database()")
+                .fetchScalar<String>()
         log.atInfo {
             message = "Target specified as $databaseTarget to rebuild"
         }

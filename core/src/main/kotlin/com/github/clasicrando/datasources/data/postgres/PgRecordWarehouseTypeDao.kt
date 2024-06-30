@@ -6,33 +6,38 @@ import com.github.clasicrando.datasources.model.RecordWarehouseTypeId
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
-import io.github.clasicrando.kdbc.postgresql.connection.PgAsyncConnection
+import io.github.clasicrando.kdbc.core.use
+import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 class PgRecordWarehouseTypeDao(override val di: DI) : DIAware, RecordWarehouseTypesDao {
-    private val connection: PgAsyncConnection by di.instance()
+    private val pool: PgAsyncConnectionPool by di.instance()
 
     override suspend fun getAll(): List<RecordWarehouseType> {
-        return connection.createPreparedQuery(
-            """
-            select rwt.id, rwt.name, rwt.description
-            from pipeline.v_record_warehouse_types rwt
-            """.trimIndent(),
-        )
-            .fetchAll(RecordWarehouseType)
+        return pool.acquire().use { conn ->
+            conn.createPreparedQuery(
+                """
+                select rwt.id, rwt.name, rwt.description
+                from pipeline.v_record_warehouse_types rwt
+                """.trimIndent(),
+            )
+                .fetchAll(RecordWarehouseType)
+        }
     }
 
     override suspend fun getById(id: RecordWarehouseTypeId): RecordWarehouseType? {
-        return connection.createPreparedQuery(
-            """
-            select rwt.id, rwt.name, rwt.description
-            from pipeline.v_record_warehouse_types rwt
-            where rwt.id = $1
-            """.trimIndent(),
-        )
-            .bind(id.value)
-            .fetchFirst(RecordWarehouseType)
+        return pool.acquire().use { conn ->
+            conn.createPreparedQuery(
+                """
+                select rwt.id, rwt.name, rwt.description
+                from pipeline.v_record_warehouse_types rwt
+                where rwt.id = $1
+                """.trimIndent(),
+            )
+                .bind(id.value)
+                .fetchFirst(RecordWarehouseType)
+        }
     }
 }

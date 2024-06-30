@@ -8,59 +8,68 @@ import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
 import io.github.clasicrando.kdbc.core.query.fetchScalar
-import io.github.clasicrando.kdbc.postgresql.connection.PgAsyncConnection
+import io.github.clasicrando.kdbc.core.use
+import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import kotlinx.uuid.UUID
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 class PgUsersDao(override val di: DI) : DIAware, UsersDao {
-    private val connection: PgAsyncConnection by di.instance()
+    private val pool: PgAsyncConnectionPool by di.instance()
 
     override suspend fun getById(userId: UserId): User? {
-        return connection.createPreparedQuery(
-            """
-            select u.user_id, u.username, u.full_name, u.roles
-            from em.v_users u
-            where u.user_id = $1
-            """.trimIndent(),
-        )
-            .bind(userId.value)
-            .fetchFirst(User)
+        return pool.acquire().use { conn ->
+            conn.createPreparedQuery(
+                """
+                select u.user_id, u.username, u.full_name, u.roles
+                from em.v_users u
+                where u.user_id = $1
+                """.trimIndent(),
+            )
+                .bind(userId.value)
+                .fetchFirst(User)
+        }
     }
 
     override suspend fun getByUsername(username: String): User? {
-        return connection.createPreparedQuery(
-            """
-            select u.user_id, u.username, u.full_name, u.roles
-            from em.v_users u
-            where u.username = $1
-            """.trimIndent(),
-        )
-            .bind(username)
-            .fetchFirst(User)
+        return pool.acquire().use { conn ->
+            conn.createPreparedQuery(
+                """
+                select u.user_id, u.username, u.full_name, u.roles
+                from em.v_users u
+                where u.username = $1
+                """.trimIndent(),
+            )
+                .bind(username)
+                .fetchFirst(User)
+        }
     }
 
     override suspend fun validateUser(loginRequest: LoginRequest): UserId? {
         val rawValue =
-            connection.createPreparedQuery("select em.validate_user($1, $2)")
-                .bind(loginRequest.username)
-                .bind(loginRequest.password)
-                .fetchScalar<UUID>()
+            pool.acquire().use { conn ->
+                conn.createPreparedQuery("select em.validate_user($1, $2)")
+                    .bind(loginRequest.username)
+                    .bind(loginRequest.password)
+                    .fetchScalar<UUID>()
+            }
         return rawValue?.let { UserId(it) }
     }
 
     override suspend fun getWithRole(role: Role): List<User> {
-        return connection.createPreparedQuery(
-            """
-            select u.user_id, u.username, u.full_name, u.roles
-            from em.v_users u
-            where
-                $1 = any(u.roles)
-                or 'admin' = any(u.roles)
-            """.trimIndent(),
-        )
-            .bind(role.dbValue)
-            .fetchAll(User)
+        return pool.acquire().use { conn ->
+            conn.createPreparedQuery(
+                """
+                select u.user_id, u.username, u.full_name, u.roles
+                from em.v_users u
+                where
+                    $1 = any(u.roles)
+                    or 'admin' = any(u.roles)
+                """.trimIndent(),
+            )
+                .bind(role.dbValue)
+                .fetchAll(User)
+        }
     }
 }
