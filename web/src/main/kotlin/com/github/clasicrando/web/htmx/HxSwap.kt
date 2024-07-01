@@ -59,7 +59,9 @@ fun FlowContent.hxSwap(
     hxSwap(HxSwap(swapType, swapTime, swapTimeUnit, settleTime, settleTimeUnit))
 }
 
-enum class SwapType(val value: String) {
+enum class SwapType(
+    val value: String,
+) {
     InnerHtml("innerHTML"),
     OuterHtml("outerHTML"),
     BeforeBegin("beforebegin"),

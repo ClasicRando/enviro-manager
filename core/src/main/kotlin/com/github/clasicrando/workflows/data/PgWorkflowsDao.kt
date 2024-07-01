@@ -11,32 +11,33 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class PgWorkflowsDao(override val di: DI) : DIAware, WorkflowsDao {
+class PgWorkflowsDao(
+    override val di: DI,
+) : DIAware,
+    WorkflowsDao {
     private val pool: PgAsyncConnectionPool by di.instance()
 
-    override suspend fun getAll(): List<Workflow> {
-        return pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                select w.id, w.name, w.workflow_definition_name, w.pipeline_state
-                from pipeline.v_workflows w
-                """.trimIndent(),
-            )
-                .fetchAll(Workflow)
+    override suspend fun getAll(): List<Workflow> =
+        pool.acquire().use { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    select w.id, w.name, w.workflow_definition_name, w.pipeline_state
+                    from pipeline.v_workflows w
+                    """.trimIndent(),
+                ).fetchAll(Workflow)
         }
-    }
 
-    override suspend fun getById(id: WorkflowId): Workflow? {
-        return pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                select w.id, w.name, w.workflow_definition_name, w.pipeline_state
-                from pipeline.v_workflows w
-                where w.id = $1
-                """.trimIndent(),
-            )
-                .bind(id.value)
+    override suspend fun getById(id: WorkflowId): Workflow? =
+        pool.acquire().use { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    select w.id, w.name, w.workflow_definition_name, w.pipeline_state
+                    from pipeline.v_workflows w
+                    where w.id = $1
+                    """.trimIndent(),
+                ).bind(id.value)
                 .fetchFirst(Workflow)
         }
-    }
 }

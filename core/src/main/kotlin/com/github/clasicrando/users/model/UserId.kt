@@ -3,8 +3,8 @@ package com.github.clasicrando.users.model
 import kotlinx.uuid.UUID
 
 @JvmInline
-value class UserId(val value: UUID) {
-    override fun toString(): String {
-        return value.toString()
-    }
+value class UserId(
+    val value: UUID,
+) {
+    override fun toString(): String = value.toString()
 }

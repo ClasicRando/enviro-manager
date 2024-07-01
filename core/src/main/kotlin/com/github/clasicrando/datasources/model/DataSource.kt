@@ -5,7 +5,9 @@ import io.github.clasicrando.kdbc.core.result.DataRow
 import io.github.clasicrando.kdbc.core.result.getAs
 import io.github.clasicrando.kdbc.core.result.getAsNonNull
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class DataSource(
     val dsId: DsId,
     val code: String,
@@ -29,9 +31,9 @@ data class DataSource(
     val qaWorkflow: String,
 ) {
     companion object : RowParser<DataSource> {
-        override fun fromRow(row: DataRow): DataSource {
-            return DataSource(
-                dsId = DsId(row.getAsNonNull("ds_id")),
+        override fun fromRow(row: DataRow): DataSource =
+            DataSource(
+                dsId = row.getAsNonNull<Long>("ds_id").toDsId(),
                 code = row.getAsNonNull("code"),
                 province = row.getAs("prov"),
                 country = row.getAs("country"),
@@ -52,6 +54,5 @@ data class DataSource(
                 checkWorkflow = row.getAsNonNull("check_workflow"),
                 qaWorkflow = row.getAsNonNull("qa_workflow"),
             )
-        }
     }
 }

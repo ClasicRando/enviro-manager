@@ -12,32 +12,33 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class PgRecordWarehouseTypeDao(override val di: DI) : DIAware, RecordWarehouseTypesDao {
+class PgRecordWarehouseTypeDao(
+    override val di: DI,
+) : DIAware,
+    RecordWarehouseTypesDao {
     private val pool: PgAsyncConnectionPool by di.instance()
 
-    override suspend fun getAll(): List<RecordWarehouseType> {
-        return pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                select rwt.id, rwt.name, rwt.description
-                from pipeline.v_record_warehouse_types rwt
-                """.trimIndent(),
-            )
-                .fetchAll(RecordWarehouseType)
+    override suspend fun getAll(): List<RecordWarehouseType> =
+        pool.acquire().use { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    select rwt.id, rwt.name, rwt.description
+                    from pipeline.v_record_warehouse_types rwt
+                    """.trimIndent(),
+                ).fetchAll(RecordWarehouseType)
         }
-    }
 
-    override suspend fun getById(id: RecordWarehouseTypeId): RecordWarehouseType? {
-        return pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                select rwt.id, rwt.name, rwt.description
-                from pipeline.v_record_warehouse_types rwt
-                where rwt.id = $1
-                """.trimIndent(),
-            )
-                .bind(id.value)
+    override suspend fun getById(id: RecordWarehouseTypeId): RecordWarehouseType? =
+        pool.acquire().use { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    select rwt.id, rwt.name, rwt.description
+                    from pipeline.v_record_warehouse_types rwt
+                    where rwt.id = $1
+                    """.trimIndent(),
+                ).bind(id.value)
                 .fetchFirst(RecordWarehouseType)
         }
-    }
 }

@@ -71,7 +71,9 @@ private fun loopCountStop(
     return lastErrorInstant.isAfter(errorInstant.plusSeconds(-1))
 }
 
-fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+fun main(args: Array<String>): Unit =
+    io.ktor.server.netty.EngineMain
+        .main(args)
 
 private fun StatusPagesConfig.configure() {
     exception<Throwable> { call, cause ->

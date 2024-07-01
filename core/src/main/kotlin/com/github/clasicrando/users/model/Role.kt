@@ -1,6 +1,9 @@
 package com.github.clasicrando.users.model
 
-enum class Role(val dbValue: String, val description: String) {
+enum class Role(
+    val dbValue: String,
+    val description: String,
+) {
     Admin(dbValue = "admin", description = "All privileges granted"),
     CreateDataSource(
         dbValue = "create-data-source",
@@ -25,16 +28,14 @@ enum class Role(val dbValue: String, val description: String) {
     PipelineQA(
         dbValue = "pipeline-qa",
         description = "Enables a user to execute a quality assurance check on data pipeline loads",
-    ), ;
+    ),
+    ;
 
-    override fun toString(): String {
-        return dbValue
-    }
+    override fun toString(): String = dbValue
 
     companion object {
-        fun fromString(value: String): Role {
-            return Role.entries.firstOrNull { it.dbValue == value }
+        fun fromString(value: String): Role =
+            Role.entries.firstOrNull { it.dbValue == value }
                 ?: error("Could not find a role for value = '$value'")
-        }
     }
 }

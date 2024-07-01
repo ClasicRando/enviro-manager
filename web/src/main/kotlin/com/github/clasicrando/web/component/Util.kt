@@ -16,6 +16,7 @@ fun Any?.displayValue(): String =
             this
                 .atZoneSameInstant(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
         is LocalDateTime -> this.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         is LocalDate -> this.format(DateTimeFormatter.ISO_LOCAL_DATE)
         is LocalTime -> this.format(DateTimeFormatter.ISO_LOCAL_TIME)

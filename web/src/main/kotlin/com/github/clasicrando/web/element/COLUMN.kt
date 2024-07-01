@@ -10,8 +10,11 @@ private fun String?.takeIfNotNullOrBlank() = this.takeIf { !it.isNullOrBlank() }
 
 private fun Int?.sizeSuffixOrEmpty(): String = this?.let { "-$it" } ?: ""
 
-class COLUMN(classes: String? = null, size: Int? = null, consumer: TagConsumer<*>) :
-    DIV(
+class COLUMN(
+    classes: String? = null,
+    size: Int? = null,
+    consumer: TagConsumer<*>,
+) : DIV(
         initialAttributes =
             mapOf(
                 "class" to "col${size.sizeSuffixOrEmpty()} ${classes.takeIfNotNullOrBlank() ?: ""}",

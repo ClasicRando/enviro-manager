@@ -6,8 +6,10 @@ import kotlinx.html.HtmlInlineTag
 import kotlinx.html.TagConsumer
 import kotlinx.html.visitAndFinalize
 
-class ROW(classes: String? = null, consumer: TagConsumer<*>) :
-    DIV(
+class ROW(
+    classes: String? = null,
+    consumer: TagConsumer<*>,
+) : DIV(
         initialAttributes =
             mapOf(
                 "class" to if (classes.isNullOrBlank()) "row" else "row $classes",

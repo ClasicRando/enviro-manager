@@ -9,11 +9,10 @@ data class DataSourceWithContacts(
     val contacts: List<DataSourceContact>?,
 ) {
     companion object : RowParser<DataSourceWithContacts> {
-        override fun fromRow(row: DataRow): DataSourceWithContacts {
-            return DataSourceWithContacts(
+        override fun fromRow(row: DataRow): DataSourceWithContacts =
+            DataSourceWithContacts(
                 dataSource = DataSource.fromRow(row),
                 contacts = row.getAs("contacts"),
             )
-        }
     }
 }

@@ -46,12 +46,6 @@
       ]
     },
     {
-      "name": "functions/em.validate_user",
-      "dependencies": [
-        "tables/em.users"
-      ]
-    },
-    {
       "name": "procedures/audit.audit_table",
       "dependencies": [
         "functions/audit.if_modified_func"

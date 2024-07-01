@@ -13,13 +13,12 @@ data class User(
     fun hasRole(role: Role): Boolean = roles.any { it == Role.Admin || it == role }
 
     companion object : RowParser<User> {
-        override fun fromRow(row: DataRow): User {
-            return User(
+        override fun fromRow(row: DataRow): User =
+            User(
                 userId = UserId(row.getAsNonNull("user_id")),
                 username = row.getAsNonNull("username"),
                 fullName = row.getAsNonNull("full_name"),
                 roles = row.getAsNonNull("roles"),
             )
-        }
     }
 }

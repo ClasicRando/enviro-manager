@@ -4,4 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @JvmInline
-value class WorkflowId(val value: Long)
+value class WorkflowId(
+    val value: Long,
+)

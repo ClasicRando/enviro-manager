@@ -15,7 +15,10 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class PgDataSourceContactsDao(override val di: DI) : DIAware, DataSourceContactsDao {
+class PgDataSourceContactsDao(
+    override val di: DI,
+) : DIAware,
+    DataSourceContactsDao {
     private val pool: PgAsyncConnectionPool by di.instance()
 
     override suspend fun create(
@@ -23,13 +26,13 @@ class PgDataSourceContactsDao(override val di: DI) : DIAware, DataSourceContacts
         request: ModifyDataSourceContactRequest,
     ) {
         pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                insert into em.data_source_contacts (ds_id, name, email, website, type, notes)
-                values ($1, $2, $3, $4, $5, $6)
-                """.trimIndent(),
-            )
-                .bind(dsId.value)
+            conn
+                .createPreparedQuery(
+                    """
+                    insert into em.data_source_contacts (ds_id, name, email, website, type, notes)
+                    values ($1, $2, $3, $4, $5, $6)
+                    """.trimIndent(),
+                ).bind(dsId.value)
                 .bind(request.name)
                 .bind(request.email.takeIf { it.isNotBlank() })
                 .bind(request.website.takeIf { it.isNotBlank() })
@@ -44,51 +47,49 @@ class PgDataSourceContactsDao(override val di: DI) : DIAware, DataSourceContacts
         dsId: DsId,
     ) {
         pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                delete from em.data_source_contacts
-                where
-                    contact_id = $1
-                    and ds_id = $2
-                """.trimIndent(),
-            )
-                .bind(contactId.value)
+            conn
+                .createPreparedQuery(
+                    """
+                    delete from em.data_source_contacts
+                    where
+                        contact_id = $1
+                        and ds_id = $2
+                    """.trimIndent(),
+                ).bind(contactId.value)
                 .bind(dsId.value)
                 .execute()
         }
     }
 
-    override suspend fun getByDsId(dsId: DsId): List<DataSourceContact> {
-        return pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                select
-                    dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
-                    dsc.notes
-                from em.v_data_source_contacts dsc
-                where dsc.ds_id = $1
-                """.trimIndent(),
-            )
-                .bind(dsId.value)
+    override suspend fun getByDsId(dsId: DsId): List<DataSourceContact> =
+        pool.acquire().use { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    select
+                        dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
+                        dsc.notes
+                    from em.v_data_source_contacts dsc
+                    where dsc.ds_id = $1
+                    """.trimIndent(),
+                ).bind(dsId.value)
                 .fetchAll(DataSourceContact)
         }
-    }
 
-    override suspend fun getById(contactId: ContactId): DataSourceContact? {
-        return pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                select
-                    dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
-                    dsc.notes
-                from em.v_data_source_contacts dsc
-                where dsc.contact_id = $1
-                """.trimIndent(),
-            )
-                .bind(contactId.value)
+    override suspend fun getById(contactId: ContactId): DataSourceContact? =
+        pool.acquire().use { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    select
+                        dsc.contact_id, dsc.ds_id, dsc.name, dsc.email, dsc.website, dsc.type,
+                        dsc.notes
+                    from em.v_data_source_contacts dsc
+                    where dsc.contact_id = $1
+                    """.trimIndent(),
+                ).bind(contactId.value)
                 .fetchFirst(DataSourceContact)
         }
-    }
 
     override suspend fun update(
         contactId: ContactId,
@@ -96,21 +97,21 @@ class PgDataSourceContactsDao(override val di: DI) : DIAware, DataSourceContacts
         request: ModifyDataSourceContactRequest,
     ) {
         pool.acquire().use { conn ->
-            conn.createPreparedQuery(
-                """
-                update em.data_source_contacts
-                set
-                    name = $3,
-                    email = $4,
-                    website = $5,
-                    type = $6,
-                    notes = $7
-                where
-                    contact_id = $1
-                    and ds_id = $2
-                """.trimIndent(),
-            )
-                .bind(contactId.value)
+            conn
+                .createPreparedQuery(
+                    """
+                    update em.data_source_contacts
+                    set
+                        name = $3,
+                        email = $4,
+                        website = $5,
+                        type = $6,
+                        notes = $7
+                    where
+                        contact_id = $1
+                        and ds_id = $2
+                    """.trimIndent(),
+                ).bind(contactId.value)
                 .bind(dsId.value)
                 .bind(request.name)
                 .bind(request.email.takeIf { it.isNotBlank() })

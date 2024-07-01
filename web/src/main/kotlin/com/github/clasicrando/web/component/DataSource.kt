@@ -140,7 +140,8 @@ fun FlowContent.dataSourceEdit(
                     label = "Collection",
                     columnWidth = 2,
                     selectionItems =
-                        workflows.asSequence()
+                        workflows
+                            .asSequence()
                             .filter { it.pipelineState == "Data Collection" }
                             .map { it.id.toString() to it.name }
                             .toList(),
@@ -151,7 +152,8 @@ fun FlowContent.dataSourceEdit(
                     label = "Load",
                     columnWidth = 2,
                     selectionItems =
-                        workflows.asSequence()
+                        workflows
+                            .asSequence()
                             .filter { it.pipelineState == "Data Loading" }
                             .map { it.id.toString() to it.name }
                             .toList(),
@@ -162,7 +164,8 @@ fun FlowContent.dataSourceEdit(
                     label = "Check",
                     columnWidth = 2,
                     selectionItems =
-                        workflows.asSequence()
+                        workflows
+                            .asSequence()
                             .filter { it.pipelineState == "Load Checking" }
                             .map { it.id.toString() to it.name }
                             .toList(),
@@ -173,7 +176,8 @@ fun FlowContent.dataSourceEdit(
                     label = "QA",
                     columnWidth = 2,
                     selectionItems =
-                        workflows.asSequence()
+                        workflows
+                            .asSequence()
                             .filter { it.pipelineState == "Load QA" }
                             .map { it.id.toString() to it.name }
                             .toList(),

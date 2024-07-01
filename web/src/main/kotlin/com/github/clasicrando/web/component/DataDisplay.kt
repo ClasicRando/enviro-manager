@@ -67,6 +67,7 @@ fun FlowContent.dataEditField(
                 data
                     .atZoneSameInstant(ZoneId.systemDefault())
                     .format(LOCAL_DATETIME_FORMAT)
+
             is LocalDateTime -> data.format(LOCAL_DATETIME_FORMAT)
             is LocalDate -> data.format(LOCAL_DATE_FORMAT)
             is LocalTime -> data.format(LOCAL_TIME_FORMAT)

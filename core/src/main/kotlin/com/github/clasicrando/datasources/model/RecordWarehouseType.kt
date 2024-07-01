@@ -10,12 +10,11 @@ data class RecordWarehouseType(
     val description: String,
 ) {
     companion object : RowParser<RecordWarehouseType> {
-        override fun fromRow(row: DataRow): RecordWarehouseType {
-            return RecordWarehouseType(
-                id = RecordWarehouseTypeId(row.getAsNonNull("id")),
+        override fun fromRow(row: DataRow): RecordWarehouseType =
+            RecordWarehouseType(
+                id = row.getAsNonNull<Short>("id").toRecordWarehouseTypeId(),
                 name = row.getAsNonNull("name"),
                 description = row.getAsNonNull("description"),
             )
-        }
     }
 }

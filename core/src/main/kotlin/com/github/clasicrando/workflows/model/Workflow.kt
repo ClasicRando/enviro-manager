@@ -11,13 +11,12 @@ data class Workflow(
     val pipelineState: String,
 ) {
     companion object : RowParser<Workflow> {
-        override fun fromRow(row: DataRow): Workflow {
-            return Workflow(
+        override fun fromRow(row: DataRow): Workflow =
+            Workflow(
                 id = WorkflowId(row.getAsNonNull("id")),
                 name = row.getAsNonNull("name"),
                 workflowDefinitionName = row.getAsNonNull("workflow_definition_name"),
                 pipelineState = row.getAsNonNull("pipeline_state"),
             )
-        }
     }
 }

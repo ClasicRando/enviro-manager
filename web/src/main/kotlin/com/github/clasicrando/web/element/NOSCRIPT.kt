@@ -7,8 +7,9 @@ import kotlinx.html.HtmlTagMarker
 import kotlinx.html.TagConsumer
 import kotlinx.html.visitAndFinalize
 
-class NOSCRIPT(consumer: TagConsumer<*>) :
-    HTMLTag(
+class NOSCRIPT(
+    consumer: TagConsumer<*>,
+) : HTMLTag(
         tagName = "noscript",
         consumer = consumer,
         initialAttributes = emptyMap(),

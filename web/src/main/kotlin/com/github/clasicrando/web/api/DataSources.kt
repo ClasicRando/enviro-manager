@@ -3,8 +3,8 @@ package com.github.clasicrando.web.api
 import com.github.clasicrando.datasources.data.DataSourceContactsDao
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
-import com.github.clasicrando.datasources.model.ContactId
-import com.github.clasicrando.datasources.model.DsId
+import com.github.clasicrando.datasources.model.toContactId
+import com.github.clasicrando.datasources.model.toDsId
 import com.github.clasicrando.requests.ModifyDataSourceContactRequest
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.data.UsersDao
@@ -89,7 +89,7 @@ private fun Route.getAllDataSources() =
 
 private fun Route.getDataSource() =
     get {
-        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
         val dataSourceWithContacts = dataSourcesDao.getByIdWithContacts(dsId)
         if (dataSourceWithContacts == null) {
@@ -114,7 +114,7 @@ private fun Route.getDataSource() =
 
 private fun Route.editDataSourceForm() =
     get("/edit") {
-        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
         val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
         val usersDao: UsersDao by closestDI().instance()
@@ -151,7 +151,7 @@ private fun Route.editDataSourceForm() =
 
 private fun Route.editDataSource() =
     patch {
-        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val user = call.userSessionOrRedirect() ?: return@patch
         val request = call.receive<UpdateDateSourceRequest>()
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
@@ -164,7 +164,7 @@ private fun Route.editDataSource() =
 
 private fun Route.createContactForm() =
     get("/create") {
-        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         call.respondHtmx {
             pushUrl = "/data-sources/$dsId/contacts/create"
             addHtml {
@@ -175,7 +175,7 @@ private fun Route.createContactForm() =
 
 private fun Route.createContact() =
     post {
-        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val request = call.receive<ModifyDataSourceContactRequest>()
         val dao: DataSourceContactsDao by closestDI().instance()
 
@@ -189,7 +189,7 @@ private fun Route.createContact() =
 
 private fun Route.editContactForm() =
     get("/edit") {
-        val contactId = ContactId(call.parameters.getOrFail<Long>("contactId"))
+        val contactId = call.parameters.getOrFail<Long>("contactId").toContactId()
         val dao: DataSourceContactsDao by closestDI().instance()
 
         val contact = dao.getById(contactId)
@@ -209,8 +209,8 @@ private fun Route.editContactForm() =
 
 private fun Route.editContact() =
     patch {
-        val contactId = ContactId(call.parameters.getOrFail<Long>("contactId"))
-        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val contactId = call.parameters.getOrFail<Long>("contactId").toContactId()
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val request = call.receive<ModifyDataSourceContactRequest>()
         val dao: DataSourceContactsDao by closestDI().instance()
 
@@ -224,8 +224,8 @@ private fun Route.editContact() =
 
 private fun Route.deleteContact() =
     delete {
-        val contactId = ContactId(call.parameters.getOrFail<Long>("contactId"))
-        val dsId = DsId(call.parameters.getOrFail<Long>("dsId"))
+        val contactId = call.parameters.getOrFail<Long>("contactId").toContactId()
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dao: DataSourceContactsDao by closestDI().instance()
 
         dao.delete(contactId, dsId)
