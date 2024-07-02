@@ -6,6 +6,7 @@ import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.hxGet
 import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTrigger
+import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.page.BasePage
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.html.respondHtmlTemplate
@@ -17,6 +18,7 @@ import kotlinx.html.id
 
 const val MAIN_CONTENT_ID = "main"
 const val MAIN_CONTENT_TARGET = "#$MAIN_CONTENT_ID"
+const val NO_DISPLAY_ELEMENT_TARGET = "#noDisplay"
 
 suspend inline fun ApplicationCall.respondBasePage(
     contentUrl: String,
@@ -56,6 +58,27 @@ suspend fun ApplicationCall.userOrRedirect(dao: UsersDao): User? {
     val user = dao.getById(userId = userSession.userId)
     if (user == null) {
         respondRedirect("/login")
+        return null
+    }
+    return user
+}
+
+private const val NON_ADMIN_ERROR_MESSAGE =
+    "Error: Cannot perform admin action since you are not an admin"
+
+suspend fun ApplicationCall.adminUserOrRespondHtmxError(dao: UsersDao): User? {
+    val userSession = sessions.get<UserSession>()
+    if (userSession == null) {
+        respondHtmx {
+            addCreateToastEvent(NON_ADMIN_ERROR_MESSAGE)
+        }
+        return null
+    }
+    val user = dao.getById(userId = userSession.userId)
+    if (user == null) {
+        respondHtmx {
+            addCreateToastEvent(NON_ADMIN_ERROR_MESSAGE)
+        }
         return null
     }
     return user

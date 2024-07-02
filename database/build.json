@@ -52,33 +52,7 @@
       ]
     },
     {
-      "name": "procedures/em.add_user_role",
-      "dependencies": [
-        "tables/em.user_roles",
-        "tables/em.users"
-      ]
-    },
-    {
-      "name": "procedures/em.add_user_roles",
-      "dependencies": [
-        "tables/em.user_roles",
-        "tables/em.users"
-      ]
-    },
-    {
       "name": "procedures/em.reset_password",
-      "dependencies": [
-        "tables/em.users"
-      ]
-    },
-    {
-      "name": "procedures/em.revoke_user_role",
-      "dependencies": [
-        "tables/em.user_roles"
-      ]
-    },
-    {
-      "name": "procedures/em.update_user",
       "dependencies": [
         "tables/em.users"
       ]

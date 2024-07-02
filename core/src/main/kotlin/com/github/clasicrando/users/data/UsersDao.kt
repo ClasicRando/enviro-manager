@@ -13,4 +13,26 @@ interface UsersDao {
     suspend fun validateUser(loginRequest: LoginRequest): UserId?
 
     suspend fun getWithRole(role: Role): List<User>
+
+    suspend fun getAll(): List<User>
+
+    suspend fun disableUser(userId: UserId)
+
+    suspend fun enableUser(userId: UserId)
+
+    suspend fun addRoles(
+        userId: UserId,
+        roles: List<Role>,
+    )
+
+    suspend fun revokeRole(
+        userId: UserId,
+        role: Role,
+    )
+
+    suspend fun updateUser(
+        userId: UserId,
+        username: String,
+        fullName: String,
+    )
 }

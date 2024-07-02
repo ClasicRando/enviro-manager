@@ -3,12 +3,15 @@ package com.github.clasicrando.users.model
 import io.github.clasicrando.kdbc.core.query.RowParser
 import io.github.clasicrando.kdbc.core.result.DataRow
 import io.github.clasicrando.kdbc.core.result.getAsNonNull
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class User(
     val userId: UserId,
     val username: String,
     val fullName: String,
     val roles: List<Role>,
+    val enabled: Boolean,
 ) {
     fun hasRole(role: Role): Boolean = roles.any { it == Role.Admin || it == role }
 
@@ -18,7 +21,11 @@ data class User(
                 userId = UserId(row.getAsNonNull("user_id")),
                 username = row.getAsNonNull("username"),
                 fullName = row.getAsNonNull("full_name"),
-                roles = row.getAsNonNull("roles"),
+                roles =
+                    row
+                        .getAsNonNull<List<String>>("roles")
+                        .map { Role.fromString(it) },
+                enabled = row.getAsNonNull("enabled"),
             )
     }
 }

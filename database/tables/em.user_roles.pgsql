@@ -7,3 +7,4 @@ create table if not exists em.user_roles (
 );
 
 call audit.audit_table('em.user_roles');
+grant select, insert, update, delete on em.user_roles to em_web;

@@ -4,7 +4,7 @@ create or replace view em.v_users as
         from em.user_roles ur
         group by ur.user_id
     )
-    select u.user_id, u.username, u.full_name, coalesce(ur.roles,'{}'::text[]) roles
+    select u.user_id, u.username, u.full_name, u.enabled, coalesce(ur.roles,'{}'::text[]) roles
     from em.users u
     left join user_roles ur
     on u.user_id = ur.user_id;

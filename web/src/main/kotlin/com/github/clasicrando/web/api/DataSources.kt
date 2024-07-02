@@ -10,12 +10,9 @@ import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.web.component.createDataSourceContactForm
-import com.github.clasicrando.web.component.dataDisplay
-import com.github.clasicrando.web.component.dataEdit
-import com.github.clasicrando.web.component.dataSourceDisplay
-import com.github.clasicrando.web.component.dataSourceEdit
-import com.github.clasicrando.web.component.dataSourceRow
-import com.github.clasicrando.web.component.dataTable
+import com.github.clasicrando.web.component.dataSourceEditForm
+import com.github.clasicrando.web.component.dataSourceTable
+import com.github.clasicrando.web.component.dataSourceView
 import com.github.clasicrando.web.component.editDataSourceContactForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.userSessionOrRedirect
@@ -30,8 +27,6 @@ import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.util.getOrFail
-import kotlinx.html.th
-import kotlinx.html.tr
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
@@ -60,29 +55,7 @@ private fun Route.getAllDataSources() =
         val dataSources = dataSourcesDao.getAll()
         call.respondHtmx {
             addHtml {
-                dataTable(
-                    title = "Data Sources",
-                    dataSource = call.request.uri,
-                    header = {
-                        tr {
-                            th { +"Id" }
-                            th { +"Code" }
-                            th { +"Province" }
-                            th { +"Country" }
-                            th { +"Prov Level" }
-                            th { +"Reporting Type" }
-                            th { +"Assigned User" }
-                            th { +"Created By" }
-                            th { +"Created" }
-                            th { +"Updated By" }
-                            th { +"Last Updated" }
-                            th { +"Actions" }
-                        }
-                    },
-                    items = dataSources,
-                ) {
-                    dataSourceRow(it)
-                }
+                dataSourceTable(requestUrl = call.request.uri, dataSources = dataSources)
             }
         }
     }
@@ -101,13 +74,7 @@ private fun Route.getDataSource() =
         call.respondHtmx {
             pushUrl = "/data-sources/$dsId"
             addHtml {
-                dataDisplay(
-                    title = "Data Source Details",
-                    dataUrl = apiV1Url("/data-sources/$dsId"),
-                    editUrl = apiV1Url("/data-sources/$dsId/edit"),
-                ) {
-                    dataSourceDisplay(dataSourceWithContacts)
-                }
+                dataSourceView(dataSourceWithContacts)
             }
         }
     }
@@ -132,19 +99,12 @@ private fun Route.editDataSourceForm() =
         call.respondHtmx {
             pushUrl = "/data-sources/$dsId/edit"
             addHtml {
-                val url = apiV1Url("/data-sources/${dataSource.dsId}")
-                dataEdit(
-                    title = "Edit Data Source Details",
-                    patchUrl = url,
-                    cancelUrl = url,
-                ) {
-                    dataSourceEdit(
-                        dataSource = dataSource,
-                        recordWarehouseTypes = recordWarehouseTypes,
-                        collectionUsers = collectionUsers,
-                        workflows = workflows,
-                    )
-                }
+                dataSourceEditForm(
+                    dataSource = dataSource,
+                    recordWarehouseTypes = recordWarehouseTypes,
+                    collectionUsers = collectionUsers,
+                    workflows = workflows,
+                )
             }
         }
     }

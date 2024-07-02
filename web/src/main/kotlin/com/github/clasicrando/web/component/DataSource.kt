@@ -11,11 +11,41 @@ import io.ktor.http.HttpMethod
 import kotlinx.html.FlowContent
 import kotlinx.html.InputType
 import kotlinx.html.TBODY
+import kotlinx.html.TagConsumer
 import kotlinx.html.fieldSet
 import kotlinx.html.i
 import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.tr
+
+fun <T, C : TagConsumer<T>> C.dataSourceTable(
+    requestUrl: String,
+    dataSources: List<DataSource>,
+) {
+    dataTable(
+        title = "Data Sources",
+        dataSource = requestUrl,
+        header = {
+            tr {
+                th { +"Id" }
+                th { +"Code" }
+                th { +"Province" }
+                th { +"Country" }
+                th { +"Prov Level" }
+                th { +"Reporting Type" }
+                th { +"Assigned User" }
+                th { +"Created By" }
+                th { +"Created" }
+                th { +"Updated By" }
+                th { +"Last Updated" }
+                th { +"Actions" }
+            }
+        },
+        items = dataSources,
+    ) {
+        dataSourceRow(it)
+    }
+}
 
 fun TBODY.dataSourceRow(dataSource: DataSource) {
     tr {
@@ -40,6 +70,38 @@ fun TBODY.dataSourceRow(dataSource: DataSource) {
                 httpMethod = HttpMethod.Get,
             )
         }
+    }
+}
+
+fun <T, C : TagConsumer<T>> C.dataSourceView(dataSourceWithContacts: DataSourceWithContacts) {
+    val dsId = dataSourceWithContacts.dataSource.dsId
+    dataDisplay(
+        title = "Data Source Details",
+        dataUrl = apiV1Url("/data-sources/$dsId"),
+        editUrl = apiV1Url("/data-sources/$dsId/edit"),
+    ) {
+        dataSourceDisplay(dataSourceWithContacts)
+    }
+}
+
+fun <T, C : TagConsumer<T>> C.dataSourceEditForm(
+    dataSource: DataSource,
+    recordWarehouseTypes: List<RecordWarehouseType>,
+    collectionUsers: List<User>,
+    workflows: List<Workflow>,
+) {
+    val url = apiV1Url("/data-sources/${dataSource.dsId}")
+    dataEdit(
+        title = "Edit Data Source Details",
+        patchUrl = url,
+        cancelUrl = url,
+    ) {
+        dataSourceEdit(
+            dataSource = dataSource,
+            recordWarehouseTypes = recordWarehouseTypes,
+            collectionUsers = collectionUsers,
+            workflows = workflows,
+        )
     }
 }
 

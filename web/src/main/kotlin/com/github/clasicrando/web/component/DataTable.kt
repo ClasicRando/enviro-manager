@@ -18,6 +18,7 @@ import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxTrigger
 import io.ktor.http.HttpMethod
+import kotlinx.html.BUTTON
 import kotlinx.html.ButtonType
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlTagMarker
@@ -47,7 +48,7 @@ fun TR.dataCell(value: Any?) {
     }
 }
 
-fun FlowContent.rowAction(
+inline fun FlowContent.rowAction(
     title: String,
     url: String,
     icon: String,
@@ -57,6 +58,7 @@ fun FlowContent.rowAction(
     style: String? = null,
     pushUrl: String? = null,
     confirmMessage: String? = null,
+    crossinline block: BUTTON.() -> Unit = {},
 ) {
     button(classes = "btn btn-primary me-1") {
         when (httpMethod) {
@@ -73,6 +75,7 @@ fun FlowContent.rowAction(
         confirmMessage?.let {
             confirmAction(it)
         }
+        block()
         i(classes = "fa-solid $icon") {
             style?.let { this.style = it }
         }
@@ -164,6 +167,7 @@ inline fun <I, T, C : TagConsumer<T>> C.dataTable(
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
     extraContainerClasses: String? = null,
+    swapTarget: String = MAIN_CONTENT_TARGET,
     crossinline header: THEAD.() -> Unit,
     items: List<I>,
     crossinline rowBuilder: TBODY.(I) -> Unit,
@@ -196,7 +200,7 @@ inline fun <I, T, C : TagConsumer<T>> C.dataTable(
                                 hxTrigger = "keyup changed delay:500ms"
                                 hxPost = "$dataSource/search"
                                 hxIndicator = ".htmx-indicator"
-                                hxTarget = MAIN_CONTENT_TARGET
+                                hxTarget = swapTarget
                                 attributes["aria-label"] = "Search"
                             }
                         }
@@ -213,7 +217,7 @@ inline fun <I, T, C : TagConsumer<T>> C.dataTable(
                             button(type = ButtonType.button, classes = "btn btn-secondary") {
                                 hxGet = dataSource
                                 hxTrigger = "click"
-                                hxTarget = MAIN_CONTENT_TARGET
+                                hxTarget = swapTarget
                                 hxSwap(SwapType.InnerHtml)
                                 hxIndicator = ".htmx-indicator"
                                 i(classes = "fa-solid fa-refresh")

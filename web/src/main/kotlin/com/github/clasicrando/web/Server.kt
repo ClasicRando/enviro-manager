@@ -151,16 +151,16 @@ fun Route.apiLoginContent() {
 
 fun Route.shutdownServer() {
     val shutdown = ShutDownUrl(url = "") { 0 }
-    get("/admin-shutdown") {
+    post("/admin-shutdown") {
         val usersDao: UsersDao by closestDI().instance()
-        val user = call.userOrRedirect(usersDao) ?: return@get
+        val user = call.userOrRedirect(usersDao) ?: return@post
 
         if (!user.hasRole(Role.Admin)) {
             call.respondText(
                 text = "You tried to shutdown the server without admin rights. Naughty, naughty",
                 status = HttpStatusCode.Forbidden,
             )
-            return@get
+            return@post
         }
 
         serverLogger.atInfo {

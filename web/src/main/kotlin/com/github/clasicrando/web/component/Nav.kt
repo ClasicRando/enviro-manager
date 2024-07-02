@@ -1,5 +1,6 @@
 package com.github.clasicrando.web.component
 
+import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.htmx.hxBoost
 import kotlinx.html.ButtonType
@@ -99,6 +100,18 @@ private fun UL.userContext(userFullName: String?) {
     }
 }
 
+fun UL.navItem(
+    name: String,
+    href: String,
+) {
+    li(classes = "nav-item") {
+        a(classes = "nav-link", href = href) {
+            hxBoost = true
+            +name
+        }
+    }
+}
+
 @HtmlTagMarker
 fun DIV.mainNav(user: User? = null) {
     nav(classes = "navbar navbar-expand-lg bg-body-tertiary") {
@@ -122,11 +135,10 @@ fun DIV.mainNav(user: User? = null) {
                         +"Home"
                     }
                 }
-                li(classes = "nav-item") {
-                    a(classes = "nav-link", href = "/data-sources") {
-                        hxBoost = true
-                        +"Data Sources"
-                    }
+                navItem(name = "Home", href = "/")
+                navItem(name = "Data Sources", href = "/data-sources")
+                if (user?.hasRole(Role.Admin) == true) {
+                    navItem(name = "Admin Dashboard", href = "/admin-dashboard")
                 }
             }
             ul(classes = "navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll align-items-center") {

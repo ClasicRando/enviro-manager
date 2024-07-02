@@ -26,14 +26,14 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 htmx.defineExtension('json-enc', {
-    onEvent: function (name, evt) {
-        if (name === "htmx:configRequest") {
-            evt.detail.headers['Content-Type'] = "application/json";
-        }
-    },
-
-    encodeParameters : function(xhr, parameters, elt) {
-        xhr.overrideMimeType('text/json');
-        return (JSON.stringify(parameters));
+  onEvent: function(name, evt) {
+    if (name === 'htmx:configRequest') {
+      evt.detail.headers['Content-Type'] = 'application/json'
     }
-});
+  },
+
+  encodeParameters: function(xhr, parameters, elt) {
+    xhr.overrideMimeType('text/json')
+    return (JSON.stringify(parameters))
+  }
+})
