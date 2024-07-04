@@ -5,7 +5,6 @@ import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.htmx.hxBoost
 import kotlinx.html.ButtonType
 import kotlinx.html.DIV
-import kotlinx.html.HtmlTagMarker
 import kotlinx.html.UL
 import kotlinx.html.a
 import kotlinx.html.button
@@ -20,7 +19,8 @@ import kotlinx.html.span
 import kotlinx.html.style
 import kotlinx.html.ul
 
-private fun UL.themeSelector() {
+@Component
+private fun UL.ThemeSelector() {
     li(classes = "nav-item dropdown") {
         a(classes = "nav-link dropdown-toggle") {
             id = "bd-theme"
@@ -74,7 +74,8 @@ private fun UL.themeSelector() {
     }
 }
 
-private fun UL.userContext(userFullName: String?) {
+@Component
+private fun UL.UserContext(userFullName: String?) {
     if (userFullName == null) {
         li(classes = "nav-item") {
             a(classes = "nav-link disabled", href = "#") {
@@ -100,7 +101,8 @@ private fun UL.userContext(userFullName: String?) {
     }
 }
 
-fun UL.navItem(
+@Component
+fun UL.NavItem(
     name: String,
     href: String,
 ) {
@@ -112,8 +114,8 @@ fun UL.navItem(
     }
 }
 
-@HtmlTagMarker
-fun DIV.mainNav(user: User? = null) {
+@Component
+fun DIV.MainNav(user: User? = null) {
     nav(classes = "navbar navbar-expand-lg bg-body-tertiary") {
         id = "mainNavBar"
         div(classes = "container-fluid") {
@@ -129,22 +131,16 @@ fun DIV.mainNav(user: User? = null) {
             }
             ul(classes = "navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll") {
                 style = "--bs-scroll-height: 100px"
-                li(classes = "nav-item") {
-                    a(classes = "nav-link", href = "/") {
-                        hxBoost = true
-                        +"Home"
-                    }
-                }
-                navItem(name = "Home", href = "/")
-                navItem(name = "Data Sources", href = "/data-sources")
+                NavItem(name = "Home", href = "/")
+                NavItem(name = "Data Sources", href = "/data-sources")
                 if (user?.hasRole(Role.Admin) == true) {
-                    navItem(name = "Admin Dashboard", href = "/admin-dashboard")
+                    NavItem(name = "Admin Dashboard", href = "/admin-dashboard")
                 }
             }
             ul(classes = "navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll align-items-center") {
                 style = "--bs-scroll-height: 100px;"
-                userContext(userFullName = user?.fullName)
-                themeSelector()
+                UserContext(userFullName = user?.fullName)
+                ThemeSelector()
             }
         }
     }

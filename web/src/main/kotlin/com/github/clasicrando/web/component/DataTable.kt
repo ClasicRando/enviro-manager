@@ -1,6 +1,7 @@
 package com.github.clasicrando.web.component
 
 import com.github.clasicrando.web.MAIN_CONTENT_TARGET
+import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.element.column
 import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HxSwap
@@ -28,6 +29,7 @@ import kotlinx.html.THEAD
 import kotlinx.html.TR
 import kotlinx.html.TagConsumer
 import kotlinx.html.button
+import kotlinx.html.caption
 import kotlinx.html.div
 import kotlinx.html.h5
 import kotlinx.html.i
@@ -39,6 +41,7 @@ import kotlinx.html.table
 import kotlinx.html.tbody
 import kotlinx.html.td
 import kotlinx.html.thead
+import kotlinx.html.title
 import kotlinx.html.tr
 
 @HtmlTagMarker
@@ -48,7 +51,8 @@ fun TR.dataCell(value: Any?) {
     }
 }
 
-inline fun FlowContent.rowAction(
+@Component
+inline fun FlowContent.RowAction(
     title: String,
     url: String,
     icon: String,
@@ -145,6 +149,7 @@ inline fun <I> FlowContent.dataTable(
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
     extraContainerClasses: String? = null,
+    swapTarget: String = MAIN_CONTENT_TARGET,
     crossinline header: THEAD.() -> Unit,
     items: List<I>,
     crossinline rowBuilder: TBODY.(I) -> Unit,
@@ -155,6 +160,7 @@ inline fun <I> FlowContent.dataTable(
         search = search,
         extraButtons = extraButtons,
         extraContainerClasses = extraContainerClasses,
+        swapTarget = swapTarget,
         header = header,
         items = items,
         rowBuilder = rowBuilder,
@@ -215,6 +221,7 @@ inline fun <I, T, C : TagConsumer<T>> C.dataTable(
                     ) {
                         if (dataSource.isNotBlank()) {
                             button(type = ButtonType.button, classes = "btn btn-secondary") {
+                                this.title = "Refresh"
                                 hxGet = dataSource
                                 hxTrigger = "click"
                                 hxTarget = swapTarget
@@ -250,6 +257,90 @@ inline fun <I, T, C : TagConsumer<T>> C.dataTable(
                     rowBuilder(item)
                 }
             }
+        }
+    }
+}
+
+@Component
+inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
+    id: String,
+    title: String,
+    dataSource: String = "",
+    search: Boolean = false,
+    extraButtons: List<ExtraButton> = emptyList(),
+    extraContainerClasses: String? = null,
+    crossinline header: THEAD.() -> Unit,
+) {
+    val bodyTarget = "#$id tbody"
+    val hasSearch = search && dataSource.isNotBlank()
+    val containerClasses =
+        if (extraContainerClasses.isNullOrBlank()) {
+            "table-responsive-sm"
+        } else {
+            "table-responsive-sm ${extraContainerClasses.trim()}"
+        }
+    div(classes = containerClasses) {
+        div(classes = "btn-toolbar mt-1") {
+            role = "toolbar"
+            if (hasSearch) {
+                div(classes = "d-flex ms-auto") {
+                    input(classes = "form-control me-2", type = InputType.search) {
+                        placeholder = "Search"
+                        name = "search"
+                        hxTrigger = "keyup changed delay:500ms, search"
+                        hxPost = "$dataSource/search"
+                        hxIndicator = ".htmx-indicator"
+                        hxTarget = bodyTarget
+                        attributes["aria-label"] = "Search"
+                    }
+                }
+            }
+            div(
+                classes =
+                    if (hasSearch) {
+                        "btn-group"
+                    } else {
+                        "btn-group ms-auto"
+                    },
+            ) {
+                if (dataSource.isNotBlank()) {
+                    button(type = ButtonType.button, classes = "btn btn-secondary") {
+                        this.title = "Refresh"
+                        hxGet = dataSource
+                        hxTrigger = "load, click"
+                        hxTarget = bodyTarget
+                        hxSwap(SwapType.OuterHtml)
+                        hxIndicator = ".htmx-indicator"
+                        i(classes = "fa-solid fa-refresh")
+                    }
+                }
+                for (button in extraButtons) {
+                    button(type = ButtonType.button, classes = "btn btn-secondary") {
+                        when (button.httpMethod) {
+                            HttpMethod.Get -> hxGet = button.apiUrl
+                            HttpMethod.Post -> hxPost = button.apiUrl
+                            HttpMethod.Put -> hxPut = button.apiUrl
+                            HttpMethod.Patch -> hxPatch = button.apiUrl
+                            HttpMethod.Delete -> hxDelete = button.apiUrl
+                        }
+                        hxTrigger = "click"
+                        hxTarget = button.target ?: NO_DISPLAY_ELEMENT_TARGET
+                        hxSwap(button.swap ?: HxSwap(swapType = SwapType.OuterHtml))
+                        i(classes = "fa-solid ${button.icon}")
+                    }
+                }
+            }
+        }
+        table(classes = "table table-stripped caption-top") {
+            this.id = id
+            caption {
+                +title
+                div(classes = "spinner-border htmx-indicator") {
+                    role = "status"
+                }
+            }
+            thead(block = header)
+            tbody()
         }
     }
 }

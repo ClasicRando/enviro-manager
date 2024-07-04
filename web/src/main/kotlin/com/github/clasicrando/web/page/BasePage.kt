@@ -1,7 +1,7 @@
 package com.github.clasicrando.web.page
 
 import com.github.clasicrando.users.model.User
-import com.github.clasicrando.web.component.mainNav
+import com.github.clasicrando.web.component.MainNav
 import com.github.clasicrando.web.element.noscript
 import io.ktor.server.html.Placeholder
 import io.ktor.server.html.Template
@@ -56,7 +56,7 @@ class BasePage(
         noscript(content = "Javascript must be enabled for most site features to work")
         body(classes = "p-3 m-0 border-0") {
             div(classes = "container-fluid") {
-                mainNav(user = user)
+                MainNav(user = user)
                 insert(innerContent)
             }
             div(classes = "toast-container top-0 end-0 p-3") {

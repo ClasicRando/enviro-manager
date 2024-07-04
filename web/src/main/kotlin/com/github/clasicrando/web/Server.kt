@@ -1,7 +1,6 @@
 package com.github.clasicrando.web
 
 import com.github.clasicrando.di.bindDaoComponents
-import com.github.clasicrando.di.registerTypes
 import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
@@ -44,7 +43,6 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.cookie
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -196,9 +194,6 @@ fun Application.module() {
     di {
         bindDaoComponents()
         bindRedisSessionComponent()
-    }
-    runBlocking {
-        closestDI().registerTypes()
     }
     environment.monitor.subscribe(ApplicationStarted) {
         serverLogger.atInfo {

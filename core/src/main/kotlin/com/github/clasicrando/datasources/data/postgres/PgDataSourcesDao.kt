@@ -2,7 +2,6 @@ package com.github.clasicrando.datasources.data.postgres
 
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.model.DataSource
-import com.github.clasicrando.datasources.model.DataSourceWithContacts
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.model.UserId
@@ -38,24 +37,6 @@ class PgDataSourcesDao(
                     """.trimIndent(),
                 ).bind(dsId.value)
                 .fetchFirst(DataSource)
-        }
-
-    override suspend fun getByIdWithContacts(dsId: DsId): DataSourceWithContacts? =
-        pool.acquire().use { conn ->
-            conn
-                .createPreparedQuery(
-                    """
-                    select
-                        ds.ds_id, ds.code, ds.prov, ds.country, ds.prov_level, ds.description,
-                        ds.files_location, ds.comments, ds.search_radius, ds.reporting_type,
-                        ds.record_warehouse_type, ds.assigned_user, ds.created_by, ds.created,
-                        ds.updated_by, ds.last_updated, ds.collection_workflow, ds.load_workflow,
-                        ds.check_workflow, ds.qa_workflow, ds.contacts
-                    from em.v_data_sources_with_contacts ds
-                    where ds.ds_id = $1
-                    """.trimIndent(),
-                ).bind(dsId.value)
-                .fetchFirst(DataSourceWithContacts)
         }
 
     override suspend fun getAll(): List<DataSource> =

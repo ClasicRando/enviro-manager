@@ -9,17 +9,17 @@ import com.github.clasicrando.requests.ModifyDataSourceContactRequest
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
+import com.github.clasicrando.web.component.DataSource
+import com.github.clasicrando.web.component.DataSourceContact
+import com.github.clasicrando.web.component.DataSourceDisplay
+import com.github.clasicrando.web.component.DataSourceEditForm
 import com.github.clasicrando.web.component.createDataSourceContactForm
-import com.github.clasicrando.web.component.dataSourceEditForm
-import com.github.clasicrando.web.component.dataSourceTable
-import com.github.clasicrando.web.component.dataSourceView
 import com.github.clasicrando.web.component.editDataSourceContactForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.userSessionOrRedirect
 import com.github.clasicrando.workflows.data.WorkflowsDao
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
-import io.ktor.server.request.uri
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -27,6 +27,7 @@ import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.util.getOrFail
+import kotlinx.html.tbody
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
@@ -38,6 +39,7 @@ fun Route.dataSources() =
             editDataSourceForm()
             editDataSource()
             route("/contacts") {
+                contacts()
                 createContactForm()
                 createContact()
                 route("/{contactId}") {
@@ -55,7 +57,11 @@ private fun Route.getAllDataSources() =
         val dataSources = dataSourcesDao.getAll()
         call.respondHtmx {
             addHtml {
-                dataSourceTable(requestUrl = call.request.uri, dataSources = dataSources)
+                tbody {
+                    for (dataSource in dataSources) {
+                        DataSource(dataSource)
+                    }
+                }
             }
         }
     }
@@ -64,7 +70,7 @@ private fun Route.getDataSource() =
     get {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
-        val dataSourceWithContacts = dataSourcesDao.getByIdWithContacts(dsId)
+        val dataSourceWithContacts = dataSourcesDao.getById(dsId)
         if (dataSourceWithContacts == null) {
             call.respondHtmx {
                 addCreateToastEvent("No data source for ds_id = $dsId")
@@ -72,9 +78,8 @@ private fun Route.getDataSource() =
             return@get
         }
         call.respondHtmx {
-            pushUrl = "/data-sources/$dsId"
             addHtml {
-                dataSourceView(dataSourceWithContacts)
+                DataSourceDisplay(dataSourceWithContacts)
             }
         }
     }
@@ -97,9 +102,8 @@ private fun Route.editDataSourceForm() =
         val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
         val workflows = workflowsDao.getAll()
         call.respondHtmx {
-            pushUrl = "/data-sources/$dsId/edit"
             addHtml {
-                dataSourceEditForm(
+                DataSourceEditForm(
                     dataSource = dataSource,
                     recordWarehouseTypes = recordWarehouseTypes,
                     collectionUsers = collectionUsers,
@@ -122,11 +126,27 @@ private fun Route.editDataSource() =
         }
     }
 
+private fun Route.contacts() =
+    get {
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
+        val user = call.userSessionOrRedirect() ?: return@get
+        val dataSourceContactsDao: DataSourceContactsDao by closestDI().instance()
+        val contacts = dataSourceContactsDao.getByDsId(dsId)
+        call.respondHtmx {
+            addHtml {
+                tbody {
+                    for (contact in contacts) {
+                        DataSourceContact(contact)
+                    }
+                }
+            }
+        }
+    }
+
 private fun Route.createContactForm() =
     get("/create") {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         call.respondHtmx {
-            pushUrl = "/data-sources/$dsId/contacts/create"
             addHtml {
                 createDataSourceContactForm(dsId)
             }

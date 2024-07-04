@@ -35,7 +35,8 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-inline fun FlowContent.dataGroup(
+@Component
+inline fun FlowContent.DataGroup(
     title: String,
     topMargin: UInt = 2u,
     crossinline content: DIV.() -> Unit,
@@ -53,7 +54,8 @@ private val LOCAL_DATETIME_FORMAT = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH
 private val LOCAL_DATE_FORMAT = DateTimeFormatter.ofPattern("uuuu-MM-dd")
 private val LOCAL_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm")
 
-fun FlowContent.dataEditField(
+@Component
+fun FlowContent.DataEditField(
     fieldId: String,
     label: String,
     columnWidth: Int,
@@ -86,7 +88,8 @@ fun FlowContent.dataEditField(
     }
 }
 
-fun FlowContent.dataEditArea(
+@Component
+fun FlowContent.DataEditArea(
     fieldId: String,
     label: String,
     columnWidth: Int,
@@ -106,7 +109,8 @@ fun FlowContent.dataEditArea(
     }
 }
 
-fun FlowContent.dataSelectionField(
+@Component
+fun FlowContent.DataSelectionField(
     fieldId: String,
     label: String,
     columnWidth: Int,
@@ -140,7 +144,8 @@ fun FlowContent.dataSelectionField(
     }
 }
 
-fun FlowContent.dataDisplayArea(
+@Component
+fun FlowContent.DataDisplayArea(
     fieldId: String,
     label: String,
     columnWidth: Int,
@@ -160,7 +165,8 @@ fun FlowContent.dataDisplayArea(
     }
 }
 
-fun FlowContent.dataDisplayField(
+@Component
+fun FlowContent.DataDisplayField(
     fieldId: String,
     label: String,
     columnWidth: Int,
@@ -179,13 +185,33 @@ fun FlowContent.dataDisplayField(
     }
 }
 
-inline fun <T, C : TagConsumer<T>> C.dataDisplay(
+@Component
+fun FlowContent.DataDisplay(
+    id: String,
     title: String,
     dataUrl: String,
     editUrl: String? = null,
-    crossinline block: FlowContent.() -> Unit,
+    editTarget: String? = null,
+) {
+    consumer.DataDisplay(
+        id = id,
+        title = title,
+        dataUrl = dataUrl,
+        editUrl = editUrl,
+        editTarget = editTarget,
+    )
+}
+
+@Component
+fun <T, C : TagConsumer<T>> C.DataDisplay(
+    id: String,
+    title: String,
+    dataUrl: String,
+    editUrl: String? = null,
+    editTarget: String? = null,
 ) {
     div {
+        this.id = id
         div(classes = "btn-toolbar mt-1") {
             role = "toolbar"
             h3 { +title }
@@ -195,29 +221,42 @@ inline fun <T, C : TagConsumer<T>> C.dataDisplay(
                         attributes["title"] = "Edit"
                         hxGet = editUrl
                         hxTrigger = "click"
-                        hxTarget = MAIN_CONTENT_TARGET
-                        hxSwap(SwapType.InnerHtml)
+                        hxTarget = if (editTarget.isNullOrBlank()) "#$id" else editTarget
+                        hxSwap(SwapType.OuterHtml)
                         i(classes = "fa-solid fa-edit")
                     }
                 }
                 button(classes = "btn btn-secondary", type = ButtonType.button) {
                     attributes["title"] = "Refresh"
                     hxGet = dataUrl
-                    hxTrigger = "click"
-                    hxTarget = MAIN_CONTENT_TARGET
+                    hxTrigger = "load, click"
+                    hxTarget = "#$id div.display-block"
                     hxSwap(SwapType.InnerHtml)
                     i(classes = "fa-solid fa-refresh")
                 }
             }
         }
         hr(classes = "border border-primary border-3 opacity-75 mt-1")
-        div(classes = "my-1") {
-            block()
-        }
+        div(classes = "my-1 display-block")
     }
 }
 
-inline fun <T, C : TagConsumer<T>> C.dataEdit(
+@Component
+inline fun <T, C : TagConsumer<T>> C.DataEdit(
+    title: String,
+    url: String,
+    crossinline data: FlowContent.() -> Unit,
+) {
+    DataEdit(
+        title = title,
+        patchUrl = url,
+        cancelUrl = url,
+        data = data,
+    )
+}
+
+@Component
+inline fun <T, C : TagConsumer<T>> C.DataEdit(
     title: String,
     patchUrl: String,
     cancelUrl: String,

@@ -9,11 +9,13 @@ import io.ktor.server.response.respond
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
 import kotlinx.html.stream.appendHTML
+import kotlinx.html.stream.createHTML
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-typealias HtmxContentCollector = TagConsumer<StringBuilder>
+typealias HtmxContentCollector = TagConsumer<String>
 
 class HtmxResponseBuilder {
     private val triggers: MutableMap<String, JsonElement> = mutableMapOf()
@@ -26,6 +28,10 @@ class HtmxResponseBuilder {
 
     fun addCreateToastEvent(message: String) {
         triggers["createToast"] = JsonPrimitive(message)
+    }
+
+    fun addRefreshDataEvent() {
+        triggers["refreshData"] = JsonNull
     }
 
     private fun finishTriggers() {
@@ -47,11 +53,9 @@ class HtmxResponseBuilder {
 
     inline fun addHtml(crossinline chunk: HtmxContentCollector.() -> Unit) {
         responseContent =
-            buildString {
-                appendHTML(prettyPrint = false).apply {
-                    chunk()
-                }
-            }
+            createHTML()
+                .apply { chunk() }
+                .finalize()
     }
 
     fun finishResponse() {

@@ -3,15 +3,15 @@ package com.github.clasicrando.web.api
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.UserIdJson
 import com.github.clasicrando.web.adminUserOrRespondHtmxError
-import com.github.clasicrando.web.component.usersTable
+import com.github.clasicrando.web.component.User
 import com.github.clasicrando.web.htmx.respondHtmx
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
-import io.ktor.server.request.uri
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import kotlinx.html.tbody
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
@@ -31,7 +31,11 @@ fun Route.getAllUsers() =
 
         call.respondHtmx {
             addHtml {
-                usersTable(requestUrl = call.request.uri, users = users)
+                tbody {
+                    for (user in users) {
+                        User(user)
+                    }
+                }
             }
         }
     }
@@ -46,6 +50,7 @@ fun Route.disableUser() =
 
         call.respondHtmx {
             addCreateToastEvent("User Disabled")
+            addRefreshDataEvent()
         }
     }
 
@@ -59,5 +64,6 @@ fun Route.enableUser() =
 
         call.respondHtmx {
             addCreateToastEvent("User Enabled")
+            addRefreshDataEvent()
         }
     }

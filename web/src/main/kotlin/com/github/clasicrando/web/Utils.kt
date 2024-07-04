@@ -10,6 +10,7 @@ import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.page.BasePage
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.html.respondHtmlTemplate
+import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
@@ -83,3 +84,7 @@ suspend fun ApplicationCall.adminUserOrRespondHtmxError(dao: UsersDao): User? {
     }
     return user
 }
+
+val ApplicationRequest.isHtmx: Boolean get() = this.headers.contains("HX-Request")
+
+val ApplicationRequest.isBoost: Boolean get() = this.headers.contains("HX-Boosted")

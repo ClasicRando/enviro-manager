@@ -1,7 +1,8 @@
 package com.github.clasicrando.web.component
 
 import com.github.clasicrando.datasources.model.DataSource
-import com.github.clasicrando.datasources.model.DataSourceWithContacts
+import com.github.clasicrando.datasources.model.DataSourceContact
+import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.api.apiV1Url
@@ -18,13 +19,14 @@ import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.tr
 
-fun <T, C : TagConsumer<T>> C.dataSourceTable(
-    requestUrl: String,
-    dataSources: List<DataSource>,
-) {
-    dataTable(
+const val DATA_SOURCES_TABLE = "dataSourcesTable"
+
+@Component
+fun <T, C : TagConsumer<T>> C.DataSourceTableRefresh() {
+    DataTableRefresh(
+        id = DATA_SOURCES_TABLE,
         title = "Data Sources",
-        dataSource = requestUrl,
+        dataSource = apiV1Url("/data-sources"),
         header = {
             tr {
                 th { +"Id" }
@@ -41,13 +43,11 @@ fun <T, C : TagConsumer<T>> C.dataSourceTable(
                 th { +"Actions" }
             }
         },
-        items = dataSources,
-    ) {
-        dataSourceRow(it)
-    }
+    )
 }
 
-fun TBODY.dataSourceRow(dataSource: DataSource) {
+@Component
+fun TBODY.DataSource(dataSource: DataSource) {
     tr {
         dataCell(dataSource.dsId)
         dataCell(dataSource.code)
@@ -63,9 +63,9 @@ fun TBODY.dataSourceRow(dataSource: DataSource) {
         dataCell(dataSource.updatedBy)
         dataCell(dataSource.lastUpdated)
         td {
-            rowAction(
+            RowAction(
                 title = "View Data Source",
-                url = apiV1Url("/data-sources/${dataSource.dsId}"),
+                url = "/data-sources/${dataSource.dsId}",
                 icon = "fa-right-to-bracket",
                 httpMethod = HttpMethod.Get,
             )
@@ -73,30 +73,29 @@ fun TBODY.dataSourceRow(dataSource: DataSource) {
     }
 }
 
-fun <T, C : TagConsumer<T>> C.dataSourceView(dataSourceWithContacts: DataSourceWithContacts) {
-    val dsId = dataSourceWithContacts.dataSource.dsId
-    dataDisplay(
+@Component
+fun <T, C : TagConsumer<T>> C.DataSourceView(dsId: DsId) {
+    DataDisplay(
+        id = "dataSourceView",
         title = "Data Source Details",
         dataUrl = apiV1Url("/data-sources/$dsId"),
         editUrl = apiV1Url("/data-sources/$dsId/edit"),
-    ) {
-        dataSourceDisplay(dataSourceWithContacts)
-    }
+    )
 }
 
-fun <T, C : TagConsumer<T>> C.dataSourceEditForm(
+@Component
+fun <T, C : TagConsumer<T>> C.DataSourceEditForm(
     dataSource: DataSource,
     recordWarehouseTypes: List<RecordWarehouseType>,
     collectionUsers: List<User>,
     workflows: List<Workflow>,
 ) {
-    val url = apiV1Url("/data-sources/${dataSource.dsId}")
-    dataEdit(
+    DataEdit(
         title = "Edit Data Source Details",
-        patchUrl = url,
-        cancelUrl = url,
+        patchUrl = apiV1Url("/data-sources/${dataSource.dsId}"),
+        cancelUrl = "/data-sources/${dataSource.dsId}",
     ) {
-        dataSourceEdit(
+        DataSourceEdit(
             dataSource = dataSource,
             recordWarehouseTypes = recordWarehouseTypes,
             collectionUsers = collectionUsers,
@@ -105,46 +104,47 @@ fun <T, C : TagConsumer<T>> C.dataSourceEditForm(
     }
 }
 
-fun FlowContent.dataSourceEdit(
+@Component
+fun FlowContent.DataSourceEdit(
     dataSource: DataSource,
     recordWarehouseTypes: List<RecordWarehouseType>,
     collectionUsers: List<User>,
     workflows: List<Workflow>,
 ) {
     fieldSet {
-        dataGroup(title = "Details") {
+        DataGroup(title = "Details") {
             row {
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "dsId",
                     label = "ID",
                     columnWidth = 1,
                     data = dataSource.dsId,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "code",
                     label = "Code",
                     columnWidth = 1,
                     data = dataSource.code,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "prov",
                     label = "Province",
                     columnWidth = 1,
                     data = dataSource.province,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "country",
                     label = "Country",
                     columnWidth = 1,
                     data = dataSource.country,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "provLevel",
                     label = "Prov Level?",
                     columnWidth = 1,
                     data = dataSource.provLevel,
                 )
-                dataEditField(
+                DataEditField(
                     fieldId = "searchRadius",
                     label = "Search Radius",
                     columnWidth = 1,
@@ -153,26 +153,26 @@ fun FlowContent.dataSourceEdit(
                 )
             }
             row {
-                dataEditField(
+                DataEditField(
                     fieldId = "filesLocation",
                     label = "Files Location",
                     columnWidth = 3,
                     data = dataSource.filesLocation,
                 )
-                dataEditField(
+                DataEditField(
                     fieldId = "reportingType",
                     label = "Reporting Type",
                     columnWidth = 1,
                     data = dataSource.reportingType,
                 )
-                dataSelectionField(
+                DataSelectionField(
                     fieldId = "recordWarehouseTypeId",
                     label = "Record Warehouse Type",
                     columnWidth = 1,
                     selectionItems = recordWarehouseTypes.map { it.id.toString() to it.name },
                     initDisplay = dataSource.recordWarehouseType,
                 )
-                dataSelectionField(
+                DataSelectionField(
                     fieldId = "assignedUser",
                     label = "Assigned User",
                     columnWidth = 3,
@@ -181,13 +181,13 @@ fun FlowContent.dataSourceEdit(
                 )
             }
             row {
-                dataEditArea(
+                DataEditArea(
                     fieldId = "description",
                     label = "Description",
                     columnWidth = 5,
                     data = dataSource.description,
                 )
-                dataEditArea(
+                DataEditArea(
                     fieldId = "comments",
                     label = "Comments",
                     columnWidth = 5,
@@ -195,9 +195,9 @@ fun FlowContent.dataSourceEdit(
                 )
             }
         }
-        dataGroup(title = "Workflows", topMargin = 4u) {
+        DataGroup(title = "Workflows", topMargin = 4u) {
             row {
-                dataSelectionField(
+                DataSelectionField(
                     fieldId = "collectionWorkflowId",
                     label = "Collection",
                     columnWidth = 2,
@@ -209,7 +209,7 @@ fun FlowContent.dataSourceEdit(
                             .toList(),
                     initDisplay = dataSource.collectionWorkflow,
                 )
-                dataSelectionField(
+                DataSelectionField(
                     fieldId = "loadWorkflowId",
                     label = "Load",
                     columnWidth = 2,
@@ -221,7 +221,7 @@ fun FlowContent.dataSourceEdit(
                             .toList(),
                     initDisplay = dataSource.loadWorkflow,
                 )
-                dataSelectionField(
+                DataSelectionField(
                     fieldId = "checkWorkflowId",
                     label = "Check",
                     columnWidth = 2,
@@ -233,7 +233,7 @@ fun FlowContent.dataSourceEdit(
                             .toList(),
                     initDisplay = dataSource.checkWorkflow,
                 )
-                dataSelectionField(
+                DataSelectionField(
                     fieldId = "qaWorkflowId",
                     label = "QA",
                     columnWidth = 2,
@@ -250,142 +250,143 @@ fun FlowContent.dataSourceEdit(
     }
 }
 
-fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
-    val dsId = data.dataSource.dsId
+@Component
+fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
+    val dsId = dataSource.dsId
     fieldSet {
-        dataGroup(title = "Details") {
+        DataGroup(title = "Details") {
             row {
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "dsId",
                     label = "ID",
                     columnWidth = 1,
                     data = dsId,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "code",
                     label = "Code",
                     columnWidth = 1,
-                    data = data.dataSource.code,
+                    data = dataSource.code,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "prov",
                     label = "Province",
                     columnWidth = 1,
-                    data = data.dataSource.province,
+                    data = dataSource.province,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "country",
                     label = "Country",
                     columnWidth = 1,
-                    data = data.dataSource.country,
+                    data = dataSource.country,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "provLevel",
                     label = "Prov Level?",
                     columnWidth = 1,
-                    data = data.dataSource.provLevel,
+                    data = dataSource.provLevel,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "searchRadius",
                     label = "Search Radius",
                     columnWidth = 1,
-                    data = data.dataSource.searchRadius,
+                    data = dataSource.searchRadius,
                 )
             }
             row {
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "filesLocation",
                     label = "Files Location",
                     columnWidth = 3,
-                    data = data.dataSource.filesLocation,
+                    data = dataSource.filesLocation,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "reportingType",
                     label = "Reporting Type",
                     columnWidth = 1,
-                    data = data.dataSource.reportingType,
+                    data = dataSource.reportingType,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "recordWarehouseType",
                     label = "Record Warehouse Type",
                     columnWidth = 1,
-                    data = data.dataSource.recordWarehouseType,
+                    data = dataSource.recordWarehouseType,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "assignedUser",
                     label = "Assigned User",
                     columnWidth = 3,
-                    data = data.dataSource.assignedUser,
+                    data = dataSource.assignedUser,
                 )
             }
             row {
-                dataDisplayArea(
+                DataDisplayArea(
                     fieldId = "description",
                     label = "Description",
                     columnWidth = 5,
-                    data = data.dataSource.description,
+                    data = dataSource.description,
                 )
-                dataDisplayArea(
+                DataDisplayArea(
                     fieldId = "comments",
                     label = "Comments",
                     columnWidth = 5,
-                    data = data.dataSource.comments,
+                    data = dataSource.comments,
                 )
             }
             row {
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "createdBy",
                     label = "Created By",
                     columnWidth = 5,
-                    data = data.dataSource.createdBy,
+                    data = dataSource.createdBy,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "created",
                     label = "Created",
                     columnWidth = 5,
-                    data = data.dataSource.created,
+                    data = dataSource.created,
                 )
             }
             row {
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "updatedBy",
                     label = "Updated By",
                     columnWidth = 5,
-                    data = data.dataSource.updatedBy,
+                    data = dataSource.updatedBy,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "lastUpdated",
                     label = "Last Updated",
                     columnWidth = 5,
-                    data = data.dataSource.lastUpdated,
+                    data = dataSource.lastUpdated,
                 )
             }
         }
-        dataGroup(title = "Workflows", topMargin = 4u) {
+        DataGroup(title = "Workflows", topMargin = 4u) {
             row {
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "collectionWorkflow",
                     label = "Collection",
                     columnWidth = 2,
-                    data = data.dataSource.collectionWorkflow,
+                    data = dataSource.collectionWorkflow,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "loadWorkflow",
                     label = "Load",
                     columnWidth = 2,
-                    data = data.dataSource.loadWorkflow,
+                    data = dataSource.loadWorkflow,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "checkWorkflow",
                     label = "Check",
                     columnWidth = 2,
-                    data = data.dataSource.checkWorkflow,
+                    data = dataSource.checkWorkflow,
                 )
-                dataDisplayField(
+                DataDisplayField(
                     fieldId = "qaWorkflow",
                     label = "QA",
                     columnWidth = 2,
-                    data = data.dataSource.qaWorkflow,
+                    data = dataSource.qaWorkflow,
                 )
             }
         }
@@ -397,8 +398,10 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
             icon = "fa-plus",
             httpMethod = HttpMethod.Get,
         )
-    dataTable(
+    DataTableRefresh(
+        id = "dataSourceContacts",
         title = "Contacts",
+        dataSource = apiV1Url("/data-sources/$dsId/contacts"),
         extraButtons = listOf(addContact),
         extraContainerClasses = "mt-2",
         header = {
@@ -412,32 +415,33 @@ fun FlowContent.dataSourceDisplay(data: DataSourceWithContacts) {
                 th { +"Actions" }
             }
         },
-        items = data.contacts ?: emptyList(),
-        rowBuilder = { contact ->
-            tr {
-                dataCell(contact.contactId)
-                dataCell(contact.name)
-                dataCell(contact.email)
-                dataCell(contact.website)
-                dataCell(contact.type)
-                dataCell(contact.notes)
-                td {
-                    rowAction(
-                        title = "Edit",
-                        url = apiV1Url("/data-sources/$dsId/contacts/${contact.contactId}/edit"),
-                        icon = "fa-edit",
-                        httpMethod = HttpMethod.Get,
-                    )
-                    rowAction(
-                        title = "Delete",
-                        url = apiV1Url("/data-sources/$dsId/contacts/${contact.contactId}"),
-                        icon = "fa-trash",
-                        httpMethod = HttpMethod.Delete,
-                        confirmMessage =
-                            "Are you sure you want to delete this data source contact?",
-                    )
-                }
-            }
-        },
     )
+}
+
+@Component
+fun TBODY.DataSourceContact(contact: DataSourceContact) {
+    tr {
+        dataCell(contact.contactId)
+        dataCell(contact.name)
+        dataCell(contact.email)
+        dataCell(contact.website)
+        dataCell(contact.type)
+        dataCell(contact.notes)
+        td {
+            RowAction(
+                title = "Edit",
+                url = apiV1Url("/data-sources/${contact.dsId}/contacts/${contact.contactId}/edit"),
+                icon = "fa-edit",
+                httpMethod = HttpMethod.Get,
+            )
+            RowAction(
+                title = "Delete",
+                url = apiV1Url("/data-sources/${contact.dsId}/contacts/${contact.contactId}"),
+                icon = "fa-trash",
+                httpMethod = HttpMethod.Delete,
+                confirmMessage =
+                    "Are you sure you want to delete this data source contact?",
+            )
+        }
+    }
 }

@@ -6,13 +6,11 @@ import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourceContactsDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourcesDao
 import com.github.clasicrando.datasources.data.postgres.PgRecordWarehouseTypeDao
-import com.github.clasicrando.datasources.model.DataSourceContact
 import com.github.clasicrando.users.data.PgUsersDao
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.workflows.data.PgWorkflowsDao
 import com.github.clasicrando.workflows.data.WorkflowsDao
 import io.github.clasicrando.kdbc.core.pool.PoolOptions
-import io.github.clasicrando.kdbc.core.use
 import io.github.clasicrando.kdbc.postgresql.connection.PgConnectOptions
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
@@ -60,12 +58,5 @@ fun DI.MainBuilder.bindDaoComponents() {
     }
     bindProvider<DataSourceContactsDao> {
         PgDataSourceContactsDao(di)
-    }
-}
-
-suspend fun DI.registerTypes() {
-    val pool: PgAsyncConnectionPool by di.instance()
-    pool.acquire().use { conn ->
-        conn.registerCompositeType<DataSourceContact>("em.data_source_contacts")
     }
 }
