@@ -5,8 +5,6 @@ import com.github.clasicrando.users.model.User
 import com.github.clasicrando.users.model.UserIdJson
 import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
-import com.github.clasicrando.web.htmx.htmxJsonEncoding
-import com.github.clasicrando.web.htmx.hxVals
 import io.ktor.http.HttpMethod
 import kotlinx.html.TBODY
 import kotlinx.html.TagConsumer
@@ -43,45 +41,44 @@ fun TBODY.User(user: User) {
             }
             val userIdJson = UserIdJson(user.userId)
             if (user.enabled) {
-                RowAction(
+                RowActionWithValue(
                     title = "Add Role",
-                    url = "",
+                    url = apiV1Url("/users/roles/add"),
                     icon = "fa-plus",
+                    requestBody = userIdJson,
                     httpMethod = HttpMethod.Get,
                 )
-                RowAction(
+                RowActionWithValue(
                     title = "Revoke Role",
-                    url = "",
+                    url = apiV1Url("/users/roles/revoke"),
                     icon = "fa-minus",
+                    requestBody = userIdJson,
                     httpMethod = HttpMethod.Get,
                 )
-                RowAction(
+                RowActionWithValue(
                     title = "Reset Password",
-                    url = "",
+                    url = apiV1Url("/users/reset-password"),
                     icon = "fa-rotate-right",
+                    requestBody = userIdJson,
                     httpMethod = HttpMethod.Get,
                 )
-                RowAction(
+                RowActionWithValue(
                     title = "Disable User",
                     url = apiV1Url("/users/disable"),
                     icon = "fa-lock",
                     httpMethod = HttpMethod.Post,
+                    requestBody = userIdJson,
                     target = NO_DISPLAY_ELEMENT_TARGET,
-                ) {
-                    htmxJsonEncoding = true
-                    hxVals(userIdJson)
-                }
+                )
             } else {
-                RowAction(
+                RowActionWithValue(
                     title = "Enable User",
                     url = apiV1Url("/users/enable"),
                     icon = "fa-unlock",
                     httpMethod = HttpMethod.Post,
+                    requestBody = userIdJson,
                     target = NO_DISPLAY_ELEMENT_TARGET,
-                ) {
-                    htmxJsonEncoding = true
-                    hxVals(userIdJson)
-                }
+                )
             }
         }
     }

@@ -5,6 +5,7 @@ import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.confirmAction
+import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxDelete
 import com.github.clasicrando.web.htmx.hxGet
 import com.github.clasicrando.web.htmx.hxIndicator
@@ -16,6 +17,7 @@ import com.github.clasicrando.web.htmx.hxPut
 import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxTrigger
+import com.github.clasicrando.web.htmx.hxVals
 import io.ktor.http.HttpMethod
 import kotlinx.html.BUTTON
 import kotlinx.html.ButtonType
@@ -80,6 +82,35 @@ inline fun FlowContent.RowAction(
         i(classes = "fa-solid $icon") {
             style?.let { this.style = it }
         }
+    }
+}
+
+@Component
+inline fun <reified T : Any> FlowContent.RowActionWithValue(
+    title: String,
+    url: String,
+    icon: String,
+    requestBody: T,
+    httpMethod: HttpMethod = HttpMethod.Post,
+    target: String? = null,
+    swap: HxSwap? = null,
+    style: String? = null,
+    pushUrl: String? = null,
+    confirmMessage: String? = null,
+) {
+    RowAction(
+        title = title,
+        url = url,
+        icon = icon,
+        httpMethod = httpMethod,
+        target = target,
+        swap = swap,
+        style = style,
+        pushUrl = pushUrl,
+        confirmMessage = confirmMessage,
+    ) {
+        htmxJsonEncoding = true
+        hxVals(requestBody)
     }
 }
 
