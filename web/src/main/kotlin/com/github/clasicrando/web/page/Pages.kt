@@ -2,6 +2,7 @@ package com.github.clasicrando.web.page
 
 import com.github.clasicrando.datasources.model.toDsId
 import com.github.clasicrando.users.data.UsersDao
+import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.UserSession
 import com.github.clasicrando.web.adminUserOrRespondHtmxError
 import com.github.clasicrando.web.component.AdminDashboard
@@ -9,7 +10,7 @@ import com.github.clasicrando.web.component.BasePage
 import com.github.clasicrando.web.component.CreateDataSourceContactForm
 import com.github.clasicrando.web.component.DataSourceTableRefresh
 import com.github.clasicrando.web.component.DataSourceView
-import com.github.clasicrando.web.component.loginForm
+import com.github.clasicrando.web.component.LoginForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.isBoost
 import com.github.clasicrando.web.isHtmx
@@ -24,11 +25,35 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.util.getOrFail
+import kotlinx.html.TagConsumer
 import kotlinx.html.p
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
 val ApplicationCall.shouldRespondHtmx: Boolean get() = request.isHtmx && !request.isBoost
+
+suspend inline fun ApplicationCall.respondMaybeHtmxPage(
+    user: User? = null,
+    stylesheetHref: String? = null,
+    pageTitle: String? = null,
+    crossinline html: TagConsumer<*>.() -> Unit,
+) {
+    if (this.shouldRespondHtmx) {
+        this.respondHtmx {
+            pushCurrentUrl(this@respondMaybeHtmxPage.request)
+            addHtml(html)
+        }
+        return
+    }
+    this.respondHtml {
+        BasePage(
+            user = user,
+            stylesheetHref = stylesheetHref,
+            pageTitle = pageTitle,
+            innerContent = html,
+        )
+    }
+}
 
 fun Route.unauthenticatedPages() {
     get("/login") {
@@ -37,19 +62,8 @@ fun Route.unauthenticatedPages() {
             call.respondRedirect("/")
             return@get
         }
-        if (call.shouldRespondHtmx) {
-            call.respondHtmx {
-                pushCurrentUrl(call.request)
-                addHtml {
-                    loginForm()
-                }
-            }
-            return@get
-        }
-        call.respondHtml {
-            BasePage(pageTitle = "Login") {
-                loginForm()
-            }
+        call.respondMaybeHtmxPage(pageTitle = "Login") {
+            LoginForm()
         }
     }
     get("/logout") {
@@ -70,19 +84,8 @@ private fun Route.index() =
     get("/") {
         val dao: UsersDao by closestDI().instance()
         val user = call.userOrRedirect(dao = dao) ?: return@get
-        if (call.shouldRespondHtmx) {
-            call.respondHtmx {
-                pushCurrentUrl(call.request)
-                addHtml {
-                    p { +"Welcome to EnviroManager" }
-                }
-            }
-            return@get
-        }
-        call.respondHtml {
-            BasePage(user = user, pageTitle = "Home") {
-                p { +"Welcome to EnviroManager" }
-            }
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Home") {
+            p { +"Welcome to EnviroManager" }
         }
     }
 
@@ -90,19 +93,8 @@ private fun Route.dataSources() =
     get("/data-sources") {
         val dao: UsersDao by closestDI().instance()
         val user = call.userOrRedirect(dao = dao) ?: return@get
-        if (call.shouldRespondHtmx) {
-            call.respondHtmx {
-                pushCurrentUrl(call.request)
-                addHtml {
-                    DataSourceTableRefresh()
-                }
-            }
-            return@get
-        }
-        call.respondHtml {
-            BasePage(user = user, pageTitle = "Data Sources") {
-                DataSourceTableRefresh()
-            }
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Data Sources") {
+            DataSourceTableRefresh()
         }
     }
 
@@ -111,19 +103,8 @@ private fun Route.dataSource() =
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dao: UsersDao by closestDI().instance()
         val user = call.userOrRedirect(dao = dao) ?: return@get
-        if (call.shouldRespondHtmx) {
-            call.respondHtmx {
-                pushCurrentUrl(call.request)
-                addHtml {
-                    DataSourceView(dsId)
-                }
-            }
-            return@get
-        }
-        call.respondHtml {
-            BasePage(user = user, pageTitle = "Data Source") {
-                DataSourceView(dsId)
-            }
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Data Source") {
+            DataSourceView(dsId)
         }
     }
 
@@ -132,19 +113,8 @@ private fun Route.createDataSourceContact() =
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dao: UsersDao by closestDI().instance()
         val user = call.userOrRedirect(dao = dao) ?: return@get
-        if (call.shouldRespondHtmx) {
-            call.respondHtmx {
-                pushCurrentUrl(call.request)
-                addHtml {
-                    CreateDataSourceContactForm(dsId)
-                }
-            }
-            return@get
-        }
-        call.respondHtml {
-            BasePage(user = user, pageTitle = "Create Contact") {
-                CreateDataSourceContactForm(dsId)
-            }
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Create Contact") {
+            CreateDataSourceContactForm(dsId)
         }
     }
 
@@ -152,18 +122,7 @@ private fun Route.adminDashboard() =
     get("/admin-dashboard") {
         val usersDao: UsersDao by closestDI().instance()
         val user = call.adminUserOrRespondHtmxError(dao = usersDao) ?: return@get
-        if (call.shouldRespondHtmx) {
-            call.respondHtmx {
-                pushCurrentUrl(call.request)
-                addHtml {
-                    AdminDashboard()
-                }
-            }
-            return@get
-        }
-        call.respondHtml {
-            BasePage(user = user, pageTitle = "Admin Dashboard") {
-                AdminDashboard()
-            }
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Admin Dashboard") {
+            AdminDashboard()
         }
     }

@@ -17,8 +17,6 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-typealias HtmxContentCollector = TagConsumer<String>
-
 class HtmxResponseBuilder {
     private val triggers: MutableMap<String, JsonElement> = mutableMapOf()
     var triggerData: JsonObject? = null
@@ -53,7 +51,7 @@ class HtmxResponseBuilder {
             }
     }
 
-    inline fun addHtml(crossinline chunk: HtmxContentCollector.() -> Unit) {
+    inline fun addHtml(crossinline chunk: TagConsumer<*>.() -> Unit) {
         responseContent =
             createHTML()
                 .apply { chunk() }
@@ -95,9 +93,4 @@ suspend fun ApplicationCall.respondHtmx(block: HtmxResponseBuilder.() -> Unit) {
             HttpStatusCode.OK,
         ),
     )
-}
-
-suspend fun ApplicationCall.respondHtmxLocation(location: String) {
-    response.headers.append("HX-Location", location)
-    respond(HttpStatusCode.OK)
 }

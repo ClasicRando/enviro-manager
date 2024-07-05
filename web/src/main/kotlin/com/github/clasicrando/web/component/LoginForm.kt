@@ -15,7 +15,8 @@ import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.label
 
-fun <T, C : TagConsumer<T>> C.loginForm() {
+@Component
+fun <T, C : TagConsumer<T>> C.LoginForm() {
     h3(classes = "login-form mx-auto") {
         +"Login to EnviroManager"
     }
