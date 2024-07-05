@@ -1,5 +1,6 @@
 package com.github.clasicrando.web.element
 
+import com.github.clasicrando.web.component.Component
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlInlineTag
@@ -23,7 +24,8 @@ class COLUMN(
     ),
     HtmlInlineTag
 
-inline fun <T, C : TagConsumer<T>> C.column(
+@Component
+inline fun <T, C : TagConsumer<T>> C.Column(
     classes: String? = null,
     size: Int? = null,
     crossinline block: DIV.() -> Unit,
@@ -31,7 +33,8 @@ inline fun <T, C : TagConsumer<T>> C.column(
     COLUMN(classes, size, this).visitAndFinalize(this) { block() }
 }
 
-inline fun FlowContent.column(
+@Component
+inline fun FlowContent.Column(
     classes: String? = null,
     size: Int? = null,
     crossinline block: DIV.() -> Unit,

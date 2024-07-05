@@ -5,8 +5,9 @@ import com.github.clasicrando.datasources.model.DataSourceContact
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
+import com.github.clasicrando.web.MAIN_CONTENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
-import com.github.clasicrando.web.element.row
+import com.github.clasicrando.web.element.Row
 import com.github.clasicrando.workflows.model.Workflow
 import io.ktor.http.HttpMethod
 import kotlinx.html.FlowContent
@@ -113,7 +114,7 @@ fun FlowContent.DataSourceEdit(
 ) {
     fieldSet {
         DataGroup(title = "Details") {
-            row {
+            Row {
                 DataDisplayField(
                     fieldId = "dsId",
                     label = "ID",
@@ -152,7 +153,7 @@ fun FlowContent.DataSourceEdit(
                     inputType = InputType.tel,
                 )
             }
-            row {
+            Row {
                 DataEditField(
                     fieldId = "filesLocation",
                     label = "Files Location",
@@ -180,7 +181,7 @@ fun FlowContent.DataSourceEdit(
                     initDisplay = dataSource.assignedUser,
                 )
             }
-            row {
+            Row {
                 DataEditArea(
                     fieldId = "description",
                     label = "Description",
@@ -196,7 +197,7 @@ fun FlowContent.DataSourceEdit(
             }
         }
         DataGroup(title = "Workflows", topMargin = 4u) {
-            row {
+            Row {
                 DataSelectionField(
                     fieldId = "collectionWorkflowId",
                     label = "Collection",
@@ -255,7 +256,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
     val dsId = dataSource.dsId
     fieldSet {
         DataGroup(title = "Details") {
-            row {
+            Row {
                 DataDisplayField(
                     fieldId = "dsId",
                     label = "ID",
@@ -293,7 +294,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
                     data = dataSource.searchRadius,
                 )
             }
-            row {
+            Row {
                 DataDisplayField(
                     fieldId = "filesLocation",
                     label = "Files Location",
@@ -319,7 +320,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
                     data = dataSource.assignedUser,
                 )
             }
-            row {
+            Row {
                 DataDisplayArea(
                     fieldId = "description",
                     label = "Description",
@@ -333,7 +334,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
                     data = dataSource.comments,
                 )
             }
-            row {
+            Row {
                 DataDisplayField(
                     fieldId = "createdBy",
                     label = "Created By",
@@ -347,7 +348,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
                     data = dataSource.created,
                 )
             }
-            row {
+            Row {
                 DataDisplayField(
                     fieldId = "updatedBy",
                     label = "Updated By",
@@ -363,7 +364,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
             }
         }
         DataGroup(title = "Workflows", topMargin = 4u) {
-            row {
+            Row {
                 DataDisplayField(
                     fieldId = "collectionWorkflow",
                     label = "Collection",
@@ -394,9 +395,10 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
     val addContact =
         ExtraButton(
             title = "New Contact",
-            apiUrl = apiV1Url("data-sources/$dsId/contacts/create"),
+            apiUrl = "/data-sources/$dsId/contacts/create",
             icon = "fa-plus",
             httpMethod = HttpMethod.Get,
+            target = MAIN_CONTENT_TARGET,
         )
     DataTableRefresh(
         id = "dataSourceContacts",

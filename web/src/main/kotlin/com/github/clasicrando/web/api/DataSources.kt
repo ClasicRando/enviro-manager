@@ -13,8 +13,7 @@ import com.github.clasicrando.web.component.DataSource
 import com.github.clasicrando.web.component.DataSourceContact
 import com.github.clasicrando.web.component.DataSourceDisplay
 import com.github.clasicrando.web.component.DataSourceEditForm
-import com.github.clasicrando.web.component.createDataSourceContactForm
-import com.github.clasicrando.web.component.editDataSourceContactForm
+import com.github.clasicrando.web.component.EditDataSourceContactForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.userSessionOrRedirect
 import com.github.clasicrando.workflows.data.WorkflowsDao
@@ -40,7 +39,6 @@ fun Route.dataSources() =
             editDataSource()
             route("/contacts") {
                 contacts()
-                createContactForm()
                 createContact()
                 route("/{contactId}") {
                     editContactForm()
@@ -70,8 +68,8 @@ private fun Route.getDataSource() =
     get {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
-        val dataSourceWithContacts = dataSourcesDao.getById(dsId)
-        if (dataSourceWithContacts == null) {
+        val dataSource = dataSourcesDao.getById(dsId)
+        if (dataSource == null) {
             call.respondHtmx {
                 addCreateToastEvent("No data source for ds_id = $dsId")
             }
@@ -79,7 +77,7 @@ private fun Route.getDataSource() =
         }
         call.respondHtmx {
             addHtml {
-                DataSourceDisplay(dataSourceWithContacts)
+                DataSourceDisplay(dataSource)
             }
         }
     }
@@ -143,16 +141,6 @@ private fun Route.contacts() =
         }
     }
 
-private fun Route.createContactForm() =
-    get("/create") {
-        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        call.respondHtmx {
-            addHtml {
-                createDataSourceContactForm(dsId)
-            }
-        }
-    }
-
 private fun Route.createContact() =
     post {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
@@ -182,7 +170,7 @@ private fun Route.editContactForm() =
 
         call.respondHtmx {
             addHtml {
-                editDataSourceContactForm(contact)
+                EditDataSourceContactForm(contact)
             }
         }
     }

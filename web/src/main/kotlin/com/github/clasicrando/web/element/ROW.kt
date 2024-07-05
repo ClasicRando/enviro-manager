@@ -1,9 +1,9 @@
 package com.github.clasicrando.web.element
 
+import com.github.clasicrando.web.component.Component
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlInlineTag
-import kotlinx.html.HtmlTagMarker
 import kotlinx.html.TagConsumer
 import kotlinx.html.visitAndFinalize
 
@@ -19,16 +19,16 @@ class ROW(
     ),
     HtmlInlineTag
 
-@HtmlTagMarker
-inline fun <T, C : TagConsumer<T>> C.row(
+@Component
+inline fun <T, C : TagConsumer<T>> C.Row(
     classes: String? = null,
     crossinline block: DIV.() -> Unit,
 ) {
     ROW(classes, this).visitAndFinalize(this) { block() }
 }
 
-@HtmlTagMarker
-inline fun FlowContent.row(
+@Component
+inline fun FlowContent.Row(
     classes: String? = null,
     crossinline block: DIV.() -> Unit,
 ) {

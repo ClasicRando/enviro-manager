@@ -2,8 +2,6 @@ package com.github.clasicrando.web.component
 
 import com.github.clasicrando.web.MAIN_CONTENT_TARGET
 import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
-import com.github.clasicrando.web.element.column
-import com.github.clasicrando.web.element.row
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.confirmAction
@@ -31,7 +29,6 @@ import kotlinx.html.TagConsumer
 import kotlinx.html.button
 import kotlinx.html.caption
 import kotlinx.html.div
-import kotlinx.html.h5
 import kotlinx.html.i
 import kotlinx.html.id
 import kotlinx.html.input
@@ -143,124 +140,6 @@ data class ExtraButton(
     val httpMethod: HttpMethod = HttpMethod.Post,
 )
 
-inline fun <I> FlowContent.dataTable(
-    title: String,
-    dataSource: String = "",
-    search: Boolean = false,
-    extraButtons: List<ExtraButton> = emptyList(),
-    extraContainerClasses: String? = null,
-    swapTarget: String = MAIN_CONTENT_TARGET,
-    crossinline header: THEAD.() -> Unit,
-    items: List<I>,
-    crossinline rowBuilder: TBODY.(I) -> Unit,
-) {
-    consumer.dataTable(
-        title = title,
-        dataSource = dataSource,
-        search = search,
-        extraButtons = extraButtons,
-        extraContainerClasses = extraContainerClasses,
-        swapTarget = swapTarget,
-        header = header,
-        items = items,
-        rowBuilder = rowBuilder,
-    )
-}
-
-inline fun <I, T, C : TagConsumer<T>> C.dataTable(
-    title: String,
-    dataSource: String = "",
-    search: Boolean = false,
-    extraButtons: List<ExtraButton> = emptyList(),
-    extraContainerClasses: String? = null,
-    swapTarget: String = MAIN_CONTENT_TARGET,
-    crossinline header: THEAD.() -> Unit,
-    items: List<I>,
-    crossinline rowBuilder: TBODY.(I) -> Unit,
-) {
-    val hasSearch = search && dataSource.isNotBlank()
-    val containerClasses =
-        if (extraContainerClasses.isNullOrBlank()) {
-            "table-responsive-sm"
-        } else {
-            "table-responsive-sm ${extraContainerClasses.trim()}"
-        }
-    div(classes = containerClasses) {
-        row {
-            column(size = 4) {
-                h5(classes = "text-start") {
-                    +title
-                    div(classes = "spinner-border htmx-indicator") {
-                        role = "status"
-                    }
-                }
-            }
-            column(size = 8) {
-                div(classes = "btn-toolbar mt-1") {
-                    role = "toolbar"
-                    if (hasSearch) {
-                        div(classes = "d-flex ms-auto") {
-                            input(classes = "form-control me-2", type = InputType.search) {
-                                placeholder = "Search"
-                                name = "search"
-                                hxTrigger = "keyup changed delay:500ms"
-                                hxPost = "$dataSource/search"
-                                hxIndicator = ".htmx-indicator"
-                                hxTarget = swapTarget
-                                attributes["aria-label"] = "Search"
-                            }
-                        }
-                    }
-                    div(
-                        classes =
-                            if (hasSearch) {
-                                "btn-group"
-                            } else {
-                                "btn-group ms-auto"
-                            },
-                    ) {
-                        if (dataSource.isNotBlank()) {
-                            button(type = ButtonType.button, classes = "btn btn-secondary") {
-                                this.title = "Refresh"
-                                hxGet = dataSource
-                                hxTrigger = "click"
-                                hxTarget = swapTarget
-                                hxSwap(SwapType.InnerHtml)
-                                hxIndicator = ".htmx-indicator"
-                                i(classes = "fa-solid fa-refresh")
-                            }
-                        }
-                        for (button in extraButtons) {
-                            button(type = ButtonType.button, classes = "btn btn-secondary") {
-                                when (button.httpMethod) {
-                                    HttpMethod.Get -> hxGet = button.apiUrl
-                                    HttpMethod.Post -> hxPost = button.apiUrl
-                                    HttpMethod.Put -> hxPut = button.apiUrl
-                                    HttpMethod.Patch -> hxPatch = button.apiUrl
-                                    HttpMethod.Delete -> hxDelete = button.apiUrl
-                                }
-                                hxPost = button.apiUrl
-                                hxTrigger = "click"
-                                hxTarget = button.target ?: MAIN_CONTENT_TARGET
-                                hxSwap(button.swap ?: HxSwap(swapType = SwapType.InnerHtml))
-                                i(classes = "fa-solid ${button.icon}")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        table(classes = "table table-stripped") {
-            thead(block = header)
-            tbody {
-                for (item in items) {
-                    rowBuilder(item)
-                }
-            }
-        }
-    }
-}
-
 @Component
 inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
     id: String,
@@ -325,7 +204,7 @@ inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
                         }
                         hxTrigger = "click"
                         hxTarget = button.target ?: NO_DISPLAY_ELEMENT_TARGET
-                        hxSwap(button.swap ?: HxSwap(swapType = SwapType.OuterHtml))
+                        hxSwap(button.swap ?: HxSwap(swapType = SwapType.InnerHtml))
                         i(classes = "fa-solid ${button.icon}")
                     }
                 }

@@ -1,16 +1,14 @@
 package com.github.clasicrando.web
 
 import com.github.clasicrando.di.bindDaoComponents
-import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
-import com.github.clasicrando.web.api.api
-import com.github.clasicrando.web.api.apiV1Url
-import com.github.clasicrando.web.component.loginForm
+import com.github.clasicrando.web.api.authenticatedApi
+import com.github.clasicrando.web.api.unauthenticatedApi
 import com.github.clasicrando.web.di.bindRedisSessionComponent
 import com.github.clasicrando.web.htmx.respondHtmx
-import com.github.clasicrando.web.htmx.respondHtmxLocation
-import com.github.clasicrando.web.page.pages
+import com.github.clasicrando.web.page.authenticatedPages
+import com.github.clasicrando.web.page.unauthenticatedPages
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -29,20 +27,14 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.header
-import io.ktor.server.request.receive
 import io.ktor.server.request.uri
-import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.sessions.SessionStorage
 import io.ktor.server.sessions.Sessions
-import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.cookie
-import io.ktor.server.sessions.sessions
-import io.ktor.server.sessions.set
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -50,6 +42,9 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import java.time.Instant
+import kotlin.collections.mapOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 
 private val serverLogger = KotlinLogging.logger {}
 private val mutex = Mutex()
@@ -121,32 +116,6 @@ private fun AuthenticationConfig.configureSession() {
     }
 }
 
-fun Route.loginPage() {
-    get("/login") {
-        call.respondBasePage(
-            contentUrl = apiV1Url("/login"),
-            pageTitle = "Login",
-        )
-    }
-}
-
-fun Route.logoutPage() {
-    get("/logout") {
-        call.sessions.clear<UserSession>()
-        call.respondRedirect(url = "/login")
-    }
-}
-
-fun Route.apiLoginContent() {
-    get(apiV1Url("/login")) {
-        call.respondHtmx {
-            addHtml {
-                loginForm()
-            }
-        }
-    }
-}
-
 fun Route.shutdownServer() {
     val shutdown = ShutDownUrl(url = "") { 0 }
     post("/admin-shutdown") {
@@ -170,22 +139,6 @@ fun Route.shutdownServer() {
          * https://ktor.io/docs/shutdown-url.html
          */
         shutdown.doShutdown(call)
-    }
-}
-
-fun Route.apiLoginAction() {
-    post(apiV1Url("/users/login")) {
-        val loginRequest = call.receive<LoginRequest>()
-        val dao: UsersDao by closestDI().instance()
-        val userId = dao.validateUser(loginRequest)
-        if (userId == null) {
-            call.respondHtmx {
-                addCreateToastEvent("Invalid username or password")
-            }
-            return@post
-        }
-        call.sessions.set(UserSession(userId))
-        call.respondHtmxLocation("/")
     }
 }
 
@@ -229,14 +182,12 @@ fun Application.module() {
     routing {
         staticResources("/assets", "assets")
         authenticate("auth-session") {
-            pages()
-            api()
+            authenticatedPages()
+            authenticatedApi()
             shutdownServer()
         }
 
-        loginPage()
-        logoutPage()
-        apiLoginContent()
-        apiLoginAction()
+        unauthenticatedPages()
+        unauthenticatedApi()
     }
 }

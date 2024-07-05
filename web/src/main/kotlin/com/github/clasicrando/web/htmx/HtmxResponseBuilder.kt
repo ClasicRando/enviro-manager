@@ -5,6 +5,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.withCharset
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
@@ -56,6 +58,10 @@ class HtmxResponseBuilder {
             createHTML()
                 .apply { chunk() }
                 .finalize()
+    }
+
+    fun pushCurrentUrl(request: ApplicationRequest) {
+        pushUrl = request.uri
     }
 
     fun finishResponse() {
