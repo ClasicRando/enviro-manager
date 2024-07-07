@@ -3,7 +3,7 @@ create table if not exists em.users (
     full_name text not null check (data_check.check_not_blank_or_empty(full_name)),
     username text not null check (data_check.check_not_blank_or_empty(username)) unique,
     password text not null check (data_check.check_not_blank_or_empty(password)),
-    enabled boolean not null default true
+    active boolean not null default true
 );
 
 call audit.audit_table('em.users');

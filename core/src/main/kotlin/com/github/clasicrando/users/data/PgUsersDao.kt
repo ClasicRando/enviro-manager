@@ -4,6 +4,8 @@ import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.users.model.UserId
+import io.github.clasicrando.kdbc.core.connection.AsyncConnection
+import io.github.clasicrando.kdbc.core.connection.transaction
 import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.executeClosing
@@ -27,9 +29,9 @@ class PgUsersDao(
             conn
                 .createPreparedQuery(
                     """
-                    select u.user_id, u.username, u.full_name, u.enabled, u.roles
-                    from em.v_users u
-                    where u.user_id = $1
+                    SELECT u.user_id, u.username, u.full_name, u.enabled, u.roles
+                    FROM em.v_users u
+                    WHERE u.user_id = $1
                     """.trimIndent(),
                 ).bind(userId.value)
                 .fetchFirst(User)
@@ -40,9 +42,9 @@ class PgUsersDao(
             conn
                 .createPreparedQuery(
                     """
-                    select u.user_id, u.username, u.full_name, u.enabled, u.roles
-                    from em.v_users u
-                    where u.username = $1
+                    SELECT u.user_id, u.username, u.full_name, u.enabled, u.roles
+                    FROM em.v_users u
+                    WHERE u.username = $1
                     """.trimIndent(),
                 ).bind(username)
                 .fetchFirst(User)
@@ -54,11 +56,11 @@ class PgUsersDao(
                 conn
                     .createPreparedQuery(
                         """
-                        select u2.user_id
-                        from em.users u2
-                        where
+                        SELECT u2.user_id
+                        FROM em.users u2
+                        WHERE
                             u2.username = $1
-                            and u2.password = crypt($2, u2.password)
+                            AND u2.password = CRYPT($2, u2.password)
                         """.trimIndent(),
                     ).bind(loginRequest.username)
                     .bind(loginRequest.password)
@@ -72,11 +74,11 @@ class PgUsersDao(
             conn
                 .createPreparedQuery(
                     """
-                    select u.user_id, u.username, u.full_name, u.enabled, u.roles
-                    from em.v_users u
-                    where
-                        $1 = any(u.roles)
-                        or 'admin' = any(u.roles)
+                    SELECT u.user_id, u.username, u.full_name, u.enabled, u.roles
+                    FROM em.v_users u
+                    WHERE
+                        $1 = ANY(u.roles)
+                        OR 'admin' = ANY(u.roles)
                     """.trimIndent(),
                 ).bind(role.dbValue)
                 .fetchAll(User)
@@ -87,88 +89,99 @@ class PgUsersDao(
             conn
                 .createPreparedQuery(
                     """
-                    select u.user_id, u.username, u.full_name, u.enabled, u.roles
-                    from em.v_users u
+                    SELECT u.user_id, u.username, u.full_name, u.enabled, u.roles
+                    FROM em.v_users u
                     """.trimIndent(),
                 ).fetchAll(User)
         }
 
-    private suspend fun updateUserIsEnabled(
+    private suspend fun updateUserIsActive(
         userId: UserId,
-        isEnabled: Boolean,
+        isActive: Boolean,
     ) {
         pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
-                    update em.users u
-                    set enabled = $1
-                    where u.user_id = $2
+                    UPDATE em.users u
+                    SET active = $1
+                    WHERE u.user_id = $2
                     """.trimIndent(),
-                ).bind(isEnabled)
+                ).bind(isActive)
                 .bind(userId.value)
                 .executeClosing()
         }
     }
 
-    override suspend fun disableUser(userId: UserId) =
-        updateUserIsEnabled(userId = userId, isEnabled = false)
+    override suspend fun deactivateUser(userId: UserId) =
+        updateUserIsActive(userId = userId, isActive = false)
 
-    override suspend fun enableUser(userId: UserId) =
-        updateUserIsEnabled(userId = userId, isEnabled = true)
-
-    override suspend fun modifyRoles(
-        userId: UserId,
-        roles: List<Role>,
-    ) {
-        pool.useConnection { conn ->
-            conn
-                .createPreparedQuery(
-                    """
-                    merge into em.user_roles as u
-                    using (
-                        select
-                            u.user_id, coalesce(ur.role, r.description) role,
-                            r.description IS NULL as revoke_role
-                        from em.users u
-                        left join em.user_roles ur on u.user_id = ur.user_id
-                        left join lateral unnest($1::text[]) r(description) on true
-                        where u.user_id = $2
-                    ) t
-                    on (u.user_id = t.user_id and u.role = t.role)
-                    when matched and t.revoke_role then
-                        delete
-                    when matched and not t.revoke_role then
-                        do nothing
-                    when not matched then
-                        insert(user_id, role)
-                        values(t.user_id, t.role);
-                    """.trimIndent(),
-                ).bind(roles.map { it.dbValue })
-                .bind(userId.value)
-                .executeClosing()
-        }
-    }
+    override suspend fun activateUser(userId: UserId) =
+        updateUserIsActive(userId = userId, isActive = true)
 
     override suspend fun updateUser(
         userId: UserId,
         username: String,
         fullName: String,
+        roles: List<Role>,
     ) {
         pool.useConnection { conn ->
-            conn
-                .createPreparedQuery(
-                    """
-                    update em.users u
-                    set
-                        username = trim($1),
-                        full_name = trim($2)
-                    where u.user_id = $3
-                    """.trimIndent(),
-                ).bind(username)
-                .bind(fullName)
-                .bind(userId.value)
-                .executeClosing()
+            conn.transaction {
+                it.updateUserDetails(userId = userId, username = username, fullName = fullName)
+                it.modifyRoles(userId = userId, roles = roles)
+            }
         }
+    }
+
+    private suspend fun AsyncConnection.updateUserDetails(
+        userId: UserId,
+        username: String,
+        fullName: String,
+    ) {
+        createPreparedQuery(
+            """
+            UPDATE em.users u
+            SET
+                username = TRIM($1),
+                full_name = TRIM($2)
+            WHERE u.user_id = $3
+            """.trimIndent(),
+        ).bind(username)
+            .bind(fullName)
+            .bind(userId.value)
+            .executeClosing()
+    }
+
+    private suspend fun AsyncConnection.modifyRoles(
+        userId: UserId,
+        roles: List<Role>,
+    ) {
+        val newRoles = if (roles.any { it == Role.Admin }) listOf(Role.Admin) else roles
+        createPreparedQuery(
+            """
+            MERGE INTO em.user_roles AS u
+            USING (
+                SELECT
+                    u.user_id, COALESCE(ur.role, r.description) AS role,
+                    r.description IS NULL AS revoke_role
+                FROM em.users u
+                LEFT JOIN em.user_roles ur ON u.user_id = ur.user_id
+                LEFT JOIN LATERAL UNNEST($1::text[]) r(description) ON TRUE
+                WHERE
+                    u.user_id = $2
+                    AND COALESCE(ur.role, r.description) IS NOT NULL
+            ) t
+            ON (u.user_id = t.user_id AND u.role = t.role)
+            WHEN MATCHED AND t.revoke_role THEN
+                DELETE
+            WHEN MATCHED AND NOT t.revoke_role THEN
+                DO NOTHING
+            WHEN NOT MATCHED THEN
+                INSERT(user_id, role)
+                VALUES(t.user_id, t.role);
+            """.trimIndent(),
+        ).bind(newRoles.map { it.dbValue })
+            .bind(userId.value)
+            .executeClosing()
     }
 }

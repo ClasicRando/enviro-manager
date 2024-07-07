@@ -3,8 +3,11 @@ package com.github.clasicrando.web.component
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.users.model.UserIdJson
+import com.github.clasicrando.web.GridTier
 import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
+import com.github.clasicrando.web.element.Column
+import com.github.clasicrando.web.element.Row
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
 import io.ktor.http.HttpMethod
@@ -50,8 +53,8 @@ fun TBODY.User(user: User) {
             val userIdJson = UserIdJson(user.userId)
             if (user.enabled) {
                 RowActionWithValue(
-                    title = "Modify Roles",
-                    url = apiV1Url("/users/roles/modify"),
+                    title = "Modify User",
+                    url = apiV1Url("/users/modify"),
                     icon = "fa-pen-to-square",
                     requestBody = userIdJson,
                     httpMethod = HttpMethod.Post,
@@ -66,8 +69,8 @@ fun TBODY.User(user: User) {
                     httpMethod = HttpMethod.Post,
                 )
                 RowActionWithValue(
-                    title = "Disable User",
-                    url = apiV1Url("/users/disable"),
+                    title = "Deactivate User",
+                    url = apiV1Url("/users/deactivate"),
                     icon = "fa-lock",
                     httpMethod = HttpMethod.Post,
                     requestBody = userIdJson,
@@ -75,8 +78,8 @@ fun TBODY.User(user: User) {
                 )
             } else {
                 RowActionWithValue(
-                    title = "Enable User",
-                    url = apiV1Url("/users/enable"),
+                    title = "Activate User",
+                    url = apiV1Url("/users/activate"),
                     icon = "fa-unlock",
                     httpMethod = HttpMethod.Post,
                     requestBody = userIdJson,
@@ -88,14 +91,46 @@ fun TBODY.User(user: User) {
 }
 
 @Component
-fun <T, C : TagConsumer<T>> C.ModifyRolesModal(userToModify: User) {
-    CreateModalWithExtraValues(
-        id = "modifyRoleModal",
-        title = "Modify Roles",
-        postUrl = apiV1Url("/users/roles"),
+fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
+    val usernameId = "username"
+    val fullNameId = "fullName"
+    CreateOrUpdateModalWithExtraValues(
+        id = "modifyUserModal",
+        title = "Modify User",
+        putUrl = apiV1Url("/users"),
         target = NO_DISPLAY_ELEMENT_TARGET,
         extraValues = UserIdJson(userToModify.userId),
     ) {
+        Row {
+            Column(size = 3, gridTier = GridTier.Small) {
+                label(classes = "col-form-label") {
+                    htmlFor = usernameId
+                    +"Username"
+                }
+            }
+            Column(size = 9, gridTier = GridTier.Small) {
+                input(classes = "form-control", type = InputType.text) {
+                    id = usernameId
+                    name = usernameId
+                    value = userToModify.username
+                }
+            }
+        }
+        Row {
+            Column(size = 3, gridTier = GridTier.Small) {
+                label(classes = "col-form-label") {
+                    htmlFor = fullNameId
+                    +"Full Name"
+                }
+            }
+            Column(size = 9, gridTier = GridTier.Small) {
+                input(classes = "form-control", type = InputType.text) {
+                    id = fullNameId
+                    name = fullNameId
+                    value = userToModify.fullName
+                }
+            }
+        }
         for (role in Role.entries) {
             div(classes = "form-check form-switch") {
                 input(classes = "form-check-input", type = InputType.checkBox) {

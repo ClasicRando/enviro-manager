@@ -16,18 +16,14 @@ interface UsersDao {
 
     suspend fun getAll(): List<User>
 
-    suspend fun disableUser(userId: UserId)
+    suspend fun deactivateUser(userId: UserId)
 
-    suspend fun enableUser(userId: UserId)
-
-    suspend fun modifyRoles(
-        userId: UserId,
-        roles: List<Role>,
-    )
+    suspend fun activateUser(userId: UserId)
 
     suspend fun updateUser(
         userId: UserId,
         username: String,
         fullName: String,
+        roles: List<Role>,
     )
 }

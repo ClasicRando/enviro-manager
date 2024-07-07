@@ -3,6 +3,7 @@ package com.github.clasicrando.web.component
 import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxInclude
 import com.github.clasicrando.web.htmx.hxPost
+import com.github.clasicrando.web.htmx.hxPut
 import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxVals
 import kotlinx.html.ButtonType
@@ -31,7 +32,7 @@ import kotlinx.serialization.json.jsonObject
 private const val MODAL_CONTAINER_ID = "modals"
 const val ADD_MODAL_TARGET = "#$MODAL_CONTAINER_ID"
 const val MODAL_ERROR_MESSAGE_ID = "modalErrorMessage"
-const val CREATE_MODAL_FORM_ID = "createForm"
+const val CREATE_OR_UPDATE_MODAL_FORM_ID = "createOrUpdateForm"
 
 @Component
 fun FlowContent.ModalContainer() {
@@ -47,6 +48,61 @@ enum class ModalSize(
     Default(""),
     Large("modal-lg"),
     ExtraLarge("modal-xl"),
+}
+
+@Component
+inline fun <T, C : TagConsumer<T>> C.CreateOrUpdateModal(
+    id: String,
+    title: String,
+    putUrl: String,
+    target: String,
+    modalSize: ModalSize = ModalSize.Default,
+    extraValues: Map<String, JsonElement> = mapOf(),
+    crossinline form: FORM.() -> Unit,
+) {
+    val map = extraValues.plus("modalId" to JsonPrimitive(id))
+    val values = Json.encodeToString(JsonObject(map))
+    Modal(
+        id = id,
+        title = title,
+        modalSize = modalSize,
+        buttons = {
+            button(classes = "btn btn-secondary", type = ButtonType.button) {
+                hxPut = putUrl
+                hxInclude = "#$CREATE_OR_UPDATE_MODAL_FORM_ID"
+                hxVals(values)
+                hxTarget = target
+                htmxJsonEncoding = true
+                +"Confirm"
+            }
+        },
+    ) {
+        form {
+            this.id = CREATE_OR_UPDATE_MODAL_FORM_ID
+            form()
+        }
+    }
+}
+
+@Component
+inline fun <T, C : TagConsumer<T>, reified V : Any> C.CreateOrUpdateModalWithExtraValues(
+    id: String,
+    title: String,
+    putUrl: String,
+    target: String,
+    modalSize: ModalSize = ModalSize.Default,
+    extraValues: V,
+    crossinline form: FORM.() -> Unit,
+) {
+    CreateOrUpdateModal(
+        id = id,
+        title = title,
+        putUrl = putUrl,
+        target = target,
+        modalSize = modalSize,
+        extraValues = Json.encodeToJsonElement(extraValues).jsonObject,
+        form = form,
+    )
 }
 
 @Component
@@ -68,7 +124,7 @@ inline fun <T, C : TagConsumer<T>> C.CreateModal(
         buttons = {
             button(classes = "btn btn-secondary", type = ButtonType.button) {
                 hxPost = postUrl
-                hxInclude = "#$CREATE_MODAL_FORM_ID"
+                hxInclude = "#$CREATE_OR_UPDATE_MODAL_FORM_ID"
                 hxVals(values)
                 hxTarget = target
                 htmxJsonEncoding = true
@@ -77,7 +133,7 @@ inline fun <T, C : TagConsumer<T>> C.CreateModal(
         },
     ) {
         form {
-            this.id = CREATE_MODAL_FORM_ID
+            this.id = CREATE_OR_UPDATE_MODAL_FORM_ID
             form()
         }
     }

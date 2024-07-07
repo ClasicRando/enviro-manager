@@ -5,7 +5,7 @@ import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.UserId
 import com.github.clasicrando.users.model.UserIdJson
 import com.github.clasicrando.web.adminUserOrRespondHtmxError
-import com.github.clasicrando.web.component.ModifyRolesModal
+import com.github.clasicrando.web.component.ModifyUserModal
 import com.github.clasicrando.web.component.User
 import com.github.clasicrando.web.htmx.respondHtmx
 import io.ktor.server.application.call
@@ -13,6 +13,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kotlinx.html.tbody
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -32,12 +33,10 @@ import org.kodein.di.ktor.closestDI
 fun Route.users() =
     route("/users") {
         getAllUsers()
-        disableUser()
-        enableUser()
-        route("/roles") {
-            modifyUserRolesModal()
-            modifyRoles()
-        }
+        deactivateUser()
+        activateUser()
+        modifyUserModal()
+        modifyUser()
     }
 
 fun Route.getAllUsers() =
@@ -58,35 +57,35 @@ fun Route.getAllUsers() =
         }
     }
 
-fun Route.disableUser() =
-    post("/disable") {
+fun Route.deactivateUser() =
+    post("/deactivate") {
         val usersDao: UsersDao by closestDI().instance()
         call.adminUserOrRespondHtmxError(usersDao) ?: return@post
 
-        val userToDisable = call.receive<UserIdJson>().userId
-        usersDao.disableUser(userToDisable)
+        val userToDeactivate = call.receive<UserIdJson>().userId
+        usersDao.deactivateUser(userToDeactivate)
 
         call.respondHtmx {
-            addCreateToastEvent("User Disabled")
+            addCreateToastEvent("User Deactivated")
             addRefreshDataEvent()
         }
     }
 
-fun Route.enableUser() =
-    post("/enable") {
+fun Route.activateUser() =
+    post("/activate") {
         val usersDao: UsersDao by closestDI().instance()
         call.adminUserOrRespondHtmxError(usersDao) ?: return@post
 
         val userToEnable = call.receive<UserIdJson>().userId
-        usersDao.enableUser(userToEnable)
+        usersDao.activateUser(userToEnable)
 
         call.respondHtmx {
-            addCreateToastEvent("User Enabled")
+            addCreateToastEvent("User Activated")
             addRefreshDataEvent()
         }
     }
 
-fun Route.modifyUserRolesModal() =
+fun Route.modifyUserModal() =
     post("/modify") {
         val usersDao: UsersDao by closestDI().instance()
         call.adminUserOrRespondHtmxError(usersDao) ?: return@post
@@ -98,7 +97,7 @@ fun Route.modifyUserRolesModal() =
 
         call.respondHtmx {
             addHtml {
-                ModifyRolesModal(userToModify)
+                ModifyUserModal(userToModify)
             }
         }
     }
@@ -107,6 +106,8 @@ fun Route.modifyUserRolesModal() =
 data class ModifyUserRolesRequest(
     val userId: UserId,
     val modalId: String,
+    val username: String,
+    val fullName: String,
     val roles: List<Role>,
 ) {
     companion object : KSerializer<ModifyUserRolesRequest> {
@@ -114,6 +115,8 @@ data class ModifyUserRolesRequest(
             buildClassSerialDescriptor(serialName = "ModifyUserRolesRequest") {
                 element<UserId>(elementName = "userId")
                 element<String>(elementName = "modalId")
+                element<String>(elementName = "username")
+                element<String>(elementName = "fullName")
                 for (role in Role.entries) {
                     element<String>(elementName = role.name, isOptional = true)
                 }
@@ -145,12 +148,16 @@ data class ModifyUserRolesRequest(
             decoder.decodeStructure(descriptor) {
                 var userId: UserId? = null
                 var modalId: String? = null
+                var username: String? = null
+                var fullName: String? = null
                 val roles = mutableListOf<Role>()
 
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
                         0 -> userId = decodeSerializableElement(descriptor, 0, UserId.serializer())
                         1 -> modalId = decodeStringElement(descriptor, 1)
+                        2 -> username = decodeStringElement(descriptor, 2)
+                        3 -> fullName = decodeStringElement(descriptor, 3)
                         CompositeDecoder.DECODE_DONE -> break
                         else -> {
                             val on = decodeStringElement(descriptor, index)
@@ -165,22 +172,29 @@ data class ModifyUserRolesRequest(
                 ModifyUserRolesRequest(
                     userId = userId ?: error("Missing 'userId' value in request body"),
                     modalId = modalId ?: error("Missing 'modalId' value in request body"),
+                    username = username ?: error("Missing 'username' value in request body"),
+                    fullName = fullName ?: error("Missing 'fullName' value in request body"),
                     roles = roles,
                 )
             }
     }
 }
 
-fun Route.modifyRoles() =
-    post {
+fun Route.modifyUser() =
+    put {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+        call.adminUserOrRespondHtmxError(usersDao) ?: return@put
         val data = call.receive<ModifyUserRolesRequest>()
 
-        usersDao.modifyRoles(data.userId, data.roles)
+        usersDao.updateUser(
+            userId = data.userId,
+            username = data.username,
+            fullName = data.fullName,
+            roles = data.roles,
+        )
 
         call.respondHtmx {
-            addCreateToastEvent("User Roles Modified!")
+            addCreateToastEvent("User Modified!")
             addModalCloseEvent(data.modalId)
             addRefreshDataEvent()
         }

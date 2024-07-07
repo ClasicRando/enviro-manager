@@ -13,6 +13,17 @@ const val MAIN_CONTENT_ID = "main"
 const val MAIN_CONTENT_TARGET = "#$MAIN_CONTENT_ID"
 const val NO_DISPLAY_ELEMENT_TARGET = "#noDisplay"
 
+enum class GridTier(
+    val cssName: String,
+) {
+    ExtraSmall(""),
+    Small("sm"),
+    Medium("md"),
+    Large("lg"),
+    ExtraLarge("xl"),
+    ExtraExtraLarge("xxl"),
+}
+
 suspend fun ApplicationCall.userSessionOrRedirect(): UserSession? {
     val userSession = sessions.get<UserSession>()
     if (userSession == null) {
