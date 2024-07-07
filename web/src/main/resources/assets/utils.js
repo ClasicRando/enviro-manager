@@ -150,7 +150,7 @@ window.addEventListener('htmx:responseError', (e) => {
     if (request === null) return;
     const event = new Event('createToast');
     event.detail = {
-        value: request.responseText
+        message: request.responseText
             ? `${request.statusText} - ${request.responseText}`
             : request.statusText
     };
