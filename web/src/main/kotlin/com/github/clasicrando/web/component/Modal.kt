@@ -2,6 +2,7 @@ package com.github.clasicrando.web.component
 
 import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxInclude
+import com.github.clasicrando.web.htmx.hxPatch
 import com.github.clasicrando.web.htmx.hxPost
 import com.github.clasicrando.web.htmx.hxPut
 import com.github.clasicrando.web.htmx.hxTarget
@@ -33,6 +34,7 @@ private const val MODAL_CONTAINER_ID = "modals"
 const val ADD_MODAL_TARGET = "#$MODAL_CONTAINER_ID"
 const val MODAL_ERROR_MESSAGE_ID = "modalErrorMessage"
 const val CREATE_OR_UPDATE_MODAL_FORM_ID = "createOrUpdateForm"
+const val UPDATE_MODAL_FORM_ID = "updateForm"
 
 @Component
 fun FlowContent.ModalContainer() {
@@ -153,6 +155,61 @@ inline fun <T, C : TagConsumer<T>, reified V : Any> C.CreateModalWithExtraValues
         id = id,
         title = title,
         postUrl = postUrl,
+        target = target,
+        modalSize = modalSize,
+        extraValues = Json.encodeToJsonElement(extraValues).jsonObject,
+        form = form,
+    )
+}
+
+@Component
+inline fun <T, C : TagConsumer<T>> C.UpdateModal(
+    id: String,
+    title: String,
+    patchUrl: String,
+    target: String,
+    modalSize: ModalSize = ModalSize.Default,
+    extraValues: Map<String, JsonElement> = mapOf(),
+    crossinline form: FORM.() -> Unit,
+) {
+    val map = extraValues.plus("modalId" to JsonPrimitive(id))
+    val values = Json.encodeToString(JsonObject(map))
+    Modal(
+        id = id,
+        title = title,
+        modalSize = modalSize,
+        buttons = {
+            button(classes = "btn btn-secondary", type = ButtonType.button) {
+                hxPatch = patchUrl
+                hxInclude = "#$UPDATE_MODAL_FORM_ID"
+                hxVals(values)
+                hxTarget = target
+                htmxJsonEncoding = true
+                +"Confirm"
+            }
+        },
+    ) {
+        form {
+            this.id = UPDATE_MODAL_FORM_ID
+            form()
+        }
+    }
+}
+
+@Component
+inline fun <T, C : TagConsumer<T>, reified V : Any> C.UpdateModalWithExtraValues(
+    id: String,
+    title: String,
+    patchUrl: String,
+    target: String,
+    modalSize: ModalSize = ModalSize.Default,
+    extraValues: V,
+    crossinline form: FORM.() -> Unit,
+) {
+    UpdateModal(
+        id = id,
+        title = title,
+        patchUrl = patchUrl,
         target = target,
         modalSize = modalSize,
         extraValues = Json.encodeToJsonElement(extraValues).jsonObject,

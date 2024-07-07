@@ -26,4 +26,9 @@ interface UsersDao {
         fullName: String,
         roles: List<Role>,
     )
+
+    suspend fun resetPassword(
+        userId: UserId,
+        newPassword: String,
+    )
 }

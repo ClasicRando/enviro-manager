@@ -1,5 +1,6 @@
 package com.github.clasicrando.web.htmx
 
+import com.github.clasicrando.web.component.MODAL_ERROR_MESSAGE_ID
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
@@ -37,6 +38,12 @@ class HtmxResponseBuilder {
 
     fun addModalCloseEvent(modalId: String) {
         triggers["closeModal"] = JsonObject(mapOf("id" to JsonPrimitive(modalId)))
+    }
+
+    fun addModalErrorMessage(message: String) {
+        target = "#$MODAL_ERROR_MESSAGE_ID"
+        swap = HxSwap(swapType = SwapType.InnerHtml)
+        responseContent = message
     }
 
     private fun finishTriggers() {

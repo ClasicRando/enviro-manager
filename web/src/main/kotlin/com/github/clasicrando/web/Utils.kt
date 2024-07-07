@@ -1,9 +1,12 @@
 package com.github.clasicrando.web
 
 import com.github.clasicrando.users.data.UsersDao
+import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
+import com.github.clasicrando.web.component.BasePage
 import com.github.clasicrando.web.htmx.respondHtmx
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.html.respondHtml
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.sessions.get
@@ -55,9 +58,36 @@ suspend fun ApplicationCall.adminUserOrRespondHtmxError(dao: UsersDao): User? {
         return null
     }
     val user = dao.getById(userId = userSession.userId)
-    if (user == null) {
+    if (user == null || !user.hasRole(Role.Admin)) {
         respondHtmx {
             addCreateToastEvent(NON_ADMIN_ERROR_MESSAGE)
+        }
+        return null
+    }
+    return user
+}
+
+suspend fun ApplicationCall.adminUserOrRespondMaybeHtmxError(dao: UsersDao): User? {
+    val userSession = sessions.get<UserSession>()
+    if (userSession == null) {
+        respondRedirect("/login")
+        return null
+    }
+    val user = dao.getById(userId = userSession.userId)
+    if (user == null || !user.hasRole(Role.Admin)) {
+        if (shouldRespondHtmx) {
+            respondHtmx {
+                addCreateToastEvent(NON_ADMIN_ERROR_MESSAGE)
+            }
+        } else {
+            respondHtml {
+                BasePage(user = user) {
+                    +(
+                        "You are trying to access an admin only page as a non-admin user. " +
+                            "Naughty, Naughty"
+                    )
+                }
+            }
         }
         return null
     }
@@ -67,3 +97,5 @@ suspend fun ApplicationCall.adminUserOrRespondHtmxError(dao: UsersDao): User? {
 val ApplicationRequest.isHtmx: Boolean get() = this.headers.contains("HX-Request")
 
 val ApplicationRequest.isBoost: Boolean get() = this.headers.contains("HX-Boosted")
+
+val ApplicationCall.shouldRespondHtmx: Boolean get() = request.isHtmx && !request.isBoost

@@ -61,6 +61,7 @@ class PgUsersDao(
                         WHERE
                             u2.username = $1
                             AND u2.password = CRYPT($2, u2.password)
+                            AND u2.active
                         """.trimIndent(),
                     ).bind(loginRequest.username)
                     .bind(loginRequest.password)
@@ -130,6 +131,24 @@ class PgUsersDao(
                 it.updateUserDetails(userId = userId, username = username, fullName = fullName)
                 it.modifyRoles(userId = userId, roles = roles)
             }
+        }
+    }
+
+    override suspend fun resetPassword(
+        userId: UserId,
+        newPassword: String,
+    ) {
+        pool.useConnection { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    UPDATE em.users u
+                    SET password = crypt($1, gen_salt('bf'))
+                    WHERE u.user_id = $2
+                    """.trimIndent(),
+                ).bind(newPassword)
+                .bind(userId.value)
+                .executeClosing()
         }
     }
 

@@ -6,14 +6,15 @@ import com.github.clasicrando.users.model.UserId
 import com.github.clasicrando.users.model.UserIdJson
 import com.github.clasicrando.web.adminUserOrRespondHtmxError
 import com.github.clasicrando.web.component.ModifyUserModal
+import com.github.clasicrando.web.component.ResetPasswordModal
 import com.github.clasicrando.web.component.User
 import com.github.clasicrando.web.htmx.respondHtmx
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
-import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kotlinx.html.tbody
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -37,6 +38,8 @@ fun Route.users() =
         activateUser()
         modifyUserModal()
         modifyUser()
+        resetPasswordModal()
+        resetPassword()
     }
 
 fun Route.getAllUsers() =
@@ -181,9 +184,9 @@ data class ModifyUserRolesRequest(
 }
 
 fun Route.modifyUser() =
-    put {
+    patch {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@put
+        call.adminUserOrRespondHtmxError(usersDao) ?: return@patch
         val data = call.receive<ModifyUserRolesRequest>()
 
         usersDao.updateUser(
@@ -194,8 +197,54 @@ fun Route.modifyUser() =
         )
 
         call.respondHtmx {
-            addCreateToastEvent("User Modified!")
+            addCreateToastEvent("User modified!")
             addModalCloseEvent(data.modalId)
             addRefreshDataEvent()
+        }
+    }
+
+fun Route.resetPasswordModal() =
+    post("/reset-password") {
+        val usersDao: UsersDao by closestDI().instance()
+        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+
+        val userIdToModify = call.receive<UserIdJson>().userId
+        val userToModify =
+            usersDao.getById(userIdToModify)
+                ?: error("Could not find user to modify in the database")
+
+        call.respondHtmx {
+            addHtml {
+                ResetPasswordModal(userToModify)
+            }
+        }
+    }
+
+@Serializable
+data class UserPasswordResetRequest(
+    val modalId: String,
+    val userId: UserId,
+    val password: String,
+    val confirmPassword: String,
+)
+
+fun Route.resetPassword() =
+    patch("/reset-password") {
+        val usersDao: UsersDao by closestDI().instance()
+        call.adminUserOrRespondHtmxError(usersDao) ?: return@patch
+        val data = call.receive<UserPasswordResetRequest>()
+
+        if (data.password != data.confirmPassword) {
+            call.respondHtmx {
+                addModalErrorMessage("Password's did not match")
+            }
+            return@patch
+        }
+
+        usersDao.resetPassword(userId = data.userId, newPassword = data.password)
+
+        call.respondHtmx {
+            addCreateToastEvent("User password reset!")
+            addModalCloseEvent(data.modalId)
         }
     }

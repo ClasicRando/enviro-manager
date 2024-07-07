@@ -18,6 +18,7 @@ import kotlinx.html.div
 import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.label
+import kotlinx.html.p
 import kotlinx.html.role
 import kotlinx.html.td
 import kotlinx.html.th
@@ -67,6 +68,8 @@ fun TBODY.User(user: User) {
                     icon = "fa-rotate-right",
                     requestBody = userIdJson,
                     httpMethod = HttpMethod.Post,
+                    target = ADD_MODAL_TARGET,
+                    swap = HxSwap(swapType = SwapType.BeforeEnd),
                 )
                 RowActionWithValue(
                     title = "Deactivate User",
@@ -94,10 +97,10 @@ fun TBODY.User(user: User) {
 fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
     val usernameId = "username"
     val fullNameId = "fullName"
-    CreateOrUpdateModalWithExtraValues(
+    UpdateModalWithExtraValues(
         id = "modifyUserModal",
         title = "Modify User",
-        putUrl = apiV1Url("/users"),
+        patchUrl = apiV1Url("/users"),
         target = NO_DISPLAY_ELEMENT_TARGET,
         extraValues = UserIdJson(userToModify.userId),
     ) {
@@ -144,6 +147,51 @@ fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
                 label(classes = "form-check-label") {
                     htmlFor = role.name
                     +role.name
+                }
+            }
+        }
+    }
+}
+
+@Component
+fun <T, C : TagConsumer<T>> C.ResetPasswordModal(userToModify: User) {
+    val passwordId = "password"
+    val confirmPasswordId = "confirmPassword"
+    UpdateModalWithExtraValues(
+        id = "resetUserPassword",
+        title = "Reset User Password",
+        patchUrl = apiV1Url("/users/reset-password"),
+        target = NO_DISPLAY_ELEMENT_TARGET,
+        extraValues = UserIdJson(userToModify.userId),
+    ) {
+        Row {
+            p { +"Username: ${userToModify.username}" }
+        }
+        Row {
+            Column(size = 3, gridTier = GridTier.Small) {
+                label(classes = "col-form-label") {
+                    htmlFor = passwordId
+                    +"New Password"
+                }
+            }
+            Column(size = 9, gridTier = GridTier.Small) {
+                input(classes = "form-control", type = InputType.password) {
+                    id = passwordId
+                    name = passwordId
+                }
+            }
+        }
+        Row {
+            Column(size = 3, gridTier = GridTier.Small) {
+                label(classes = "col-form-label") {
+                    htmlFor = confirmPasswordId
+                    +"Confirm New Password"
+                }
+            }
+            Column(size = 9, gridTier = GridTier.Small) {
+                input(classes = "form-control", type = InputType.password) {
+                    id = confirmPasswordId
+                    name = confirmPasswordId
                 }
             }
         }

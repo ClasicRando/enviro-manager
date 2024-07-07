@@ -4,7 +4,7 @@ import com.github.clasicrando.datasources.model.toDsId
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.UserSession
-import com.github.clasicrando.web.adminUserOrRespondHtmxError
+import com.github.clasicrando.web.adminUserOrRespondMaybeHtmxError
 import com.github.clasicrando.web.component.AdminDashboard
 import com.github.clasicrando.web.component.BasePage
 import com.github.clasicrando.web.component.CreateDataSourceContactForm
@@ -12,8 +12,7 @@ import com.github.clasicrando.web.component.DataSourceTableRefresh
 import com.github.clasicrando.web.component.DataSourceView
 import com.github.clasicrando.web.component.LoginForm
 import com.github.clasicrando.web.htmx.respondHtmx
-import com.github.clasicrando.web.isBoost
-import com.github.clasicrando.web.isHtmx
+import com.github.clasicrando.web.shouldRespondHtmx
 import com.github.clasicrando.web.userOrRedirect
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -29,8 +28,6 @@ import kotlinx.html.TagConsumer
 import kotlinx.html.p
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
-
-val ApplicationCall.shouldRespondHtmx: Boolean get() = request.isHtmx && !request.isBoost
 
 suspend inline fun ApplicationCall.respondMaybeHtmxPage(
     user: User? = null,
@@ -121,7 +118,7 @@ private fun Route.createDataSourceContact() =
 private fun Route.adminDashboard() =
     get("/admin-dashboard") {
         val usersDao: UsersDao by closestDI().instance()
-        val user = call.adminUserOrRespondHtmxError(dao = usersDao) ?: return@get
+        val user = call.adminUserOrRespondMaybeHtmxError(dao = usersDao) ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Admin Dashboard") {
             AdminDashboard()
         }
