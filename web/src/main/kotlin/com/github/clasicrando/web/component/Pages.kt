@@ -60,9 +60,7 @@ inline fun HTML.BasePage(
         div(classes = "toast-container top-0 end-0 p-3") {
             id = "toasts"
         }
-        div {
-            id = "modals"
-        }
+        ModalContainer()
         div(classes = "d-none") {
             id = "noDisplay"
         }

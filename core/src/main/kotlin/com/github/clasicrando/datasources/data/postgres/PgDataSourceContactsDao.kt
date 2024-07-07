@@ -5,11 +5,11 @@ import com.github.clasicrando.datasources.model.ContactId
 import com.github.clasicrando.datasources.model.DataSourceContact
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.requests.ModifyDataSourceContactRequest
+import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.executeClosing
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
-import io.github.clasicrando.kdbc.core.use
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -25,7 +25,7 @@ class PgDataSourceContactsDao(
         dsId: DsId,
         request: ModifyDataSourceContactRequest,
     ) {
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -46,7 +46,7 @@ class PgDataSourceContactsDao(
         contactId: ContactId,
         dsId: DsId,
     ) {
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -62,7 +62,7 @@ class PgDataSourceContactsDao(
     }
 
     override suspend fun getByDsId(dsId: DsId): List<DataSourceContact> =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -77,7 +77,7 @@ class PgDataSourceContactsDao(
         }
 
     override suspend fun getById(contactId: ContactId): DataSourceContact? =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -96,7 +96,7 @@ class PgDataSourceContactsDao(
         dsId: DsId,
         request: ModifyDataSourceContactRequest,
     ) {
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """

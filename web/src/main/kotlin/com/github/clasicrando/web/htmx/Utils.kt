@@ -18,8 +18,9 @@ private const val HX_INDICATOR = "hx-indicator"
 private const val HX_TARGET = "hx-target"
 private const val HX_PUSH_URL = "hx-push-url"
 private const val HX_VALS = "hx-vals"
-private const val HYPER_SCRIPT = "_"
+private const val HX_INCLUDE = "hx-include"
 private const val HX_EXT = "hx-ext"
+private const val HX_CONFIRM = "hx-confirm"
 private const val HTMX_JSON_ENCODING_EXT = "json-enc"
 
 var A.hxBoost: Boolean?
@@ -92,21 +93,21 @@ fun FlowContent.hxVals(json: String) {
     attributes[HX_VALS] = json
 }
 
-inline fun <reified T> FlowContent.hxVals(json: T) {
+inline fun <reified T : Any> FlowContent.hxVals(json: T) {
     hxVals(json, serializer())
 }
 
-fun <T> FlowContent.hxVals(
+fun <T : Any> FlowContent.hxVals(
     json: T,
     serializationStrategy: SerializationStrategy<T>,
 ) {
-    attributes[HX_VALS] = Json.encodeToString(serializationStrategy, json)
+    hxVals(Json.encodeToString(serializationStrategy, json))
 }
 
-var FlowContent.hyperscript: String?
-    get() = attributes[HYPER_SCRIPT]
+var FlowContent.hxInclude: String?
+    get() = attributes[HX_INCLUDE]
     set(value) {
-        value?.let { attributes[HYPER_SCRIPT] = value }
+        value?.let { attributes[HX_INCLUDE] = value }
     }
 
 var FlowContent.htmxJsonEncoding: Boolean
@@ -122,13 +123,13 @@ var FlowContent.htmxJsonEncoding: Boolean
         }
     }
 
+var FlowContent.hxConfirm: String?
+    get() = attributes[HX_CONFIRM]
+    set(value) {
+        value?.let { attributes[HX_CONFIRM] = value }
+    }
+
 fun FlowContent.confirmAction(message: String) {
-    hxTrigger = "confirmed"
-    val finalMessage = message.replace("'", "\\'")
-    hyperscript =
-        """
-        on click
-            call Swal.fire({title: 'Confirm', text:'$finalMessage'})
-            if result.isConfirmed trigger confirmed
-        """.trimIndent()
+    hxConfirm = message
+    attributes["confirm-with-dialog"] = "true"
 }

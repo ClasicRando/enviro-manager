@@ -1,7 +1,7 @@
 package com.github.clasicrando.database.build
 
 import com.github.clasicrando.di.bindDatabaseComponents
-import io.github.clasicrando.kdbc.core.use
+import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -17,7 +17,7 @@ val di =
 
 suspend fun main() {
     val pool: PgAsyncConnectionPool by di.instance()
-    pool.acquire().use {
+    pool.useConnection {
         try {
             val builder = PgDatabaseBuilder(it)
             builder.buildDatabase()

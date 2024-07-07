@@ -1,7 +1,6 @@
 package com.github.clasicrando.web.component
 
 import com.github.clasicrando.datasources.model.DataSource
-import com.github.clasicrando.datasources.model.DataSourceContact
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
@@ -418,32 +417,4 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
             }
         },
     )
-}
-
-@Component
-fun TBODY.DataSourceContact(contact: DataSourceContact) {
-    tr {
-        dataCell(contact.contactId)
-        dataCell(contact.name)
-        dataCell(contact.email)
-        dataCell(contact.website)
-        dataCell(contact.type)
-        dataCell(contact.notes)
-        td {
-            RowAction(
-                title = "Edit",
-                url = apiV1Url("/data-sources/${contact.dsId}/contacts/${contact.contactId}/edit"),
-                icon = "fa-edit",
-                httpMethod = HttpMethod.Get,
-            )
-            RowAction(
-                title = "Delete",
-                url = apiV1Url("/data-sources/${contact.dsId}/contacts/${contact.contactId}"),
-                icon = "fa-trash",
-                httpMethod = HttpMethod.Delete,
-                confirmMessage =
-                    "Are you sure you want to delete this data source contact?",
-            )
-        }
-    }
 }

@@ -1,5 +1,6 @@
 const CLASS_NAME_SHOW = 'show';
 const ATTRIBUTE_NAME_POPPER = 'data-bs-popper';
+const MODALS = 'modals';
 
 /** @type {(classList: DOMTokenList) => Array<string>} */
 const filterIconClassList = (classList) => {
@@ -173,7 +174,7 @@ document.addEventListener('closeModal', (e) => {
 });
 
 document.addEventListener('createToast', (e) => {
-    const message = e.detail?.value;
+    const message = e.detail?.message;
     if (typeof message !== "string") {
         console.log('Could not create toast', e);
     }
@@ -194,7 +195,7 @@ document.addEventListener('refreshData', () => {
 
 /** @type {(element: HTMLElement) => void} */
 window.closeModal = (element) => {
-    const container = document.getElementById('modals');
+    const container = document.getElementById(MODALS);
     const modal = element.classList.contains('modal') ? element : element.closest('.modal');
     if (!modal) {
         console.warn('Could not find modal to close');
@@ -203,11 +204,13 @@ window.closeModal = (element) => {
     const modalBackdrop = document.getElementById(`${modal.id}-backdrop`);
 
     modal.classList.remove(CLASS_NAME_SHOW);
-    modalBackdrop.classList.remove(CLASS_NAME_SHOW);
+    modalBackdrop?.classList?.remove(CLASS_NAME_SHOW);
 
     setTimeout(() => {
         container.removeChild(modal);
-        container.removeChild(modalBackdrop);
+        if (modalBackdrop) {
+            container.removeChild(modalBackdrop);
+        }
     }, 200);
 }
 
@@ -310,14 +313,19 @@ class Toast {
     }
 }
 
-/** @type {(button: HTMLButtonElement) => void} */
-window.removeJobScheduleEntry = (button) => {
-    const row = button.closest('.schedule-entry');
-    row?.remove();
-};
+document.addEventListener('htmx:confirm', (e) => {
+    if (!e.target.matches("[confirm-with-dialog='true']")) {
+        return;
+    }
 
-/** @type {(button: HTMLButtonElement) => void} */
-window.removeWorkflowTask = (button) => {
-    const row = button.closest('.workflow-task-item');
-    row?.remove();
-};
+    e.preventDefault();
+    Swal.fire({
+        title: 'Confirm',
+        text: e.detail.question,
+        showCancelButton: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            e.detail.issueRequest(true);
+        }
+    });
+});

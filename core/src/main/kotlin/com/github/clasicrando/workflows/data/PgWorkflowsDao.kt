@@ -2,10 +2,10 @@ package com.github.clasicrando.workflows.data
 
 import com.github.clasicrando.workflows.model.Workflow
 import com.github.clasicrando.workflows.model.WorkflowId
+import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
-import io.github.clasicrando.kdbc.core.use
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -18,7 +18,7 @@ class PgWorkflowsDao(
     private val pool: PgAsyncConnectionPool by di.instance()
 
     override suspend fun getAll(): List<Workflow> =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -29,7 +29,7 @@ class PgWorkflowsDao(
         }
 
     override suspend fun getById(id: WorkflowId): Workflow? =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """

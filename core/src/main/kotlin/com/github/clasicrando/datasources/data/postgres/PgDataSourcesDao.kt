@@ -5,11 +5,11 @@ import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.model.UserId
+import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.executeClosing
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
-import io.github.clasicrando.kdbc.core.use
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -22,7 +22,7 @@ class PgDataSourcesDao(
     private val pool: PgAsyncConnectionPool by di.instance()
 
     override suspend fun getById(dsId: DsId): DataSource? =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -40,7 +40,7 @@ class PgDataSourcesDao(
         }
 
     override suspend fun getAll(): List<DataSource> =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -60,7 +60,7 @@ class PgDataSourcesDao(
         dsId: DsId,
         request: UpdateDateSourceRequest,
     ) {
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """

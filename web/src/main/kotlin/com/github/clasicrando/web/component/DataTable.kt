@@ -139,12 +139,12 @@ fun <T> TBODY.rowWithDetails(
     )
 }
 
-fun <T> TBODY.detailsTable(
+inline fun <T> TBODY.detailsTable(
     detailId: String,
     columnCount: Int,
     items: List<T>,
-    header: THEAD.() -> Unit,
-    rowBuilder: TBODY.(T) -> Unit,
+    crossinline header: THEAD.() -> Unit,
+    crossinline rowBuilder: TBODY.(T) -> Unit,
 ) {
     tr(classes = "d-none") {
         id = detailId

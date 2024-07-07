@@ -3,10 +3,10 @@ package com.github.clasicrando.datasources.data.postgres
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.datasources.model.RecordWarehouseTypeId
+import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
-import io.github.clasicrando.kdbc.core.use
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -19,7 +19,7 @@ class PgRecordWarehouseTypeDao(
     private val pool: PgAsyncConnectionPool by di.instance()
 
     override suspend fun getAll(): List<RecordWarehouseType> =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -30,7 +30,7 @@ class PgRecordWarehouseTypeDao(
         }
 
     override suspend fun getById(id: RecordWarehouseTypeId): RecordWarehouseType? =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """

@@ -20,6 +20,7 @@ import kotlinx.serialization.json.JsonPrimitive
 class HtmxResponseBuilder {
     private val triggers: MutableMap<String, JsonElement> = mutableMapOf()
     var triggerData: JsonObject? = null
+        private set
     var target: String? = null
     var swap: HxSwap? = null
     var redirect: String? = null
@@ -27,11 +28,15 @@ class HtmxResponseBuilder {
     var responseContent: String = ""
 
     fun addCreateToastEvent(message: String) {
-        triggers["createToast"] = JsonPrimitive(message)
+        triggers["createToast"] = JsonObject(mapOf("message" to JsonPrimitive(message)))
     }
 
     fun addRefreshDataEvent() {
         triggers["refreshData"] = JsonNull
+    }
+
+    fun addModalCloseEvent(modalId: String) {
+        triggers["closeModal"] = JsonObject(mapOf("id" to JsonPrimitive(modalId)))
     }
 
     private fun finishTriggers() {

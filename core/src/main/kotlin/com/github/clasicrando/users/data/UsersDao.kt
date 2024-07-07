@@ -20,14 +20,9 @@ interface UsersDao {
 
     suspend fun enableUser(userId: UserId)
 
-    suspend fun addRoles(
+    suspend fun modifyRoles(
         userId: UserId,
         roles: List<Role>,
-    )
-
-    suspend fun revokeRole(
-        userId: UserId,
-        role: Role,
     )
 
     suspend fun updateUser(

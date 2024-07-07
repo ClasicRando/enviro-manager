@@ -4,12 +4,12 @@ import com.github.clasicrando.requests.LoginRequest
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.users.model.UserId
+import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.executeClosing
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
 import io.github.clasicrando.kdbc.core.query.fetchScalar
-import io.github.clasicrando.kdbc.core.use
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import kotlinx.uuid.UUID
 import org.kodein.di.DI
@@ -23,7 +23,7 @@ class PgUsersDao(
     private val pool: PgAsyncConnectionPool by di.instance()
 
     override suspend fun getById(userId: UserId): User? =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -36,7 +36,7 @@ class PgUsersDao(
         }
 
     override suspend fun getByUsername(username: String): User? =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -50,7 +50,7 @@ class PgUsersDao(
 
     override suspend fun validateUser(loginRequest: LoginRequest): UserId? {
         val rawValue =
-            pool.acquire().use { conn ->
+            pool.useConnection { conn ->
                 conn
                     .createPreparedQuery(
                         """
@@ -68,7 +68,7 @@ class PgUsersDao(
     }
 
     override suspend fun getWithRole(role: Role): List<User> =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -83,7 +83,7 @@ class PgUsersDao(
         }
 
     override suspend fun getAll(): List<User> =
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -97,7 +97,7 @@ class PgUsersDao(
         userId: UserId,
         isEnabled: Boolean,
     ) {
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
@@ -117,42 +117,35 @@ class PgUsersDao(
     override suspend fun enableUser(userId: UserId) =
         updateUserIsEnabled(userId = userId, isEnabled = true)
 
-    override suspend fun addRoles(
+    override suspend fun modifyRoles(
         userId: UserId,
         roles: List<Role>,
     ) {
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
-                    insert into em.user_roles(user_id, role)
-                    select u.user_id, r.description
-                    from em.users u
-                    cross join unnest($1) r(description)
-                    where u.user_id = $2
-                    on conflict (user_id, role) do nothing;
+                    merge into em.user_roles as u
+                    using (
+                        select
+                            u.user_id, coalesce(ur.role, r.description) role,
+                            r.description IS NULL as revoke_role
+                        from em.users u
+                        left join em.user_roles ur on u.user_id = ur.user_id
+                        left join lateral unnest($1::text[]) r(description) on true
+                        where u.user_id = $2
+                    ) t
+                    on (u.user_id = t.user_id and u.role = t.role)
+                    when matched and t.revoke_role then
+                        delete
+                    when matched and not t.revoke_role then
+                        do nothing
+                    when not matched then
+                        insert(user_id, role)
+                        values(t.user_id, t.role);
                     """.trimIndent(),
                 ).bind(roles.map { it.dbValue })
                 .bind(userId.value)
-                .executeClosing()
-        }
-    }
-
-    override suspend fun revokeRole(
-        userId: UserId,
-        role: Role,
-    ) {
-        pool.acquire().use { conn ->
-            conn
-                .createPreparedQuery(
-                    """
-                    delete from em.user_roles ur
-                    where
-                        ur.user_id = $1
-                        and ur.role = $2;
-                    """.trimIndent(),
-                ).bind(userId.value)
-                .bind(role.dbValue)
                 .executeClosing()
         }
     }
@@ -162,7 +155,7 @@ class PgUsersDao(
         username: String,
         fullName: String,
     ) {
-        pool.acquire().use { conn ->
+        pool.useConnection { conn ->
             conn
                 .createPreparedQuery(
                     """
