@@ -1,6 +1,7 @@
 package com.github.clasicrando.web
 
 import com.github.clasicrando.di.bindDaoComponents
+import com.github.clasicrando.di.cleanUpResources
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.web.api.authenticatedApi
@@ -35,6 +36,7 @@ import io.ktor.server.routing.routing
 import io.ktor.server.sessions.SessionStorage
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -154,6 +156,8 @@ fun Application.module() {
         }
     }
     environment.monitor.subscribe(ApplicationStopped) {
+        val di by closestDI()
+        runBlocking { di.cleanUpResources() }
         serverLogger.atInfo {
             message = "Server is shutting down"
         }

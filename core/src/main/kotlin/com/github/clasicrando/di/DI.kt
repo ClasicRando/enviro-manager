@@ -30,6 +30,7 @@ fun DI.MainBuilder.bindDatabaseComponents() {
             password =
                 System.getenv("EM_DB_PASSWORD")
                     ?: error("Missing EM_DB_PASSWORD env parameter"),
+            applicationName = "EnviroManager Web",
         )
     }
     bindEagerSingleton<PgAsyncConnectionPool> {
@@ -59,4 +60,9 @@ fun DI.MainBuilder.bindDaoComponents() {
     bindProvider<DataSourceContactsDao> {
         PgDataSourceContactsDao(di)
     }
+}
+
+suspend fun DI.cleanUpResources() {
+    val connectionPool by this.instance<PgAsyncConnectionPool>()
+    connectionPool.close()
 }
