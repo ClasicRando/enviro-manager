@@ -11,6 +11,7 @@ import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
+import kotlinx.html.p
 
 const val MAIN_CONTENT_ID = "main"
 const val MAIN_CONTENT_TARGET = "#$MAIN_CONTENT_ID"
@@ -82,10 +83,12 @@ suspend fun ApplicationCall.adminUserOrRespondMaybeHtmxError(dao: UsersDao): Use
         } else {
             respondHtml {
                 BasePage(user = user) {
-                    +(
-                        "You are trying to access an admin only page as a non-admin user. " +
-                            "Naughty, Naughty"
-                    )
+                    p {
+                        +(
+                            "You are trying to access an admin only page as a non-admin user. " +
+                                "Naughty, Naughty"
+                        )
+                    }
                 }
             }
         }
