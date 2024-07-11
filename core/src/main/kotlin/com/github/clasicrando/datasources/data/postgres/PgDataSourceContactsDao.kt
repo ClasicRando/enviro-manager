@@ -33,11 +33,11 @@ class PgDataSourceContactsDao(
                     values ($1, $2, $3, $4, $5, $6)
                     """.trimIndent(),
                 ).bind(dsId.value)
-                .bind(request.name)
-                .bind(request.email.takeIf { it.isNotBlank() })
-                .bind(request.website.takeIf { it.isNotBlank() })
-                .bind(request.type.takeIf { it.isNotBlank() })
-                .bind(request.notes.takeIf { it.isNotBlank() })
+                .bind(request.name.trim())
+                .bind(request.email.trim().takeIf { it.isNotBlank() })
+                .bind(request.website.trim().takeIf { it.isNotBlank() })
+                .bind(request.type.trim().takeIf { it.isNotBlank() })
+                .bind(request.notes.trim().takeIf { it.isNotBlank() })
                 .executeClosing()
         }
     }
@@ -113,11 +113,11 @@ class PgDataSourceContactsDao(
                     """.trimIndent(),
                 ).bind(contactId.value)
                 .bind(dsId.value)
-                .bind(request.name)
-                .bind(request.email.takeIf { it.isNotBlank() })
-                .bind(request.website.takeIf { it.isNotBlank() })
-                .bind(request.type.takeIf { it.isNotBlank() })
-                .bind(request.notes.takeIf { it.isNotBlank() })
+                .bind(request.name.trim())
+                .bind(request.email.trim().takeIf { it.isNotBlank() })
+                .bind(request.website.trim().takeIf { it.isNotBlank() })
+                .bind(request.type.trim().takeIf { it.isNotBlank() })
+                .bind(request.notes.trim().takeIf { it.isNotBlank() })
                 .executeClosing()
         }
     }

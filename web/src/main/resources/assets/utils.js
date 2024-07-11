@@ -2,6 +2,8 @@ const CLASS_NAME_SHOW = 'show';
 const ATTRIBUTE_NAME_POPPER = 'data-bs-popper';
 const MODALS = 'modals';
 
+htmx.config.globalViewTransitions = true;
+
 /** @type {(classList: DOMTokenList) => Array<string>} */
 const filterIconClassList = (classList) => {
     return Array.from(classList.values()).filter(c => c.startsWith('fa-') && c !== 'fa-solid')

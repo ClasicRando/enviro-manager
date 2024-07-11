@@ -9,4 +9,11 @@ data class UserPasswordResetRequest(
     val userId: UserId,
     val password: String,
     val confirmPassword: String,
-)
+) : ApiRequest {
+    override fun validate(): String? {
+        if (password == confirmPassword) {
+            return null
+        }
+        return "Passwords must match"
+    }
+}

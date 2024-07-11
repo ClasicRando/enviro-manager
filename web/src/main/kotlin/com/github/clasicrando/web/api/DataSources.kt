@@ -9,11 +9,11 @@ import com.github.clasicrando.requests.ModifyDataSourceContactRequest
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
+import com.github.clasicrando.web.component.CreateOrUpdateDataSourceContactModal
 import com.github.clasicrando.web.component.DataSource
 import com.github.clasicrando.web.component.DataSourceContact
 import com.github.clasicrando.web.component.DataSourceDisplay
 import com.github.clasicrando.web.component.DataSourceEditForm
-import com.github.clasicrando.web.component.EditDataSourceContactForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.userSessionOrRedirect
 import com.github.clasicrando.workflows.data.WorkflowsDao
@@ -23,7 +23,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
-import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.util.getOrFail
 import kotlinx.html.tbody
@@ -39,10 +39,10 @@ fun Route.dataSources() =
             editDataSource()
             route("/contacts") {
                 contacts()
-                createContact()
+                createContactModal()
+                createOrEditContact()
                 route("/{contactId}") {
-                    editContactForm()
-                    editContact()
+                    editContactModal()
                     deleteContact()
                 }
             }
@@ -116,18 +116,24 @@ private fun Route.editDataSource() =
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val user = call.userSessionOrRedirect() ?: return@patch
         val request = call.receive<UpdateDateSourceRequest>()
+        request.validate()?.let { issue ->
+            call.respondHtmx {
+                addCreateToastEvent("Error: $issue")
+            }
+            return@patch
+        }
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
         dataSourcesDao.update(user.userId, dsId, request)
         call.respondHtmx {
             addCreateToastEvent("Updated data source, id = $dsId")
-            addLoadProxy(apiV1Url("/data-sources/$dsId"))
+            redirect = "/data-sources/$dsId"
         }
     }
 
 private fun Route.contacts() =
     get {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val user = call.userSessionOrRedirect() ?: return@get
+        call.userSessionOrRedirect() ?: return@get
         val dataSourceContactsDao: DataSourceContactsDao by closestDI().instance()
         val contacts = dataSourceContactsDao.getByDsId(dsId)
         call.respondHtmx {
@@ -141,22 +147,20 @@ private fun Route.contacts() =
         }
     }
 
-private fun Route.createContact() =
-    post {
+private fun Route.createContactModal() =
+    get("/create") {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val request = call.receive<ModifyDataSourceContactRequest>()
-        val dao: DataSourceContactsDao by closestDI().instance()
-
-        dao.create(dsId, request)
 
         call.respondHtmx {
-            addCreateToastEvent("Created new data source contact")
-            addLoadProxy(apiV1Url("/data-sources/$dsId"))
+            addHtml {
+                CreateOrUpdateDataSourceContactModal(dsId, null)
+            }
         }
     }
 
-private fun Route.editContactForm() =
+private fun Route.editContactModal() =
     get("/edit") {
+        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val contactId = call.parameters.getOrFail<Long>("contactId").toContactId()
         val dao: DataSourceContactsDao by closestDI().instance()
 
@@ -170,23 +174,39 @@ private fun Route.editContactForm() =
 
         call.respondHtmx {
             addHtml {
-                EditDataSourceContactForm(contact)
+                CreateOrUpdateDataSourceContactModal(dsId, contact)
             }
         }
     }
 
-private fun Route.editContact() =
-    patch {
-        val contactId = call.parameters.getOrFail<Long>("contactId").toContactId()
+private fun Route.createOrEditContact() =
+    put {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val request = call.receive<ModifyDataSourceContactRequest>()
+
+        request.validate()?.let { errorMessage ->
+            call.respondHtmx {
+                addModalErrorMessage(errorMessage)
+            }
+            return@put
+        }
+
         val dao: DataSourceContactsDao by closestDI().instance()
 
-        dao.update(contactId, dsId, request)
+        val message =
+            if (request.contactId != null) {
+                val contactId = request.contactId!!
+                dao.update(contactId, dsId, request)
+                "Updated data source contact, contact_id = $contactId"
+            } else {
+                dao.create(dsId, request)
+                "Created data source contact"
+            }
 
         call.respondHtmx {
-            addCreateToastEvent("Updated data source contact, contact_id = $contactId")
-            addLoadProxy(apiV1Url("/data-sources/$dsId"))
+            addModalCloseEvent(request.modalId)
+            addCreateToastEvent(message)
+            addRefreshDataEvent()
         }
     }
 
@@ -199,7 +219,7 @@ private fun Route.deleteContact() =
         dao.delete(contactId, dsId)
 
         call.respondHtmx {
-            addCreateToastEvent("Delete data source contact, contact_id = $contactId")
-            addLoadProxy(apiV1Url("/data-sources/$dsId"))
+            addCreateToastEvent("Deleted data source contact, contact_id = $contactId")
+            addRefreshDataEvent()
         }
     }

@@ -18,7 +18,7 @@ data class DataSourceContact(
         override fun fromRow(row: DataRow): DataSourceContact =
             DataSourceContact(
                 contactId = row.getAsNonNull<Long>("contact_id").toContactId(),
-                dsId = row.getAsNonNull("ds_id"),
+                dsId = row.getAsNonNull<Long>("ds_id").toDsId(),
                 name = row.getAsNonNull("name"),
                 email = row.getAs("email"),
                 website = row.getAs("website"),

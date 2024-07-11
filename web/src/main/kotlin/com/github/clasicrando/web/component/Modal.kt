@@ -87,27 +87,6 @@ inline fun <T, C : TagConsumer<T>> C.CreateOrUpdateModal(
 }
 
 @Component
-inline fun <T, C : TagConsumer<T>, reified V : Any> C.CreateOrUpdateModalWithExtraValues(
-    id: String,
-    title: String,
-    putUrl: String,
-    target: String,
-    modalSize: ModalSize = ModalSize.Default,
-    extraValues: V,
-    crossinline form: FORM.() -> Unit,
-) {
-    CreateOrUpdateModal(
-        id = id,
-        title = title,
-        putUrl = putUrl,
-        target = target,
-        modalSize = modalSize,
-        extraValues = Json.encodeToJsonElement(extraValues).jsonObject,
-        form = form,
-    )
-}
-
-@Component
 inline fun <T, C : TagConsumer<T>> C.CreateModal(
     id: String,
     title: String,
@@ -139,27 +118,6 @@ inline fun <T, C : TagConsumer<T>> C.CreateModal(
             form()
         }
     }
-}
-
-@Component
-inline fun <T, C : TagConsumer<T>, reified V : Any> C.CreateModalWithExtraValues(
-    id: String,
-    title: String,
-    postUrl: String,
-    target: String,
-    modalSize: ModalSize = ModalSize.Default,
-    extraValues: V,
-    crossinline form: FORM.() -> Unit,
-) {
-    CreateModal(
-        id = id,
-        title = title,
-        postUrl = postUrl,
-        target = target,
-        modalSize = modalSize,
-        extraValues = Json.encodeToJsonElement(extraValues).jsonObject,
-        form = form,
-    )
 }
 
 @Component

@@ -37,34 +37,12 @@ import io.ktor.server.sessions.SessionStorage
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
-import java.time.Instant
-import kotlin.collections.mapOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.set
 
 private val serverLogger = KotlinLogging.logger {}
-private val mutex = Mutex()
-private val errorLoopCheck = mutableMapOf<String, Instant>()
-
-private fun loopCountStop(
-    currentUrl: String,
-    errorInstant: Instant,
-): Boolean {
-    val lastErrorInstant = errorLoopCheck[currentUrl]
-    if (lastErrorInstant == null) {
-        errorLoopCheck[currentUrl] = errorInstant
-        return false
-    }
-
-    errorLoopCheck[currentUrl] = errorInstant
-    return lastErrorInstant.isAfter(errorInstant.plusSeconds(-1))
-}
 
 fun main(args: Array<String>): Unit =
     io.ktor.server.netty.EngineMain
@@ -77,25 +55,8 @@ private fun StatusPagesConfig.configure() {
             this.cause = cause
         }
         if (call.request.header("HX-Request") == "true") {
-            val currentUrl = call.request.header("HX-Current-URL")
-            val shouldShortCircuit =
-                currentUrl?.let {
-                    mutex.withLock {
-                        loopCountStop(currentUrl, Instant.now())
-                    }
-                } ?: false
             call.respondHtmx {
                 addCreateToastEvent("Error: ${cause.message}")
-                redirect =
-                    if (shouldShortCircuit) {
-                        serverLogger.atError {
-                            message = "Error short circuit"
-                            payload = mapOf("url" to (currentUrl ?: ""))
-                        }
-                        "/"
-                    } else {
-                        currentUrl ?: "/"
-                    }
             }
             return@exception
         }

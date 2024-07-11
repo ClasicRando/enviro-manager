@@ -4,7 +4,6 @@ import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
-import com.github.clasicrando.web.MAIN_CONTENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.element.Row
 import com.github.clasicrando.workflows.model.Workflow
@@ -394,10 +393,10 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
     val addContact =
         ExtraButton(
             title = "New Contact",
-            apiUrl = "/data-sources/$dsId/contacts/create",
+            apiUrl = apiV1Url("/data-sources/$dsId/contacts/create"),
             icon = "fa-plus",
             httpMethod = HttpMethod.Get,
-            target = MAIN_CONTENT_TARGET,
+            target = ADD_MODAL_TARGET,
         )
     DataTableRefresh(
         id = "dataSourceContacts",

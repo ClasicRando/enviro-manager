@@ -21,7 +21,14 @@ data class ModifyUserRequest(
     val username: String,
     val fullName: String,
     val roles: List<Role>,
-) {
+) : ApiRequest {
+    override fun validate(): String? =
+        when {
+            username.isBlank() -> "Username cannot be blank"
+            fullName.isBlank() -> "Full name cannot be blank"
+            else -> null
+        }
+
     companion object : KSerializer<ModifyUserRequest> {
         override val descriptor: SerialDescriptor =
             buildClassSerialDescriptor(serialName = "ModifyUserRolesRequest") {

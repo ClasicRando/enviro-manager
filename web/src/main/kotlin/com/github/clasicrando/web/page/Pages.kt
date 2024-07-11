@@ -7,7 +7,6 @@ import com.github.clasicrando.web.UserSession
 import com.github.clasicrando.web.adminUserOrRespondMaybeHtmxError
 import com.github.clasicrando.web.component.AdminDashboard
 import com.github.clasicrando.web.component.BasePage
-import com.github.clasicrando.web.component.CreateDataSourceContactForm
 import com.github.clasicrando.web.component.DataSourceTableRefresh
 import com.github.clasicrando.web.component.DataSourceView
 import com.github.clasicrando.web.component.LoginForm
@@ -73,7 +72,6 @@ fun Route.authenticatedPages() {
     index()
     dataSources()
     dataSource()
-    createDataSourceContact()
     adminDashboard()
 }
 
@@ -102,16 +100,6 @@ private fun Route.dataSource() =
         val user = call.userOrRedirect(dao = dao) ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Data Source") {
             DataSourceView(dsId)
-        }
-    }
-
-private fun Route.createDataSourceContact() =
-    get("/data-sources/{dsId}/contacts/create") {
-        val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val dao: UsersDao by closestDI().instance()
-        val user = call.userOrRedirect(dao = dao) ?: return@get
-        call.respondMaybeHtmxPage(user = user, pageTitle = "Create Contact") {
-            CreateDataSourceContactForm(dsId)
         }
     }
 

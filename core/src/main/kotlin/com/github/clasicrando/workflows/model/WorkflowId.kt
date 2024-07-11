@@ -6,4 +6,6 @@ import kotlinx.serialization.Serializable
 @JvmInline
 value class WorkflowId(
     val value: Long,
-)
+) {
+    override fun toString(): String = value.toString()
+}

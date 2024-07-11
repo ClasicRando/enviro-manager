@@ -99,6 +99,12 @@ fun Route.modifyUser() =
         val usersDao: UsersDao by closestDI().instance()
         call.adminUserOrRespondHtmxError(usersDao) ?: return@patch
         val data = call.receive<ModifyUserRequest>()
+        data.validate()?.let { issue ->
+            call.respondHtmx {
+                addModalErrorMessage(issue)
+            }
+            return@patch
+        }
 
         usersDao.updateUser(
             userId = data.userId,
@@ -136,10 +142,9 @@ fun Route.resetPassword() =
         val usersDao: UsersDao by closestDI().instance()
         call.adminUserOrRespondHtmxError(usersDao) ?: return@patch
         val data = call.receive<UserPasswordResetRequest>()
-
-        if (data.password != data.confirmPassword) {
+        data.validate()?.let { issue ->
             call.respondHtmx {
-                addModalErrorMessage("Password's did not match")
+                addModalErrorMessage(issue)
             }
             return@patch
         }

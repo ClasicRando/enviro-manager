@@ -88,12 +88,12 @@ class PgDataSourcesDao(
                 .bind(request.assignedUser)
                 .bind(currentUser.value)
                 .bind(request.searchRadius)
-                .bind(request.recordWarehouseTypeId)
+                .bind(request.recordWarehouseTypeId.value)
                 .bind(request.reportingType)
-                .bind(request.collectionWorkflowId)
-                .bind(request.loadWorkflowId)
-                .bind(request.checkWorkflowId)
-                .bind(request.qaWorkflowId)
+                .bind(request.collectionWorkflowId.value)
+                .bind(request.loadWorkflowId.value)
+                .bind(request.checkWorkflowId.value)
+                .bind(request.qaWorkflowId.value)
                 .executeClosing()
         }
     }

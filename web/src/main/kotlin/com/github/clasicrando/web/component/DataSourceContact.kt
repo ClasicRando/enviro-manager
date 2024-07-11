@@ -2,6 +2,7 @@ package com.github.clasicrando.web.component
 
 import com.github.clasicrando.datasources.model.DataSourceContact
 import com.github.clasicrando.datasources.model.DsId
+import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.element.Column
 import com.github.clasicrando.web.element.Row
@@ -14,6 +15,7 @@ import kotlinx.html.label
 import kotlinx.html.td
 import kotlinx.html.textArea
 import kotlinx.html.tr
+import kotlinx.serialization.json.JsonPrimitive
 
 private const val NAME_FIELD = "name"
 private const val EMAIL_FIELD = "email"
@@ -36,6 +38,7 @@ fun TBODY.DataSourceContact(contact: DataSourceContact) {
                 url = apiV1Url("/data-sources/${contact.dsId}/contacts/${contact.contactId}/edit"),
                 icon = "fa-edit",
                 httpMethod = HttpMethod.Get,
+                target = ADD_MODAL_TARGET,
             )
             RowAction(
                 title = "Delete",
@@ -44,19 +47,27 @@ fun TBODY.DataSourceContact(contact: DataSourceContact) {
                 httpMethod = HttpMethod.Delete,
                 confirmMessage =
                     "Are you sure you want to delete this data source contact?",
+                target = NO_DISPLAY_ELEMENT_TARGET,
             )
         }
     }
 }
 
 @Component
-fun <T, C : TagConsumer<T>> C.EditDataSourceContactForm(contact: DataSourceContact) {
-    val dsId = contact.dsId
-    val contactId = contact.contactId
-    EditForm(
-        title = "Edit Data Source Contact",
-        patchUrl = apiV1Url("/data-sources/$dsId/contacts/$contactId"),
-        cancelUrl = "/data-sources/$dsId",
+fun <T, C : TagConsumer<T>> C.CreateOrUpdateDataSourceContactModal(
+    dsId: DsId,
+    contact: DataSourceContact?,
+) {
+    val extraValues =
+        contact?.contactId?.let {
+            mapOf("contactId" to JsonPrimitive(it.value))
+        } ?: mapOf()
+    CreateOrUpdateModal(
+        id = "createOrUpdateDataSourceContact",
+        title = "${if (contact == null) "Create New" else "Update"} Data Source Contact",
+        putUrl = apiV1Url("/data-sources/$dsId/contacts"),
+        target = NO_DISPLAY_ELEMENT_TARGET,
+        extraValues = extraValues,
     ) {
         Row(classes = "mb-3") {
             label(classes = "col-sm-3 col-form-label") {
@@ -67,7 +78,7 @@ fun <T, C : TagConsumer<T>> C.EditDataSourceContactForm(contact: DataSourceConta
                 input(classes = "form-control") {
                     id = NAME_FIELD
                     name = NAME_FIELD
-                    value = contact.name
+                    contact?.name?.let { value = it }
                 }
             }
         }
@@ -80,7 +91,7 @@ fun <T, C : TagConsumer<T>> C.EditDataSourceContactForm(contact: DataSourceConta
                 input(classes = "form-control") {
                     id = EMAIL_FIELD
                     name = EMAIL_FIELD
-                    value = contact.name
+                    contact?.email?.let { value = it }
                 }
             }
         }
@@ -93,7 +104,7 @@ fun <T, C : TagConsumer<T>> C.EditDataSourceContactForm(contact: DataSourceConta
                 input(classes = "form-control") {
                     id = WEBSITE_FIELD
                     name = WEBSITE_FIELD
-                    value = contact.website ?: ""
+                    contact?.website?.let { value = it }
                 }
             }
         }
@@ -106,7 +117,7 @@ fun <T, C : TagConsumer<T>> C.EditDataSourceContactForm(contact: DataSourceConta
                 input(classes = "form-control") {
                     id = TYPE_FIELD
                     name = TYPE_FIELD
-                    value = contact.type ?: ""
+                    contact?.type?.let { value = it }
                 }
             }
         }
@@ -119,77 +130,7 @@ fun <T, C : TagConsumer<T>> C.EditDataSourceContactForm(contact: DataSourceConta
                 textArea(classes = "form-control") {
                     id = NOTES_FIELD
                     name = NOTES_FIELD
-                    +(contact.notes ?: "")
-                }
-            }
-        }
-    }
-}
-
-@Component
-fun <T, C : TagConsumer<T>> C.CreateDataSourceContactForm(dsId: DsId) {
-    CreateForm(
-        title = "Create New Data Source Contact",
-        postUrl = apiV1Url("/data-sources/$dsId/contacts"),
-        cancelUrl = "/data-sources/$dsId",
-    ) {
-        Row(classes = "mb-3") {
-            label(classes = "col-sm-3 col-form-label") {
-                htmlFor = NAME_FIELD
-                +"Name"
-            }
-            Column(size = 9) {
-                input(classes = "form-control") {
-                    id = NAME_FIELD
-                    name = NAME_FIELD
-                }
-            }
-        }
-        Row(classes = "mb-3") {
-            label(classes = "col-sm-3 col-form-label") {
-                htmlFor = EMAIL_FIELD
-                +"Email"
-            }
-            Column(size = 9) {
-                input(classes = "form-control") {
-                    id = EMAIL_FIELD
-                    name = EMAIL_FIELD
-                }
-            }
-        }
-        Row(classes = "mb-3") {
-            label(classes = "col-sm-3 col-form-label") {
-                htmlFor = WEBSITE_FIELD
-                +"Website"
-            }
-            Column(size = 9) {
-                input(classes = "form-control") {
-                    id = WEBSITE_FIELD
-                    name = WEBSITE_FIELD
-                }
-            }
-        }
-        Row(classes = "mb-3") {
-            label(classes = "col-sm-3 col-form-label") {
-                htmlFor = TYPE_FIELD
-                +"Type"
-            }
-            Column(size = 9) {
-                input(classes = "form-control") {
-                    id = TYPE_FIELD
-                    name = TYPE_FIELD
-                }
-            }
-        }
-        Row(classes = "mb-3") {
-            label(classes = "col-sm-3 col-form-label") {
-                htmlFor = NOTES_FIELD
-                +"Notes"
-            }
-            Column(size = 9) {
-                textArea(classes = "form-control") {
-                    id = NOTES_FIELD
-                    name = NOTES_FIELD
+                    contact?.notes?.let { text(it) }
                 }
             }
         }
