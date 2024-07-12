@@ -3,6 +3,8 @@ package com.github.clasicrando.datasources.data.postgres
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DsId
+import com.github.clasicrando.datasources.model.toDsId
+import com.github.clasicrando.requests.CreateDateSourceRequest
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.model.UserId
 import io.github.clasicrando.kdbc.core.pool.useConnection
@@ -10,6 +12,7 @@ import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.executeClosing
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.core.query.fetchFirst
+import io.github.clasicrando.kdbc.core.query.fetchScalar
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -53,6 +56,45 @@ class PgDataSourcesDao(
                     from em.v_data_sources ds
                     """.trimIndent(),
                 ).fetchAll(DataSource)
+        }
+
+    override suspend fun create(
+        currentUser: UserId,
+        request: CreateDateSourceRequest,
+    ): DsId =
+        pool.useConnection { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    insert into em.data_sources (
+                        code, prov, country, description, files_location, prov_level, comments,
+                        assigned_user, created_by, search_radius, record_warehouse_type, reporting_type,
+                        collection_workflow, load_workflow, check_workflow, qa_workflow
+                    )
+                    SELECT $1, $2, $3, $4, $5, $6, $7, u.user_id, $9, $10, $11, $12, $13, $14, $15, $16
+                    FROM em.users u
+                    WHERE u.username = $8
+                    returning ds_id
+                    """.trimIndent(),
+                ).bind(request.code)
+                .bind(request.prov.takeIf { it.isNotBlank() })
+                .bind(request.country)
+                .bind(request.description)
+                .bind(request.filesLocation)
+                .bind(request.provLevel)
+                .bind(request.comments.takeIf { it.isNotBlank() })
+                .bind(request.assignedUser)
+                .bind(currentUser.value)
+                .bind(request.searchRadius)
+                .bind(request.recordWarehouseTypeId.value)
+                .bind(request.reportingType)
+                .bind(request.collectionWorkflowId.value)
+                .bind(request.loadWorkflowId.value)
+                .bind(request.checkWorkflowId.value)
+                .bind(request.qaWorkflowId.value)
+                .fetchScalar<Long>()
+                ?.toDsId()
+                ?: error("New data source ID not returned")
         }
 
     override suspend fun update(

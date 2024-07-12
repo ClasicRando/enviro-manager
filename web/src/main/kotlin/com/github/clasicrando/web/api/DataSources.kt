@@ -5,10 +5,12 @@ import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.model.toContactId
 import com.github.clasicrando.datasources.model.toDsId
+import com.github.clasicrando.requests.CreateDateSourceRequest
 import com.github.clasicrando.requests.ModifyDataSourceContactRequest
 import com.github.clasicrando.requests.UpdateDateSourceRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
+import com.github.clasicrando.web.component.CreateDataSourceModal
 import com.github.clasicrando.web.component.CreateOrUpdateDataSourceContactModal
 import com.github.clasicrando.web.component.DataSource
 import com.github.clasicrando.web.component.DataSourceContact
@@ -23,6 +25,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
+import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.util.getOrFail
@@ -33,6 +36,8 @@ import org.kodein.di.ktor.closestDI
 fun Route.dataSources() =
     route("/data-sources") {
         getAllDataSources()
+        createDataSourceModal()
+        createDataSource()
         route("/{dsId}") {
             getDataSource()
             editDataSourceForm()
@@ -79,6 +84,44 @@ private fun Route.getDataSource() =
             addHtml {
                 DataSourceDisplay(dataSource)
             }
+        }
+    }
+
+private fun Route.createDataSourceModal() =
+    get("/create") {
+        val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
+        val usersDao: UsersDao by closestDI().instance()
+        val workflowsDao: WorkflowsDao by closestDI().instance()
+        val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
+        val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
+        val workflows = workflowsDao.getAll()
+        call.respondHtmx {
+            addHtml {
+                CreateDataSourceModal(
+                    recordWarehouseTypes = recordWarehouseTypes,
+                    collectionUsers = collectionUsers,
+                    workflows = workflows,
+                )
+            }
+        }
+    }
+
+private fun Route.createDataSource() =
+    post {
+        val user = call.userSessionOrRedirect() ?: return@post
+        val request = call.receive<CreateDateSourceRequest>()
+        request.validate()?.let { issue ->
+            call.respondHtmx {
+                addModalErrorMessage(issue)
+            }
+            return@post
+        }
+        val dataSourcesDao: DataSourcesDao by closestDI().instance()
+        val dsId = dataSourcesDao.create(user.userId, request)
+        call.respondHtmx {
+            addCreateToastEvent("Created data source, id = $dsId")
+            addModalCloseEvent(request.modalId)
+            addRefreshDataEvent()
         }
     }
 

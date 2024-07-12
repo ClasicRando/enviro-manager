@@ -14,6 +14,13 @@ private fun Int?.sizeSuffixOrEmpty(): String = this?.let { "-$it" } ?: ""
 
 private fun GridTier.prefix(): String = if (this == GridTier.ExtraSmall) "" else "-$cssName"
 
+private fun createClassName(
+    gridTier: GridTier,
+    size: Int?,
+    classes: String?,
+): String =
+    "col${gridTier.prefix()}${size.sizeSuffixOrEmpty()} ${classes.takeIfNotNullOrBlank() ?: ""}"
+
 class COLUMN(
     gridTier: GridTier,
     classes: String? = null,
@@ -22,8 +29,7 @@ class COLUMN(
 ) : DIV(
         initialAttributes =
             mapOf(
-                "class" to
-                    "col${gridTier.prefix()}${size.sizeSuffixOrEmpty()} ${classes.takeIfNotNullOrBlank() ?: ""}",
+                "class" to createClassName(gridTier, size, classes),
             ),
         consumer = consumer,
     ),

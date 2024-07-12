@@ -4,16 +4,24 @@ import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
+import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.element.Row
+import com.github.clasicrando.web.htmx.HxSwap
+import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.workflows.model.Workflow
 import io.ktor.http.HttpMethod
 import kotlinx.html.FlowContent
 import kotlinx.html.InputType
 import kotlinx.html.TBODY
 import kotlinx.html.TagConsumer
+import kotlinx.html.div
 import kotlinx.html.fieldSet
 import kotlinx.html.i
+import kotlinx.html.id
+import kotlinx.html.input
+import kotlinx.html.label
+import kotlinx.html.role
 import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.tr
@@ -26,6 +34,17 @@ fun <T, C : TagConsumer<T>> C.DataSourceTableRefresh() {
         id = DATA_SOURCES_TABLE,
         title = "Data Sources",
         dataSource = apiV1Url("/data-sources"),
+        extraButtons =
+            listOf(
+                ExtraButton(
+                    title = "Create New Data Source",
+                    apiUrl = apiV1Url("/data-sources/create"),
+                    icon = "fa-plus",
+                    target = ADD_MODAL_TARGET,
+                    swap = HxSwap(swapType = SwapType.BeforeEnd),
+                    httpMethod = HttpMethod.Get,
+                ),
+            ),
         header = {
             tr {
                 th { +"Id" }
@@ -80,6 +99,152 @@ fun <T, C : TagConsumer<T>> C.DataSourceView(dsId: DsId) {
         dataUrl = apiV1Url("/data-sources/$dsId"),
         editUrl = apiV1Url("/data-sources/$dsId/edit"),
     )
+}
+
+@Component
+fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(
+    recordWarehouseTypes: List<RecordWarehouseType>,
+    collectionUsers: List<User>,
+    workflows: List<Workflow>,
+) {
+    CreateModal(
+        id = "createDataSource",
+        title = "Create Data Source",
+        postUrl = apiV1Url("/data-sources"),
+        target = NO_DISPLAY_ELEMENT_TARGET,
+        modalSize = ModalSize.ExtraLarge,
+    ) {
+        fieldSet {
+            DataGroup(title = "Details") {
+                Row {
+                    DataEditField(
+                        fieldId = "code",
+                        label = "Code",
+                        columnWidth = 1,
+                    )
+                    DataEditField(
+                        fieldId = "prov",
+                        label = "Province",
+                        columnWidth = 1,
+                    )
+                    DataEditField(
+                        fieldId = "country",
+                        label = "Country",
+                        columnWidth = 1,
+                    )
+                    div(classes = "col-sm-2 ms-3 my-2 form-check form-switch") {
+                        input(classes = "form-check-input", type = InputType.checkBox) {
+                            this.role = "switch"
+                            name = "provLevel"
+                            id = "provLevel"
+                        }
+                        label(classes = "form-check-label") {
+                            htmlFor = "provLevel"
+                            +"Prov Level"
+                        }
+                    }
+                    DataEditField(
+                        fieldId = "searchRadius",
+                        label = "Search Radius",
+                        columnWidth = 1,
+                        data = 0.25,
+                        inputType = InputType.tel,
+                        labelColumnWidth = 2,
+                    )
+                }
+                Row {
+                    DataEditField(
+                        fieldId = "reportingType",
+                        label = "Reporting Type",
+                        columnWidth = 4,
+                        labelColumnWidth = 2,
+                    )
+                    DataSelectionField(
+                        fieldId = "recordWarehouseTypeId",
+                        label = "Record Warehouse Type",
+                        columnWidth = 4,
+                        selectionItems = recordWarehouseTypes.map { it.id.toString() to it.name },
+                        labelColumnWidth = 2,
+                    )
+                }
+                Row {
+                    DataEditField(
+                        fieldId = "filesLocation",
+                        label = "Files Location",
+                        columnWidth = 4,
+                        labelColumnWidth = 2,
+                    )
+                    DataSelectionField(
+                        fieldId = "assignedUser",
+                        label = "Assigned User",
+                        columnWidth = 4,
+                        selectionItems = collectionUsers.map { it.username to it.fullName },
+                        labelColumnWidth = 2,
+                    )
+                }
+                Row {
+                    DataEditArea(
+                        fieldId = "description",
+                        label = "Description",
+                        columnWidth = 5,
+                    )
+                    DataEditArea(
+                        fieldId = "comments",
+                        label = "Comments",
+                        columnWidth = 5,
+                    )
+                }
+            }
+            DataGroup(title = "Workflows", topMargin = 4u) {
+                Row {
+                    DataSelectionField(
+                        fieldId = "collectionWorkflowId",
+                        label = "Collection",
+                        columnWidth = 2,
+                        selectionItems =
+                            workflows
+                                .asSequence()
+                                .filter { it.pipelineState == "Data Collection" }
+                                .map { it.id.toString() to it.name }
+                                .toList(),
+                    )
+                    DataSelectionField(
+                        fieldId = "loadWorkflowId",
+                        label = "Load",
+                        columnWidth = 2,
+                        selectionItems =
+                            workflows
+                                .asSequence()
+                                .filter { it.pipelineState == "Data Loading" }
+                                .map { it.id.toString() to it.name }
+                                .toList(),
+                    )
+                    DataSelectionField(
+                        fieldId = "checkWorkflowId",
+                        label = "Check",
+                        columnWidth = 2,
+                        selectionItems =
+                            workflows
+                                .asSequence()
+                                .filter { it.pipelineState == "Load Checking" }
+                                .map { it.id.toString() to it.name }
+                                .toList(),
+                    )
+                    DataSelectionField(
+                        fieldId = "qaWorkflowId",
+                        label = "QA",
+                        columnWidth = 2,
+                        selectionItems =
+                            workflows
+                                .asSequence()
+                                .filter { it.pipelineState == "Load QA" }
+                                .map { it.id.toString() to it.name }
+                                .toList(),
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Component

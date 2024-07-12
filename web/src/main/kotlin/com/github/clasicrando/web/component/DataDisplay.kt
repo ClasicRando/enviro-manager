@@ -61,6 +61,7 @@ fun FlowContent.DataEditField(
     columnWidth: Int,
     data: Any? = null,
     inputType: InputType = InputType.text,
+    labelColumnWidth: Int = 1,
 ) {
     val inputValue =
         when (data) {
@@ -75,7 +76,7 @@ fun FlowContent.DataEditField(
             is LocalTime -> data.format(LOCAL_TIME_FORMAT)
             else -> data.toString()
         }
-    label(classes = "col-sm-1 col-form-label text-center") {
+    label(classes = "col-sm-$labelColumnWidth col-form-label text-center") {
         htmlFor = fieldId
         +label
     }
@@ -93,9 +94,10 @@ fun FlowContent.DataEditArea(
     fieldId: String,
     label: String,
     columnWidth: Int,
-    data: String?,
+    data: String? = null,
+    labelColumnWidth: Int = 1,
 ) {
-    label(classes = "col-sm-1 col-form-label text-center") {
+    label(classes = "col-sm-$labelColumnWidth col-form-label text-center") {
         htmlFor = fieldId
         +label
     }
@@ -117,12 +119,13 @@ fun FlowContent.DataSelectionField(
     selectionItems: List<Pair<String, String>>,
     initValue: String? = null,
     initDisplay: String? = null,
+    labelColumnWidth: Int = 1,
 ) {
     val selectedIndex =
         selectionItems.indexOfFirst {
             it.first == initValue || it.second == initDisplay
         }
-    label(classes = "col-sm-1 col-form-label text-center") {
+    label(classes = "col-sm-$labelColumnWidth col-form-label text-center") {
         htmlFor = fieldId
         +label
     }

@@ -1,12 +1,8 @@
 create table if not exists em.data_sources (
     ds_id bigint primary key generated always as identity,
     code text not null check (data_check.check_not_blank_or_empty(code)) unique,
-    prov text references em.provinces (prov_code) match simple
-        on update cascade
-        on delete restrict,
-    country text references em.countries (country_code) match simple
-        on update cascade
-        on delete restrict,
+    prov text,
+    country text not null data_check.check_not_blank_or_empty(country),
     description text not null check (data_check.check_not_blank_or_empty(description)),
     files_location text not null check (data_check.check_not_blank_or_empty(files_location)),
     prov_level boolean not null,
@@ -39,8 +35,13 @@ create table if not exists em.data_sources (
     qa_workflow bigint not null references pipeline.workflows (id) match simple
         on update cascade
         on delete restrict,
-    check (case when prov_level then country is null else data_check.check_not_blank_or_empty(country) end),
-    check (case when prov_level then data_check.check_not_blank_or_empty(prov) else prov is null end)
+    check (case when prov_level then data_check.check_not_blank_or_empty(prov) else prov is null end),
+    foreign key (prov, country) references em.provinces (prov_code, country_code) match simple
+        on update cascade
+        on delete restrict,
+    foreign key (country) references em.countries (country_code) match simple
+        on update cascade
+        on delete restrict
 );
 
 call audit.audit_table('em.data_sources');
