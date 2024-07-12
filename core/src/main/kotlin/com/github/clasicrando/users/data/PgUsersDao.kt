@@ -120,6 +120,34 @@ class PgUsersDao(
     override suspend fun activateUser(userId: UserId) =
         updateUserIsActive(userId = userId, isActive = true)
 
+    override suspend fun createUser(
+        username: String,
+        fullName: String,
+        password: String,
+        roles: List<Role>,
+    ) {
+        pool.useConnection { conn ->
+            conn
+                .createPreparedQuery(
+                    """
+                    WITH new_user AS (
+                        INSERT INTO em.users AS u (full_name, username, password)
+                        VALUES($1, $2, crypt($3, gen_salt('bf')))
+                        RETURNING u.user_id
+                    )
+                    INSERT INTO em.user_roles(user_id, role)
+                    SELECT u.user_id, r.role
+                    FROM new_user u
+                    CROSS JOIN UNNEST($4) r(role)
+                    """.trimIndent(),
+                ).bind(fullName)
+                .bind(username)
+                .bind(password)
+                .bind(roles.map { it.dbValue })
+                .executeClosing()
+        }
+    }
+
     override suspend fun updateUser(
         userId: UserId,
         username: String,

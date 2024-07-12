@@ -20,6 +20,13 @@ interface UsersDao {
 
     suspend fun activateUser(userId: UserId)
 
+    suspend fun createUser(
+        username: String,
+        fullName: String,
+        password: String,
+        roles: List<Role>,
+    )
+
     suspend fun updateUser(
         userId: UserId,
         username: String,

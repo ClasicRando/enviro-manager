@@ -1,10 +1,12 @@
 package com.github.clasicrando.web.api
 
+import com.github.clasicrando.requests.CreateUserRequest
 import com.github.clasicrando.requests.ModifyUserRequest
 import com.github.clasicrando.requests.UserPasswordResetRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.UserIdJson
 import com.github.clasicrando.web.adminUserOrRespondHtmxError
+import com.github.clasicrando.web.component.CreateUserModal
 import com.github.clasicrando.web.component.ModifyUserModal
 import com.github.clasicrando.web.component.ResetPasswordModal
 import com.github.clasicrando.web.component.User
@@ -25,7 +27,9 @@ fun Route.users() =
         getAllUsers()
         deactivateUser()
         activateUser()
+        createUserModal()
         modifyUserModal()
+        createUser()
         modifyUser()
         resetPasswordModal()
         resetPassword()
@@ -77,6 +81,18 @@ fun Route.activateUser() =
         }
     }
 
+fun Route.createUserModal() =
+    get("/create") {
+        val usersDao: UsersDao by closestDI().instance()
+        call.adminUserOrRespondHtmxError(usersDao) ?: return@get
+
+        call.respondHtmx {
+            addHtml {
+                CreateUserModal()
+            }
+        }
+    }
+
 fun Route.modifyUserModal() =
     post("/modify") {
         val usersDao: UsersDao by closestDI().instance()
@@ -91,6 +107,32 @@ fun Route.modifyUserModal() =
             addHtml {
                 ModifyUserModal(userToModify)
             }
+        }
+    }
+
+fun Route.createUser() =
+    post {
+        val usersDao: UsersDao by closestDI().instance()
+        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+        val data = call.receive<CreateUserRequest>()
+        data.validate()?.let { issue ->
+            call.respondHtmx {
+                addModalErrorMessage(issue)
+            }
+            return@post
+        }
+
+        usersDao.createUser(
+            username = data.username,
+            fullName = data.fullName,
+            password = data.password,
+            roles = data.roles,
+        )
+
+        call.respondHtmx {
+            addCreateToastEvent("User Created!")
+            addModalCloseEvent(data.modalId)
+            addRefreshDataEvent()
         }
     }
 

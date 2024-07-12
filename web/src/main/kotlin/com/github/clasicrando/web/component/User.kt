@@ -30,6 +30,17 @@ fun <T, C : TagConsumer<T>> C.UsersTable() {
         id = "usersTable",
         title = "Users",
         dataSource = apiV1Url("/users"),
+        extraButtons =
+            listOf(
+                ExtraButton(
+                    title = "Create User",
+                    icon = "fa-plus",
+                    apiUrl = apiV1Url("/users/create"),
+                    target = ADD_MODAL_TARGET,
+                    swap = HxSwap(swapType = SwapType.BeforeEnd),
+                    httpMethod = HttpMethod.Get,
+                ),
+            ),
         header = {
             tr {
                 th { +"Username" }
@@ -93,10 +104,79 @@ fun TBODY.User(user: User) {
     }
 }
 
+private const val USERNAME_ID = "username"
+private const val FULL_NAME_ID = "fullName"
+private const val PASSWORD_ID = "password"
+private const val CONFIRM_PASSWORD_ID = "confirmPassword"
+
+@Component
+fun <T, C : TagConsumer<T>> C.CreateUserModal() {
+    CreateModal(
+        id = "modifyUserModal",
+        title = "Modify User",
+        postUrl = apiV1Url("/users"),
+        target = NO_DISPLAY_ELEMENT_TARGET,
+    ) {
+        Row {
+            Column(size = 3, gridTier = GridTier.Small) {
+                label(classes = "col-form-label") {
+                    htmlFor = USERNAME_ID
+                    +"Username"
+                }
+            }
+            Column(size = 9, gridTier = GridTier.Small) {
+                input(classes = "form-control", type = InputType.text) {
+                    id = USERNAME_ID
+                    name = USERNAME_ID
+                }
+            }
+        }
+        Row {
+            Column(size = 3, gridTier = GridTier.Small) {
+                label(classes = "col-form-label") {
+                    htmlFor = PASSWORD_ID
+                    +"Password"
+                }
+            }
+            Column(size = 9, gridTier = GridTier.Small) {
+                input(classes = "form-control", type = InputType.password) {
+                    id = PASSWORD_ID
+                    name = PASSWORD_ID
+                }
+            }
+        }
+        Row {
+            Column(size = 3, gridTier = GridTier.Small) {
+                label(classes = "col-form-label") {
+                    htmlFor = FULL_NAME_ID
+                    +"Full Name"
+                }
+            }
+            Column(size = 9, gridTier = GridTier.Small) {
+                input(classes = "form-control", type = InputType.text) {
+                    id = FULL_NAME_ID
+                    name = FULL_NAME_ID
+                }
+            }
+        }
+        for (role in Role.entries) {
+            div(classes = "form-check form-switch") {
+                input(classes = "form-check-input", type = InputType.checkBox) {
+                    this.role = "switch"
+                    name = role.name
+                    id = role.name
+                }
+                label(classes = "form-check-label") {
+                    htmlFor = role.name
+                    +role.name
+                }
+            }
+        }
+    }
+}
+
 @Component
 fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
-    val usernameId = "username"
-    val fullNameId = "fullName"
     UpdateModalWithExtraValues(
         id = "modifyUserModal",
         title = "Modify User",
@@ -107,14 +187,14 @@ fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
         Row {
             Column(size = 3, gridTier = GridTier.Small) {
                 label(classes = "col-form-label") {
-                    htmlFor = usernameId
+                    htmlFor = USERNAME_ID
                     +"Username"
                 }
             }
             Column(size = 9, gridTier = GridTier.Small) {
                 input(classes = "form-control", type = InputType.text) {
-                    id = usernameId
-                    name = usernameId
+                    id = USERNAME_ID
+                    name = USERNAME_ID
                     value = userToModify.username
                 }
             }
@@ -122,14 +202,14 @@ fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
         Row {
             Column(size = 3, gridTier = GridTier.Small) {
                 label(classes = "col-form-label") {
-                    htmlFor = fullNameId
+                    htmlFor = FULL_NAME_ID
                     +"Full Name"
                 }
             }
             Column(size = 9, gridTier = GridTier.Small) {
                 input(classes = "form-control", type = InputType.text) {
-                    id = fullNameId
-                    name = fullNameId
+                    id = FULL_NAME_ID
+                    name = FULL_NAME_ID
                     value = userToModify.fullName
                 }
             }
@@ -155,8 +235,6 @@ fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
 
 @Component
 fun <T, C : TagConsumer<T>> C.ResetPasswordModal(userToModify: User) {
-    val passwordId = "password"
-    val confirmPasswordId = "confirmPassword"
     UpdateModalWithExtraValues(
         id = "resetUserPassword",
         title = "Reset User Password",
@@ -170,28 +248,28 @@ fun <T, C : TagConsumer<T>> C.ResetPasswordModal(userToModify: User) {
         Row {
             Column(size = 3, gridTier = GridTier.Small) {
                 label(classes = "col-form-label") {
-                    htmlFor = passwordId
+                    htmlFor = PASSWORD_ID
                     +"New Password"
                 }
             }
             Column(size = 9, gridTier = GridTier.Small) {
                 input(classes = "form-control", type = InputType.password) {
-                    id = passwordId
-                    name = passwordId
+                    id = PASSWORD_ID
+                    name = PASSWORD_ID
                 }
             }
         }
         Row {
             Column(size = 3, gridTier = GridTier.Small) {
                 label(classes = "col-form-label") {
-                    htmlFor = confirmPasswordId
+                    htmlFor = CONFIRM_PASSWORD_ID
                     +"Confirm New Password"
                 }
             }
             Column(size = 9, gridTier = GridTier.Small) {
                 input(classes = "form-control", type = InputType.password) {
-                    id = confirmPasswordId
-                    name = confirmPasswordId
+                    id = CONFIRM_PASSWORD_ID
+                    name = CONFIRM_PASSWORD_ID
                 }
             }
         }
