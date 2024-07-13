@@ -11,7 +11,6 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import kotlinx.html.TagConsumer
 import kotlinx.html.div
-import kotlinx.html.stream.appendHTML
 import kotlinx.html.stream.createHTML
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -55,19 +54,6 @@ class HtmxResponseBuilder {
 
     private fun finishTriggers() {
         triggerData = JsonObject(triggers)
-    }
-
-    fun addLoadProxy(url: String) {
-        responseContent =
-            buildString {
-                appendHTML(prettyPrint = false).apply {
-                    div {
-                        hxGet = url
-                        hxTrigger = "load"
-                        hxSwap(SwapType.OuterHtml)
-                    }
-                }
-            }
     }
 
     inline fun addHtml(crossinline chunk: TagConsumer<*>.() -> Unit) {
