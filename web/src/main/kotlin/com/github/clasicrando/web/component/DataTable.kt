@@ -226,13 +226,7 @@ inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
                 }
                 for (button in extraButtons) {
                     button(type = ButtonType.button, classes = "btn btn-secondary") {
-                        when (button.httpMethod) {
-                            HttpMethod.Get -> hxGet = button.apiUrl
-                            HttpMethod.Post -> hxPost = button.apiUrl
-                            HttpMethod.Put -> hxPut = button.apiUrl
-                            HttpMethod.Patch -> hxPatch = button.apiUrl
-                            HttpMethod.Delete -> hxDelete = button.apiUrl
-                        }
+                        setHxUrl(button.httpMethod, button.apiUrl)
                         hxTrigger = "click"
                         hxTarget = button.target ?: NO_DISPLAY_ELEMENT_TARGET
                         hxSwap(button.swap ?: HxSwap(swapType = SwapType.InnerHtml))

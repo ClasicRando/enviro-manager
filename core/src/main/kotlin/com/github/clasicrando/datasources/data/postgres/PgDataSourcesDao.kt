@@ -81,7 +81,7 @@ class PgDataSourcesDao(
                 .bind(request.country)
                 .bind(request.description)
                 .bind(request.filesLocation)
-                .bind(request.provLevel)
+                .bind(request.prov.isNotBlank())
                 .bind(request.comments.takeIf { it.isNotBlank() })
                 .bind(request.assignedUser)
                 .bind(currentUser.value)

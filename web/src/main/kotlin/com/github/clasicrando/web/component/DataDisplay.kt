@@ -8,10 +8,12 @@ import com.github.clasicrando.web.htmx.hxPatch
 import com.github.clasicrando.web.htmx.hxSwap
 import com.github.clasicrando.web.htmx.hxTarget
 import com.github.clasicrando.web.htmx.hxTrigger
+import io.ktor.http.HttpMethod
 import kotlinx.html.ButtonType
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.InputType
+import kotlinx.html.SELECT
 import kotlinx.html.TagConsumer
 import kotlinx.html.button
 import kotlinx.html.div
@@ -107,6 +109,33 @@ fun FlowContent.DataEditArea(
             name = fieldId
             style = "height: 200px"
             +(data ?: "")
+        }
+    }
+}
+
+@Component
+inline fun FlowContent.DataSelectionField(
+    fieldId: String,
+    label: String,
+    columnWidth: Int,
+    dataUrl: String,
+    httpMethod: HttpMethod = HttpMethod.Get,
+    trigger: String = "click",
+    labelColumnWidth: Int = 1,
+    crossinline attributes: SELECT.() -> Unit = {},
+) {
+    label(classes = "col-sm-$labelColumnWidth col-form-label text-center") {
+        htmlFor = fieldId
+        +label
+    }
+    div(classes = "col-sm-$columnWidth") {
+        select(classes = "data-field form-control") {
+            id = fieldId
+            name = fieldId
+            hxTrigger = trigger
+            setHxUrl(httpMethod, dataUrl)
+            hxSwap(swapType = SwapType.InnerHtml)
+            attributes()
         }
     }
 }

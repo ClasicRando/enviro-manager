@@ -2,26 +2,20 @@ package com.github.clasicrando.web.component
 
 import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DsId
-import com.github.clasicrando.datasources.model.RecordWarehouseType
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
 import com.github.clasicrando.web.element.Row
 import com.github.clasicrando.web.htmx.HxSwap
 import com.github.clasicrando.web.htmx.SwapType
-import com.github.clasicrando.workflows.model.Workflow
+import com.github.clasicrando.web.htmx.hxInclude
 import io.ktor.http.HttpMethod
 import kotlinx.html.FlowContent
 import kotlinx.html.InputType
 import kotlinx.html.TBODY
 import kotlinx.html.TagConsumer
-import kotlinx.html.div
 import kotlinx.html.fieldSet
 import kotlinx.html.i
-import kotlinx.html.id
-import kotlinx.html.input
-import kotlinx.html.label
-import kotlinx.html.role
 import kotlinx.html.td
 import kotlinx.html.th
 import kotlinx.html.tr
@@ -102,11 +96,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceView(dsId: DsId) {
 }
 
 @Component
-fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(
-    recordWarehouseTypes: List<RecordWarehouseType>,
-    collectionUsers: List<User>,
-    workflows: List<Workflow>,
-) {
+fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(collectionUsers: List<User>) {
     CreateModal(
         id = "createDataSource",
         title = "Create Data Source",
@@ -122,27 +112,22 @@ fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(
                         label = "Code",
                         columnWidth = 1,
                     )
-                    DataEditField(
+                    DataSelectionField(
                         fieldId = "prov",
                         label = "Province",
-                        columnWidth = 1,
-                    )
-                    DataEditField(
+                        columnWidth = 2,
+                        dataUrl = apiV1Url("/regions/provinces"),
+                        trigger = "refresh-provinces from:body, change from:#country",
+                    ) {
+                        hxInclude = "#country"
+                    }
+                    DataSelectionField(
                         fieldId = "country",
                         label = "Country",
-                        columnWidth = 1,
+                        columnWidth = 2,
+                        dataUrl = apiV1Url("/regions/countries"),
+                        trigger = "load",
                     )
-                    div(classes = "col-sm-2 ms-3 my-2 form-check form-switch") {
-                        input(classes = "form-check-input", type = InputType.checkBox) {
-                            this.role = "switch"
-                            name = "provLevel"
-                            id = "provLevel"
-                        }
-                        label(classes = "form-check-label") {
-                            htmlFor = "provLevel"
-                            +"Prov Level"
-                        }
-                    }
                     DataEditField(
                         fieldId = "searchRadius",
                         label = "Search Radius",
@@ -156,29 +141,30 @@ fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(
                     DataEditField(
                         fieldId = "reportingType",
                         label = "Reporting Type",
-                        columnWidth = 4,
+                        columnWidth = 1,
                         labelColumnWidth = 2,
                     )
                     DataSelectionField(
                         fieldId = "recordWarehouseTypeId",
                         label = "Record Warehouse Type",
-                        columnWidth = 4,
-                        selectionItems = recordWarehouseTypes.map { it.id.toString() to it.name },
-                        labelColumnWidth = 2,
-                    )
-                }
-                Row {
-                    DataEditField(
-                        fieldId = "filesLocation",
-                        label = "Files Location",
-                        columnWidth = 4,
-                        labelColumnWidth = 2,
+                        columnWidth = 2,
+                        dataUrl = apiV1Url("/data-sources/record-warehouse-types"),
+                        trigger = "load",
+                        labelColumnWidth = 3,
                     )
                     DataSelectionField(
                         fieldId = "assignedUser",
                         label = "Assigned User",
-                        columnWidth = 4,
+                        columnWidth = 2,
                         selectionItems = collectionUsers.map { it.username to it.fullName },
+                        labelColumnWidth = 2,
+                    )
+                }
+                Row(classes = "m-1") {
+                    DataEditField(
+                        fieldId = "filesLocation",
+                        label = "Files Location",
+                        columnWidth = 10,
                         labelColumnWidth = 2,
                     )
                 }
@@ -201,45 +187,29 @@ fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(
                         fieldId = "collectionWorkflowId",
                         label = "Collection",
                         columnWidth = 2,
-                        selectionItems =
-                            workflows
-                                .asSequence()
-                                .filter { it.pipelineState == "Data Collection" }
-                                .map { it.id.toString() to it.name }
-                                .toList(),
+                        dataUrl = apiV1Url("/workflows/collection"),
+                        trigger = "load",
                     )
                     DataSelectionField(
                         fieldId = "loadWorkflowId",
                         label = "Load",
                         columnWidth = 2,
-                        selectionItems =
-                            workflows
-                                .asSequence()
-                                .filter { it.pipelineState == "Data Loading" }
-                                .map { it.id.toString() to it.name }
-                                .toList(),
+                        dataUrl = apiV1Url("/workflows/load"),
+                        trigger = "load",
                     )
                     DataSelectionField(
                         fieldId = "checkWorkflowId",
                         label = "Check",
                         columnWidth = 2,
-                        selectionItems =
-                            workflows
-                                .asSequence()
-                                .filter { it.pipelineState == "Load Checking" }
-                                .map { it.id.toString() to it.name }
-                                .toList(),
+                        dataUrl = apiV1Url("/workflows/check"),
+                        trigger = "load",
                     )
                     DataSelectionField(
                         fieldId = "qaWorkflowId",
                         label = "QA",
                         columnWidth = 2,
-                        selectionItems =
-                            workflows
-                                .asSequence()
-                                .filter { it.pipelineState == "Load QA" }
-                                .map { it.id.toString() to it.name }
-                                .toList(),
+                        dataUrl = apiV1Url("/workflows/qa"),
+                        trigger = "load",
                     )
                 }
             }
@@ -250,9 +220,7 @@ fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(
 @Component
 fun <T, C : TagConsumer<T>> C.DataSourceEditForm(
     dataSource: DataSource,
-    recordWarehouseTypes: List<RecordWarehouseType>,
     collectionUsers: List<User>,
-    workflows: List<Workflow>,
 ) {
     DataEdit(
         title = "Edit Data Source Details",
@@ -261,9 +229,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceEditForm(
     ) {
         DataSourceEdit(
             dataSource = dataSource,
-            recordWarehouseTypes = recordWarehouseTypes,
             collectionUsers = collectionUsers,
-            workflows = workflows,
         )
     }
 }
@@ -271,9 +237,7 @@ fun <T, C : TagConsumer<T>> C.DataSourceEditForm(
 @Component
 fun FlowContent.DataSourceEdit(
     dataSource: DataSource,
-    recordWarehouseTypes: List<RecordWarehouseType>,
     collectionUsers: List<User>,
-    workflows: List<Workflow>,
 ) {
     fieldSet {
         DataGroup(title = "Details") {
@@ -329,12 +293,17 @@ fun FlowContent.DataSourceEdit(
                     columnWidth = 1,
                     data = dataSource.reportingType,
                 )
+                val current = dataSource.recordWarehouseType
+                val warehouseUrl =
+                    apiV1Url(
+                        "/data-sources/record-warehouse-types?current=$current",
+                    )
                 DataSelectionField(
                     fieldId = "recordWarehouseTypeId",
                     label = "Record Warehouse Type",
                     columnWidth = 1,
-                    selectionItems = recordWarehouseTypes.map { it.id.toString() to it.name },
-                    initDisplay = dataSource.recordWarehouseType,
+                    dataUrl = warehouseUrl,
+                    trigger = "load",
                 )
                 DataSelectionField(
                     fieldId = "assignedUser",
@@ -365,49 +334,41 @@ fun FlowContent.DataSourceEdit(
                     fieldId = "collectionWorkflowId",
                     label = "Collection",
                     columnWidth = 2,
-                    selectionItems =
-                        workflows
-                            .asSequence()
-                            .filter { it.pipelineState == "Data Collection" }
-                            .map { it.id.toString() to it.name }
-                            .toList(),
-                    initDisplay = dataSource.collectionWorkflow,
+                    dataUrl =
+                        apiV1Url(
+                            "/workflows/collection?current=${dataSource.collectionWorkflow}",
+                        ),
+                    trigger = "load",
                 )
                 DataSelectionField(
                     fieldId = "loadWorkflowId",
                     label = "Load",
                     columnWidth = 2,
-                    selectionItems =
-                        workflows
-                            .asSequence()
-                            .filter { it.pipelineState == "Data Loading" }
-                            .map { it.id.toString() to it.name }
-                            .toList(),
-                    initDisplay = dataSource.loadWorkflow,
+                    dataUrl =
+                        apiV1Url(
+                            "/workflows/load?current=${dataSource.collectionWorkflow}",
+                        ),
+                    trigger = "load",
                 )
                 DataSelectionField(
                     fieldId = "checkWorkflowId",
                     label = "Check",
                     columnWidth = 2,
-                    selectionItems =
-                        workflows
-                            .asSequence()
-                            .filter { it.pipelineState == "Load Checking" }
-                            .map { it.id.toString() to it.name }
-                            .toList(),
-                    initDisplay = dataSource.checkWorkflow,
+                    dataUrl =
+                        apiV1Url(
+                            "/workflows/check?current=${dataSource.collectionWorkflow}",
+                        ),
+                    trigger = "load",
                 )
                 DataSelectionField(
                     fieldId = "qaWorkflowId",
                     label = "QA",
                     columnWidth = 2,
-                    selectionItems =
-                        workflows
-                            .asSequence()
-                            .filter { it.pipelineState == "Load QA" }
-                            .map { it.id.toString() to it.name }
-                            .toList(),
-                    initDisplay = dataSource.qaWorkflow,
+                    dataUrl =
+                        apiV1Url(
+                            "/workflows/qa?current=${dataSource.collectionWorkflow}",
+                        ),
+                    trigger = "load",
                 )
             }
         }

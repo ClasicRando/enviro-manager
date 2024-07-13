@@ -89,6 +89,7 @@ fun TBODY.User(user: User) {
                     httpMethod = HttpMethod.Post,
                     requestBody = userIdJson,
                     target = NO_DISPLAY_ELEMENT_TARGET,
+                    confirmMessage = "Are you sure you want to deactivate ${user.fullName}?",
                 )
             } else {
                 RowActionWithValue(
@@ -98,6 +99,7 @@ fun TBODY.User(user: User) {
                     httpMethod = HttpMethod.Post,
                     requestBody = userIdJson,
                     target = NO_DISPLAY_ELEMENT_TARGET,
+                    confirmMessage = "Are you sure you want to activate ${user.fullName}?",
                 )
             }
         }

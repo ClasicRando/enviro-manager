@@ -16,9 +16,9 @@ import com.github.clasicrando.web.component.DataSource
 import com.github.clasicrando.web.component.DataSourceContact
 import com.github.clasicrando.web.component.DataSourceDisplay
 import com.github.clasicrando.web.component.DataSourceEditForm
+import com.github.clasicrando.web.component.SimpleOption
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.userSessionOrRedirect
-import com.github.clasicrando.workflows.data.WorkflowsDao
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
@@ -51,6 +51,9 @@ fun Route.dataSources() =
                     deleteContact()
                 }
             }
+        }
+        route("/record-warehouse-types") {
+            getRecordWarehouseTypes()
         }
     }
 
@@ -89,19 +92,11 @@ private fun Route.getDataSource() =
 
 private fun Route.createDataSourceModal() =
     get("/create") {
-        val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
         val usersDao: UsersDao by closestDI().instance()
-        val workflowsDao: WorkflowsDao by closestDI().instance()
-        val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
         val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
-        val workflows = workflowsDao.getAll()
         call.respondHtmx {
             addHtml {
-                CreateDataSourceModal(
-                    recordWarehouseTypes = recordWarehouseTypes,
-                    collectionUsers = collectionUsers,
-                    workflows = workflows,
-                )
+                CreateDataSourceModal(collectionUsers = collectionUsers)
             }
         }
     }
@@ -129,9 +124,7 @@ private fun Route.editDataSourceForm() =
     get("/edit") {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val dataSourcesDao: DataSourcesDao by closestDI().instance()
-        val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
         val usersDao: UsersDao by closestDI().instance()
-        val workflowsDao: WorkflowsDao by closestDI().instance()
         val dataSource = dataSourcesDao.getById(dsId)
         if (dataSource == null) {
             call.respondHtmx {
@@ -139,16 +132,12 @@ private fun Route.editDataSourceForm() =
             }
             return@get
         }
-        val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
         val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
-        val workflows = workflowsDao.getAll()
         call.respondHtmx {
             addHtml {
                 DataSourceEditForm(
                     dataSource = dataSource,
-                    recordWarehouseTypes = recordWarehouseTypes,
                     collectionUsers = collectionUsers,
-                    workflows = workflows,
                 )
             }
         }
@@ -264,5 +253,27 @@ private fun Route.deleteContact() =
         call.respondHtmx {
             addCreateToastEvent("Deleted data source contact, contact_id = $contactId")
             addRefreshDataEvent()
+        }
+    }
+
+private fun Route.getRecordWarehouseTypes() =
+    get {
+        val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
+        val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
+
+        val selectedType =
+            call.parameters["current"]
+                ?.takeIf { it.isNotBlank() }
+                ?: recordWarehouseTypes.first().name
+        call.respondHtmx {
+            addHtml {
+                for (recordWarehouseType in recordWarehouseTypes) {
+                    SimpleOption(
+                        value = recordWarehouseType.id.toString(),
+                        text = recordWarehouseType.name,
+                        selected = selectedType == recordWarehouseType.name,
+                    )
+                }
+            }
         }
     }

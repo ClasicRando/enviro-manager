@@ -6,6 +6,8 @@ import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourceContactsDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourcesDao
 import com.github.clasicrando.datasources.data.postgres.PgRecordWarehouseTypeDao
+import com.github.clasicrando.regions.data.PgRegionsDao
+import com.github.clasicrando.regions.data.RegionsDao
 import com.github.clasicrando.users.data.PgUsersDao
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.workflows.data.PgWorkflowsDao
@@ -17,6 +19,8 @@ import org.kodein.di.DI
 import org.kodein.di.bindEagerSingleton
 import org.kodein.di.bindProvider
 import org.kodein.di.instance
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 fun DI.MainBuilder.bindDatabaseComponents() {
     bindEagerSingleton {
@@ -31,6 +35,7 @@ fun DI.MainBuilder.bindDatabaseComponents() {
                 System.getenv("EM_DB_PASSWORD")
                     ?: error("Missing EM_DB_PASSWORD env parameter"),
             applicationName = "EnviroManager Web",
+            connectionTimeout = 5.toDuration(DurationUnit.SECONDS),
         )
     }
     bindEagerSingleton<PgAsyncConnectionPool> {
@@ -59,6 +64,9 @@ fun DI.MainBuilder.bindDaoComponents() {
     }
     bindProvider<DataSourceContactsDao> {
         PgDataSourceContactsDao(di)
+    }
+    bindProvider<RegionsDao> {
+        PgRegionsDao(di)
     }
 }
 

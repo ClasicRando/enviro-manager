@@ -28,16 +28,23 @@ class HtmxResponseBuilder {
     var pushUrl: String? = null
     var responseContent: String = ""
 
+    fun addTrigger(
+        name: String,
+        data: JsonElement = JsonNull,
+    ) {
+        triggers[name] = data
+    }
+
     fun addCreateToastEvent(message: String) {
-        triggers["createToast"] = JsonObject(mapOf("message" to JsonPrimitive(message)))
+        addTrigger("createToast", JsonObject(mapOf("message" to JsonPrimitive(message))))
     }
 
     fun addRefreshDataEvent() {
-        triggers["refreshData"] = JsonNull
+        addTrigger("refreshData")
     }
 
     fun addModalCloseEvent(modalId: String) {
-        triggers["closeModal"] = JsonObject(mapOf("id" to JsonPrimitive(modalId)))
+        addTrigger("closeModal", JsonObject(mapOf("id" to JsonPrimitive(modalId))))
     }
 
     fun addModalErrorMessage(message: String) {

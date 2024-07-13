@@ -12,8 +12,6 @@ data class CreateDateSourceRequest(
     val country: String,
     val description: String,
     val filesLocation: String,
-    @Serializable(with = BooleanSwitchSerializer::class)
-    val provLevel: Boolean = false,
     val comments: String,
     val assignedUser: String,
     @Serializable(with = DecimalInputSerializer::class)
@@ -28,7 +26,6 @@ data class CreateDateSourceRequest(
     override fun validate(): String? =
         when {
             code.isBlank() -> "Code cannot be blank"
-            provLevel && prov.isBlank() -> "Prov cannot be blank when the data source is prov level"
             country.isBlank() -> "Country cannot be blank"
             description.isBlank() -> "Description cannot be blank"
             filesLocation.isBlank() -> "Files location cannot be blank"

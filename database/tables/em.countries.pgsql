@@ -4,3 +4,4 @@ create table if not exists em.countries (
 );
 
 call audit.audit_table('em.countries');
+grant select, insert, update, delete on table em.countries to em_web;

@@ -55,4 +55,6 @@ fun Route.authenticatedApi() =
     route(API_V1_PREFIX) {
         users()
         dataSources()
+        regions()
+        workflows()
     }

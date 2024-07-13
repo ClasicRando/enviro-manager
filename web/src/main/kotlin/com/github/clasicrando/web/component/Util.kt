@@ -1,5 +1,12 @@
 package com.github.clasicrando.web.component
 
+import com.github.clasicrando.web.htmx.hxDelete
+import com.github.clasicrando.web.htmx.hxGet
+import com.github.clasicrando.web.htmx.hxPatch
+import com.github.clasicrando.web.htmx.hxPost
+import com.github.clasicrando.web.htmx.hxPut
+import io.ktor.http.HttpMethod
+import kotlinx.html.FlowContent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -22,3 +29,16 @@ fun Any?.displayValue(): String =
         is LocalTime -> this.format(DateTimeFormatter.ISO_LOCAL_TIME)
         else -> this.toString()
     }
+
+fun FlowContent.setHxUrl(
+    httpMethod: HttpMethod,
+    url: String,
+) {
+    when (httpMethod) {
+        HttpMethod.Get -> hxGet = url
+        HttpMethod.Post -> hxPost = url
+        HttpMethod.Put -> hxPut = url
+        HttpMethod.Patch -> hxPatch = url
+        HttpMethod.Delete -> hxDelete = url
+    }
+}

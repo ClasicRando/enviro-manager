@@ -146,10 +146,19 @@ window.addEventListener('DOMContentLoaded', () => {
     enableThemeSelectors();
 });
 window.addEventListener('htmx:responseError', (e) => {
-    console.log(e);
     /** @type {XMLHttpRequest | null} */
     const request = e.detail?.xhr;
     if (request === null) return;
+    if (request.responseURL.includes('/admin-shutdown')) {
+        const event = new Event('createToast');
+        event.detail = {
+            message: request.status === 410
+                ? 'Server shutdown was successful'
+                : 'Server shutdown was not successful'
+        };
+        document.dispatchEvent(event);
+        return;
+    }
     const event = new Event('createToast');
     event.detail = {
         message: request.responseText
@@ -282,7 +291,7 @@ class Toast {
         img.classList.add('me-1');
         const title = document.createElement('strong');
         header.appendChild(title);
-        title.textContent = 'Workflow Engine';
+        title.textContent = 'Enviro Manager';
         title.classList.add('me-auto');
         const dismiss = document.createElement('button');
         header.appendChild(dismiss);

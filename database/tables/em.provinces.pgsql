@@ -8,3 +8,4 @@ create table if not exists em.provinces (
 );
 
 call audit.audit_table('em.provinces');
+grant select, insert, update, delete on table em.provinces to em_web;

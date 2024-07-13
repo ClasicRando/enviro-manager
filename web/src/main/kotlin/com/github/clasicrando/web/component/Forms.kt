@@ -15,6 +15,7 @@ import kotlinx.html.TagConsumer
 import kotlinx.html.button
 import kotlinx.html.form
 import kotlinx.html.h5
+import kotlinx.html.option
 
 @Component
 inline fun FlowContent.CreateForm(
@@ -97,5 +98,18 @@ inline fun <T, C : TagConsumer<T>> C.EditForm(
                 }
             }
         }
+    }
+}
+
+@Component
+fun <T, C : TagConsumer<T>> C.SimpleOption(
+    value: String,
+    text: String = value,
+    selected: Boolean = false,
+) {
+    option {
+        this.value = value
+        this.selected = selected
+        +text
     }
 }
