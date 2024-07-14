@@ -5,7 +5,7 @@ import com.github.clasicrando.requests.ModifyUserRequest
 import com.github.clasicrando.requests.UserPasswordResetRequest
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.UserIdJson
-import com.github.clasicrando.web.adminUserOrRespondHtmxError
+import com.github.clasicrando.web.adminUserOrRespondMaybeHtmxError
 import com.github.clasicrando.web.component.CreateUserModal
 import com.github.clasicrando.web.component.ModifyUserModal
 import com.github.clasicrando.web.component.ResetPasswordModal
@@ -38,7 +38,7 @@ fun Route.users() =
 fun Route.getAllUsers() =
     get {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@get
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@get
 
         val users = usersDao.getAll()
 
@@ -56,7 +56,7 @@ fun Route.getAllUsers() =
 fun Route.deactivateUser() =
     post("/deactivate") {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@post
 
         val userToDeactivate = call.receive<UserIdJson>().userId
         usersDao.deactivateUser(userToDeactivate)
@@ -70,7 +70,7 @@ fun Route.deactivateUser() =
 fun Route.activateUser() =
     post("/activate") {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@post
 
         val userToEnable = call.receive<UserIdJson>().userId
         usersDao.activateUser(userToEnable)
@@ -83,8 +83,7 @@ fun Route.activateUser() =
 
 fun Route.createUserModal() =
     get("/create") {
-        val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@get
+        adminUserOrRespondMaybeHtmxError() ?: return@get
 
         call.respondHtmx {
             addHtml {
@@ -96,7 +95,7 @@ fun Route.createUserModal() =
 fun Route.modifyUserModal() =
     post("/modify") {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@post
 
         val userIdToModify = call.receive<UserIdJson>().userId
         val userToModify =
@@ -113,7 +112,7 @@ fun Route.modifyUserModal() =
 fun Route.createUser() =
     post {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@post
         val data = call.receive<CreateUserRequest>()
         data.validate()?.let { issue ->
             call.respondHtmx {
@@ -139,7 +138,7 @@ fun Route.createUser() =
 fun Route.modifyUser() =
     patch {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@patch
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@patch
         val data = call.receive<ModifyUserRequest>()
         data.validate()?.let { issue ->
             call.respondHtmx {
@@ -165,7 +164,7 @@ fun Route.modifyUser() =
 fun Route.resetPasswordModal() =
     post("/reset-password") {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@post
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@post
 
         val userIdToModify = call.receive<UserIdJson>().userId
         val userToModify =
@@ -182,7 +181,7 @@ fun Route.resetPasswordModal() =
 fun Route.resetPassword() =
     patch("/reset-password") {
         val usersDao: UsersDao by closestDI().instance()
-        call.adminUserOrRespondHtmxError(usersDao) ?: return@patch
+        call.adminUserOrRespondMaybeHtmxError(usersDao) ?: return@patch
         val data = call.receive<UserPasswordResetRequest>()
         data.validate()?.let { issue ->
             call.respondHtmx {

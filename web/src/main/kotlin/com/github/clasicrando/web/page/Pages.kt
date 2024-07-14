@@ -1,7 +1,7 @@
 package com.github.clasicrando.web.page
 
 import com.github.clasicrando.datasources.model.toDsId
-import com.github.clasicrando.users.data.UsersDao
+import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.UserSession
 import com.github.clasicrando.web.adminUserOrRespondMaybeHtmxError
@@ -13,6 +13,7 @@ import com.github.clasicrando.web.component.LoginForm
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.shouldRespondHtmx
 import com.github.clasicrando.web.userOrRedirect
+import com.github.clasicrando.web.userWithRoleOrRespond
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.html.respondHtml
@@ -24,9 +25,8 @@ import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.util.getOrFail
 import kotlinx.html.TagConsumer
+import kotlinx.html.h5
 import kotlinx.html.p
-import org.kodein.di.instance
-import org.kodein.di.ktor.closestDI
 
 suspend inline fun ApplicationCall.respondMaybeHtmxPage(
     user: User? = null,
@@ -72,13 +72,13 @@ fun Route.authenticatedPages() {
     index()
     dataSources()
     dataSource()
+    workflows()
     adminDashboard()
 }
 
 private fun Route.index() =
     get("/") {
-        val dao: UsersDao by closestDI().instance()
-        val user = call.userOrRedirect(dao = dao) ?: return@get
+        val user = userOrRedirect() ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Home") {
             p { +"Welcome to EnviroManager" }
         }
@@ -86,27 +86,32 @@ private fun Route.index() =
 
 private fun Route.dataSources() =
     get("/data-sources") {
-        val dao: UsersDao by closestDI().instance()
-        val user = call.userOrRedirect(dao = dao) ?: return@get
+        val user = userOrRedirect() ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Data Sources") {
-            DataSourceTableRefresh()
+            DataSourceTableRefresh(user)
         }
     }
 
 private fun Route.dataSource() =
     get("/data-sources/{dsId}") {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val dao: UsersDao by closestDI().instance()
-        val user = call.userOrRedirect(dao = dao) ?: return@get
+        val user = userOrRedirect() ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Data Source") {
-            DataSourceView(dsId)
+            DataSourceView(dsId = dsId, user = user)
+        }
+    }
+
+private fun Route.workflows() =
+    get("/workflows") {
+        val user = userWithRoleOrRespond(Role.Developer) ?: return@get
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Workflows") {
+            h5 { +"Workflows!" }
         }
     }
 
 private fun Route.adminDashboard() =
     get("/admin-dashboard") {
-        val usersDao: UsersDao by closestDI().instance()
-        val user = call.adminUserOrRespondMaybeHtmxError(dao = usersDao) ?: return@get
+        val user = adminUserOrRespondMaybeHtmxError() ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Admin Dashboard") {
             AdminDashboard()
         }

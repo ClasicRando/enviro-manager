@@ -81,7 +81,7 @@ data class CreateUserRequest(
                                 continue
                             }
                             val roleName = descriptor.getElementName(index)
-                            roles.add(Role.valueOf(roleName))
+                            roles.add(Role.fromString(roleName))
                         }
                     }
                 }

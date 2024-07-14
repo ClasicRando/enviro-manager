@@ -27,7 +27,8 @@ fun main(args: Array<String>) {
     var configurer: TaskRunnerConfigurer? = null
     try {
         configurer =
-            TaskRunnerConfigurer.Builder(taskClient, workers)
+            TaskRunnerConfigurer
+                .Builder(taskClient, workers)
                 .withTaskThreadCount(workerThreadCount)
                 .build()
         configurer.init()
@@ -49,7 +50,8 @@ fun main(args: Array<String>) {
 }
 
 private fun collectMethodWorkers(vararg packages: String): List<GeneratedWorker> {
-    return ClassPath.from(GeneratedWorker::class.java.classLoader)
+    return ClassPath
+        .from(GeneratedWorker::class.java.classLoader)
         .allClasses
         .flatMap { classInfo ->
             if (!checkPackages(packages, classInfo.name)) {
@@ -67,17 +69,14 @@ private fun collectMethodWorkers(vararg packages: String): List<GeneratedWorker>
                 .mapNotNull(::processMethod)
                 .map { (method, annotation) ->
                     createGeneratedWorker(objectRef, method, annotation)
-                }
-                .toList()
+                }.toList()
         }
 }
 
 private fun checkPackages(
     packages: Array<out String>,
     fullName: String,
-): Boolean {
-    return packages.any { fullName.startsWith(it) }
-}
+): Boolean = packages.any { fullName.startsWith(it) }
 
 private fun processMethod(method: KFunction<*>): Pair<KFunction<TaskResult>, WorkerTask>? {
     val annotation = method.findAnnotation<WorkerTask>() ?: return null
@@ -102,16 +101,11 @@ private fun createGeneratedWorker(
     objectReference: Any,
     method: KFunction<TaskResult>,
     annotation: WorkerTask,
-): GeneratedWorker {
-    return object : GeneratedWorker {
+): GeneratedWorker =
+    object : GeneratedWorker {
         override val threadCount: Int = annotation.threadCount
 
-        override fun getTaskDefName(): String {
-            return annotation.value
-        }
+        override fun getTaskDefName(): String = annotation.value
 
-        override fun execute(task: Task): TaskResult {
-            return method.call(objectReference, task)
-        }
+        override fun execute(task: Task): TaskResult = method.call(objectReference, task)
     }
-}

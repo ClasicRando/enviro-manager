@@ -161,16 +161,16 @@ fun <T, C : TagConsumer<T>> C.CreateUserModal() {
                 }
             }
         }
-        for (role in Role.entries) {
+        for (role in Role.all) {
             div(classes = "form-check form-switch") {
                 input(classes = "form-check-input", type = InputType.checkBox) {
                     this.role = "switch"
-                    name = role.name
-                    id = role.name
+                    name = role.dbValue
+                    id = role.dbValue
                 }
                 label(classes = "form-check-label") {
-                    htmlFor = role.name
-                    +role.name
+                    htmlFor = role.dbValue
+                    +role.display
                 }
             }
         }
@@ -216,19 +216,19 @@ fun <T, C : TagConsumer<T>> C.ModifyUserModal(userToModify: User) {
                 }
             }
         }
-        for (role in Role.entries) {
+        for (role in Role.all) {
             div(classes = "form-check form-switch") {
                 input(classes = "form-check-input", type = InputType.checkBox) {
                     this.role = "switch"
-                    name = role.name
-                    id = role.name
+                    name = role.dbValue
+                    id = role.dbValue
                     if (userToModify.hasRole(role)) {
                         checked = true
                     }
                 }
                 label(classes = "form-check-label") {
-                    htmlFor = role.name
-                    +role.name
+                    htmlFor = role.dbValue
+                    +role.display
                 }
             }
         }

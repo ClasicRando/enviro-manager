@@ -1,8 +1,5 @@
 package com.github.clasicrando.web.api
 
-import com.github.clasicrando.datasources.data.DataSourceContactsDao
-import com.github.clasicrando.datasources.data.DataSourcesDao
-import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.model.toContactId
 import com.github.clasicrando.datasources.model.toDsId
 import com.github.clasicrando.requests.CreateDateSourceRequest
@@ -17,8 +14,14 @@ import com.github.clasicrando.web.component.DataSourceContact
 import com.github.clasicrando.web.component.DataSourceDisplay
 import com.github.clasicrando.web.component.DataSourceEditForm
 import com.github.clasicrando.web.component.SimpleOption
+import com.github.clasicrando.web.dataSourceContactsDao
+import com.github.clasicrando.web.dataSourcesDao
 import com.github.clasicrando.web.htmx.respondHtmx
+import com.github.clasicrando.web.recordWarehouseTypesDao
+import com.github.clasicrando.web.userOrRedirect
 import com.github.clasicrando.web.userSessionOrRedirect
+import com.github.clasicrando.web.userWithRoleOrRespond
+import com.github.clasicrando.web.usersDao
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
@@ -59,7 +62,7 @@ fun Route.dataSources() =
 
 private fun Route.getAllDataSources() =
     get {
-        val dataSourcesDao: DataSourcesDao by closestDI().instance()
+        userSessionOrRedirect() ?: return@get
         val dataSources = dataSourcesDao.getAll()
         call.respondHtmx {
             addHtml {
@@ -74,8 +77,8 @@ private fun Route.getAllDataSources() =
 
 private fun Route.getDataSource() =
     get {
+        val user = userOrRedirect() ?: return@get
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val dataSourcesDao: DataSourcesDao by closestDI().instance()
         val dataSource = dataSourcesDao.getById(dsId)
         if (dataSource == null) {
             call.respondHtmx {
@@ -85,14 +88,15 @@ private fun Route.getDataSource() =
         }
         call.respondHtmx {
             addHtml {
-                DataSourceDisplay(dataSource)
+                DataSourceDisplay(dataSource, user)
             }
         }
     }
 
 private fun Route.createDataSourceModal() =
     get("/create") {
-        val usersDao: UsersDao by closestDI().instance()
+        val usersDao = usersDao
+        call.userWithRoleOrRespond(dao = usersDao, role = Role.CreateDataSource) ?: return@get
         val collectionUsers = usersDao.getWithRole(Role.PipelineCollection)
         call.respondHtmx {
             addHtml {
@@ -103,7 +107,7 @@ private fun Route.createDataSourceModal() =
 
 private fun Route.createDataSource() =
     post {
-        val user = call.userSessionOrRedirect() ?: return@post
+        val user = userWithRoleOrRespond(Role.CreateDataSource) ?: return@post
         val request = call.receive<CreateDateSourceRequest>()
         request.validate()?.let { issue ->
             call.respondHtmx {
@@ -111,7 +115,6 @@ private fun Route.createDataSource() =
             }
             return@post
         }
-        val dataSourcesDao: DataSourcesDao by closestDI().instance()
         val dsId = dataSourcesDao.create(user.userId, request)
         call.respondHtmx {
             addCreateToastEvent("Created data source, id = $dsId")
@@ -123,8 +126,8 @@ private fun Route.createDataSource() =
 private fun Route.editDataSourceForm() =
     get("/edit") {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val dataSourcesDao: DataSourcesDao by closestDI().instance()
         val usersDao: UsersDao by closestDI().instance()
+        call.userWithRoleOrRespond(dao = usersDao, role = Role.CreateDataSource) ?: return@get
         val dataSource = dataSourcesDao.getById(dsId)
         if (dataSource == null) {
             call.respondHtmx {
@@ -146,7 +149,7 @@ private fun Route.editDataSourceForm() =
 private fun Route.editDataSource() =
     patch {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val user = call.userSessionOrRedirect() ?: return@patch
+        val user = userWithRoleOrRespond(role = Role.EditDataSource) ?: return@patch
         val request = call.receive<UpdateDateSourceRequest>()
         request.validate()?.let { issue ->
             call.respondHtmx {
@@ -154,7 +157,6 @@ private fun Route.editDataSource() =
             }
             return@patch
         }
-        val dataSourcesDao: DataSourcesDao by closestDI().instance()
         dataSourcesDao.update(user.userId, dsId, request)
         call.respondHtmx {
             addCreateToastEvent("Updated data source, id = $dsId")
@@ -165,8 +167,7 @@ private fun Route.editDataSource() =
 private fun Route.contacts() =
     get {
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        call.userSessionOrRedirect() ?: return@get
-        val dataSourceContactsDao: DataSourceContactsDao by closestDI().instance()
+        userSessionOrRedirect() ?: return@get
         val contacts = dataSourceContactsDao.getByDsId(dsId)
         call.respondHtmx {
             addHtml {
@@ -181,6 +182,7 @@ private fun Route.contacts() =
 
 private fun Route.createContactModal() =
     get("/create") {
+        userWithRoleOrRespond(role = Role.EditDataSource) ?: return@get
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
 
         call.respondHtmx {
@@ -192,11 +194,11 @@ private fun Route.createContactModal() =
 
 private fun Route.editContactModal() =
     get("/edit") {
+        userWithRoleOrRespond(role = Role.EditDataSource) ?: return@get
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val contactId = call.parameters.getOrFail<Long>("contactId").toContactId()
-        val dao: DataSourceContactsDao by closestDI().instance()
 
-        val contact = dao.getById(contactId)
+        val contact = dataSourceContactsDao.getById(contactId)
         if (contact == null) {
             call.respondHtmx {
                 addCreateToastEvent("No contact for contact_id = $contactId")
@@ -213,6 +215,7 @@ private fun Route.editContactModal() =
 
 private fun Route.createOrEditContact() =
     put {
+        userWithRoleOrRespond(role = Role.EditDataSource) ?: return@put
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
         val request = call.receive<ModifyDataSourceContactRequest>()
 
@@ -223,15 +226,13 @@ private fun Route.createOrEditContact() =
             return@put
         }
 
-        val dao: DataSourceContactsDao by closestDI().instance()
-
         val message =
             if (request.contactId != null) {
                 val contactId = request.contactId!!
-                dao.update(contactId, dsId, request)
+                dataSourceContactsDao.update(contactId, dsId, request)
                 "Updated data source contact, contact_id = $contactId"
             } else {
-                dao.create(dsId, request)
+                dataSourceContactsDao.create(dsId, request)
                 "Created data source contact"
             }
 
@@ -244,11 +245,11 @@ private fun Route.createOrEditContact() =
 
 private fun Route.deleteContact() =
     delete {
+        userWithRoleOrRespond(role = Role.EditDataSource) ?: return@delete
         val contactId = call.parameters.getOrFail<Long>("contactId").toContactId()
         val dsId = call.parameters.getOrFail<Long>("dsId").toDsId()
-        val dao: DataSourceContactsDao by closestDI().instance()
 
-        dao.delete(contactId, dsId)
+        dataSourceContactsDao.delete(contactId, dsId)
 
         call.respondHtmx {
             addCreateToastEvent("Deleted data source contact, contact_id = $contactId")
@@ -258,7 +259,6 @@ private fun Route.deleteContact() =
 
 private fun Route.getRecordWarehouseTypes() =
     get {
-        val recordWarehouseTypesDao: RecordWarehouseTypesDao by closestDI().instance()
         val recordWarehouseTypes = recordWarehouseTypesDao.getAll()
 
         val selectedType =

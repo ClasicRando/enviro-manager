@@ -133,6 +133,9 @@ fun DIV.MainNav(user: User? = null) {
                 style = "--bs-scroll-height: 100px"
                 NavItem(name = "Home", href = "/")
                 NavItem(name = "Data Sources", href = "/data-sources")
+                if (user?.hasRole(Role.Developer) == true) {
+                    NavItem(name = "Workflows", href = "/workflows")
+                }
                 if (user?.hasRole(Role.Admin) == true) {
                     NavItem(name = "Admin Dashboard", href = "/admin-dashboard")
                 }

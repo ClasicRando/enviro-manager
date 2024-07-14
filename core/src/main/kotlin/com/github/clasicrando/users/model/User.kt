@@ -13,7 +13,17 @@ data class User(
     val roles: List<Role>,
     val enabled: Boolean,
 ) {
-    fun hasRole(role: Role): Boolean = roles.any { it == Role.Admin || it == role }
+    private val allRoles by lazy {
+        sequence {
+            for (role in roles) {
+                yield(role)
+                yieldAll(role.inheritedRoles)
+            }
+        }.sortedBy { it.dbValue }
+            .toList()
+    }
+
+    fun hasRole(role: Role): Boolean = allRoles.any { it == Role.Admin || it == role }
 
     companion object : RowParser<User> {
         override fun fromRow(row: DataRow): User =

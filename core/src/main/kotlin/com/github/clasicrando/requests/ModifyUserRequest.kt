@@ -5,8 +5,6 @@ import com.github.clasicrando.users.model.UserId
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
@@ -38,7 +36,9 @@ data class ModifyUserRequest(
                 element<String>(elementName = "modalId")
                 element<String>(elementName = "username")
                 element<String>(elementName = "fullName")
-                element<List<String>>(elementName = "roles")
+                for (role in Role.all) {
+                    element<String>(elementName = role.dbValue, isOptional = true)
+                }
             }
 
         override fun serialize(
@@ -48,12 +48,11 @@ data class ModifyUserRequest(
             encoder.encodeStructure(descriptor) {
                 encodeSerializableElement(descriptor, 0, UserId.serializer(), value.userId)
                 encodeStringElement(descriptor, 1, value.modalId)
-                encodeSerializableElement(
-                    CreateUserRequest.descriptor,
-                    4,
-                    ListSerializer(String.serializer()),
-                    value.roles.map { it.dbValue },
-                )
+                for ((i, role) in Role.all.withIndex()) {
+                    if (value.roles.contains(role)) {
+                        encodeStringElement(descriptor, 5 + i, role.dbValue)
+                    }
+                }
             }
         }
 
@@ -79,7 +78,7 @@ data class ModifyUserRequest(
                                 continue
                             }
                             val roleName = descriptor.getElementName(index)
-                            roles.add(Role.valueOf(roleName))
+                            roles.add(Role.fromString(roleName))
                         }
                     }
                 }

@@ -2,6 +2,7 @@ package com.github.clasicrando.web.component
 
 import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DsId
+import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.api.apiV1Url
@@ -23,12 +24,9 @@ import kotlinx.html.tr
 const val DATA_SOURCES_TABLE = "dataSourcesTable"
 
 @Component
-fun <T, C : TagConsumer<T>> C.DataSourceTableRefresh() {
-    DataTableRefresh(
-        id = DATA_SOURCES_TABLE,
-        title = "Data Sources",
-        dataSource = apiV1Url("/data-sources"),
-        extraButtons =
+fun <T, C : TagConsumer<T>> C.DataSourceTableRefresh(user: User) {
+    val extraButtons =
+        if (user.hasRole(Role.CreateDataSource)) {
             listOf(
                 ExtraButton(
                     title = "Create New Data Source",
@@ -38,7 +36,15 @@ fun <T, C : TagConsumer<T>> C.DataSourceTableRefresh() {
                     swap = HxSwap(swapType = SwapType.BeforeEnd),
                     httpMethod = HttpMethod.Get,
                 ),
-            ),
+            )
+        } else {
+            emptyList()
+        }
+    DataTableRefresh(
+        id = DATA_SOURCES_TABLE,
+        title = "Data Sources",
+        dataSource = apiV1Url("/data-sources"),
+        extraButtons = extraButtons,
         header = {
             tr {
                 th { +"Id" }
@@ -86,12 +92,20 @@ fun TBODY.DataSource(dataSource: DataSource) {
 }
 
 @Component
-fun <T, C : TagConsumer<T>> C.DataSourceView(dsId: DsId) {
+fun <T, C : TagConsumer<T>> C.DataSourceView(
+    dsId: DsId,
+    user: User,
+) {
     DataDisplay(
         id = "dataSourceView",
         title = "Data Source Details",
         dataUrl = apiV1Url("/data-sources/$dsId"),
-        editUrl = apiV1Url("/data-sources/$dsId/edit"),
+        editUrl =
+            if (user.hasRole(Role.EditDataSource)) {
+                apiV1Url("/data-sources/$dsId/edit")
+            } else {
+                null
+            },
     )
 }
 
@@ -376,7 +390,10 @@ fun FlowContent.DataSourceEdit(
 }
 
 @Component
-fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
+fun <T, C : TagConsumer<T>> C.DataSourceDisplay(
+    dataSource: DataSource,
+    user: User,
+) {
     val dsId = dataSource.dsId
     fieldSet {
         DataGroup(title = "Details") {
@@ -516,19 +533,25 @@ fun <T, C : TagConsumer<T>> C.DataSourceDisplay(dataSource: DataSource) {
             }
         }
     }
-    val addContact =
-        ExtraButton(
-            title = "New Contact",
-            apiUrl = apiV1Url("/data-sources/$dsId/contacts/create"),
-            icon = "fa-plus",
-            httpMethod = HttpMethod.Get,
-            target = ADD_MODAL_TARGET,
-        )
+    val extraButtons =
+        if (user.hasRole(Role.EditDataSource)) {
+            listOf(
+                ExtraButton(
+                    title = "New Contact",
+                    apiUrl = apiV1Url("/data-sources/$dsId/contacts/create"),
+                    icon = "fa-plus",
+                    httpMethod = HttpMethod.Get,
+                    target = ADD_MODAL_TARGET,
+                ),
+            )
+        } else {
+            emptyList()
+        }
     DataTableRefresh(
         id = "dataSourceContacts",
         title = "Contacts",
         dataSource = apiV1Url("/data-sources/$dsId/contacts"),
-        extraButtons = listOf(addContact),
+        extraButtons = extraButtons,
         extraContainerClasses = "mt-2",
         header = {
             tr {
