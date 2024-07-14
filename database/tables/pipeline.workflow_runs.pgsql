@@ -6,3 +6,4 @@ create table if not exists pipeline.workflow_runs (
 );
 
 call audit.audit_table('pipeline.workflow_runs');
+grant select, insert, update, delete on table pipeline.workflow_runs to em_web;

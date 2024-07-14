@@ -13,3 +13,4 @@ create table if not exists pipeline.plotting_methods (
 );
 
 call audit.audit_table('pipeline.plotting_methods');
+grant select, insert, update, delete on table pipeline.plotting_methods to em_web;

@@ -17,3 +17,4 @@ create table if not exists pipeline.plotting_fields (
 );
 
 call audit.audit_table('pipeline.plotting_fields');
+grant select, insert, update, delete on table pipeline.plotting_fields to em_web;

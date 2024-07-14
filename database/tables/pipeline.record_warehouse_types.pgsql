@@ -5,3 +5,4 @@ create table if not exists pipeline.record_warehouse_types (
 );
 
 call audit.audit_table('pipeline.record_warehouse_types');
+grant select, insert, update, delete on table pipeline.record_warehouse_types to em_web;

@@ -4,3 +4,4 @@ create table if not exists pipeline.loader_types (
 );
 
 call audit.audit_table('pipeline.loader_types');
+grant select, insert, update, delete on table pipeline.loader_types to em_web;

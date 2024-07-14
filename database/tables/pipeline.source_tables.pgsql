@@ -26,3 +26,4 @@ create table if not exists pipeline.source_tables (
 );
 
 call audit.audit_table('pipeline.source_tables');
+grant select, insert, update, delete on table pipeline.source_tables to em_web;

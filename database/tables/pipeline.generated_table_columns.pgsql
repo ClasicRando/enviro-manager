@@ -9,3 +9,4 @@ create table if not exists pipeline.generated_table_columns (
 );
 
 call audit.audit_table('pipeline.generated_table_columns');
+grant select, insert, update, delete on table pipeline.generated_table_columns to em_web;

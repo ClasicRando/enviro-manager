@@ -23,3 +23,4 @@ create table if not exists em.report_tables (
 );
 
 call audit.audit_table('em.report_tables');
+grant select, insert, update, delete on table em.report_tables to em_web;

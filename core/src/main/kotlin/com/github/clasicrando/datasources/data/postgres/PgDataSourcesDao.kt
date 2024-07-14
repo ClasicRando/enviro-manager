@@ -1,5 +1,6 @@
 package com.github.clasicrando.datasources.data.postgres
 
+import com.github.clasicrando.cleanNullableNonEmptyTextParameter
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.model.DataSource
 import com.github.clasicrando.datasources.model.DsId
@@ -76,18 +77,18 @@ class PgDataSourcesDao(
                     WHERE u.username = $8
                     returning ds_id
                     """.trimIndent(),
-                ).bind(request.code)
-                .bind(request.prov.takeIf { it.isNotBlank() })
-                .bind(request.country)
-                .bind(request.description)
-                .bind(request.filesLocation)
+                ).bind(request.code.trim())
+                .bind(request.prov.cleanNullableNonEmptyTextParameter())
+                .bind(request.country.trim())
+                .bind(request.description.trim())
+                .bind(request.filesLocation.trim())
                 .bind(request.prov.isNotBlank())
-                .bind(request.comments.takeIf { it.isNotBlank() })
+                .bind(request.comments.cleanNullableNonEmptyTextParameter())
                 .bind(request.assignedUser)
                 .bind(currentUser.value)
                 .bind(request.searchRadius)
                 .bind(request.recordWarehouseTypeId.value)
-                .bind(request.reportingType)
+                .bind(request.reportingType.trim())
                 .bind(request.collectionWorkflowId.value)
                 .bind(request.loadWorkflowId.value)
                 .bind(request.checkWorkflowId.value)
@@ -110,7 +111,7 @@ class PgDataSourcesDao(
                     set
                         description = $2,
                         files_location = $3,
-                        comments = case when trim(coalesce($4,'')) = '' then null else $4 end,
+                        comments = $4,
                         assigned_user = (select u.user_id from em.users u where u.username = $5),
                         last_updated = timezone('utc'::text, now()),
                         updated_by = $6,
@@ -124,14 +125,14 @@ class PgDataSourcesDao(
                     where ds_id = $1
                     """.trimIndent(),
                 ).bind(dsId.value)
-                .bind(request.description)
-                .bind(request.filesLocation)
-                .bind(request.comments.takeIf { it.isNotBlank() })
+                .bind(request.description.trim())
+                .bind(request.filesLocation.trim())
+                .bind(request.comments.cleanNullableNonEmptyTextParameter())
                 .bind(request.assignedUser)
                 .bind(currentUser.value)
                 .bind(request.searchRadius)
                 .bind(request.recordWarehouseTypeId.value)
-                .bind(request.reportingType)
+                .bind(request.reportingType.trim())
                 .bind(request.collectionWorkflowId.value)
                 .bind(request.loadWorkflowId.value)
                 .bind(request.checkWorkflowId.value)

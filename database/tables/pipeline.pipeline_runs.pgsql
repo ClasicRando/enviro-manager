@@ -46,3 +46,4 @@ create table if not exists pipeline.pipeline_runs (
 );
 
 call audit.audit_table('pipeline.pipeline_runs');
+grant select, insert, update, delete on table pipeline.pipeline_runs to em_web;

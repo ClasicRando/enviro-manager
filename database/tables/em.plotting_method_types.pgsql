@@ -4,3 +4,4 @@ create table if not exists em.plotting_method_types (
 );
 
 call audit.audit_table('em.plotting_method_types');
+grant select, insert, update, delete on table em.plotting_method_types to em_web;

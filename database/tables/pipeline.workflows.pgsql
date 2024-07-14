@@ -9,3 +9,4 @@ create table if not exists pipeline.workflows (
 );
 
 call audit.audit_table('pipeline.workflows');
+grant select, insert, update, delete on table pipeline.workflows to em_web;

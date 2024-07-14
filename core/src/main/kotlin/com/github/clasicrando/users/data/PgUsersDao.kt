@@ -140,8 +140,8 @@ class PgUsersDao(
                     FROM new_user u
                     CROSS JOIN UNNEST($4) r(role)
                     """.trimIndent(),
-                ).bind(fullName)
-                .bind(username)
+                ).bind(fullName.trim())
+                .bind(username.trim())
                 .bind(password)
                 .bind(roles.map { it.dbValue })
                 .executeClosing()
@@ -193,8 +193,8 @@ class PgUsersDao(
                 full_name = TRIM($2)
             WHERE u.user_id = $3
             """.trimIndent(),
-        ).bind(username)
-            .bind(fullName)
+        ).bind(username.trim())
+            .bind(fullName.trim())
             .bind(userId.value)
             .executeClosing()
     }

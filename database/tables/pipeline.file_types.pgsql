@@ -6,3 +6,4 @@ create table if not exists pipeline.file_types (
 );
 
 call audit.audit_table('pipeline.file_types');
+grant select, insert, update, delete on table pipeline.file_types to em_web;

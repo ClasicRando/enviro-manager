@@ -1,5 +1,6 @@
 package com.github.clasicrando.datasources.data.postgres
 
+import com.github.clasicrando.cleanNullableNonEmptyTextParameter
 import com.github.clasicrando.datasources.data.DataSourceContactsDao
 import com.github.clasicrando.datasources.model.ContactId
 import com.github.clasicrando.datasources.model.DataSourceContact
@@ -34,10 +35,10 @@ class PgDataSourceContactsDao(
                     """.trimIndent(),
                 ).bind(dsId.value)
                 .bind(request.name.trim())
-                .bind(request.email.trim().takeIf { it.isNotBlank() })
-                .bind(request.website.trim().takeIf { it.isNotBlank() })
-                .bind(request.type.trim().takeIf { it.isNotBlank() })
-                .bind(request.notes.trim().takeIf { it.isNotBlank() })
+                .bind(request.email.cleanNullableNonEmptyTextParameter())
+                .bind(request.website.cleanNullableNonEmptyTextParameter())
+                .bind(request.type.cleanNullableNonEmptyTextParameter())
+                .bind(request.notes.cleanNullableNonEmptyTextParameter())
                 .executeClosing()
         }
     }
@@ -114,10 +115,10 @@ class PgDataSourceContactsDao(
                 ).bind(contactId.value)
                 .bind(dsId.value)
                 .bind(request.name.trim())
-                .bind(request.email.trim().takeIf { it.isNotBlank() })
-                .bind(request.website.trim().takeIf { it.isNotBlank() })
-                .bind(request.type.trim().takeIf { it.isNotBlank() })
-                .bind(request.notes.trim().takeIf { it.isNotBlank() })
+                .bind(request.email.cleanNullableNonEmptyTextParameter())
+                .bind(request.website.cleanNullableNonEmptyTextParameter())
+                .bind(request.type.cleanNullableNonEmptyTextParameter())
+                .bind(request.notes.cleanNullableNonEmptyTextParameter())
                 .executeClosing()
         }
     }

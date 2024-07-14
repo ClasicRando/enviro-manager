@@ -6,3 +6,4 @@ create table if not exists pipeline.pipeline_states (
 );
 
 call audit.audit_table('pipeline.pipeline_states');
+grant select, insert, update, delete on table pipeline.pipeline_states to em_web;

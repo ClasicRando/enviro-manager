@@ -4,3 +4,4 @@ create table if not exists pipeline.collect_types (
 );
 
 call audit.audit_table('pipeline.collect_types');
+grant select, insert, update, delete on table pipeline.collect_types to em_web;

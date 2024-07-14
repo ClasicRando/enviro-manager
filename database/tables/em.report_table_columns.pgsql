@@ -16,3 +16,4 @@ create table if not exists em.report_table_columns (
 );
 
 call audit.audit_table('em.report_table_columns');
+grant select, insert, update, delete on table em.report_table_columns to em_web;
