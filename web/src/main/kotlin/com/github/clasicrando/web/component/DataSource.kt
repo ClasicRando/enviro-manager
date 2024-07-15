@@ -24,7 +24,7 @@ import kotlinx.html.tr
 const val DATA_SOURCES_TABLE = "dataSourcesTable"
 
 @Component
-fun <T, C : TagConsumer<T>> C.DataSourceTableRefresh(user: User) {
+fun <T, C : TagConsumer<T>> C.DataSourceTable(user: User) {
     val extraButtons =
         if (user.hasRole(Role.CreateDataSource)) {
             listOf(
@@ -67,19 +67,19 @@ fun <T, C : TagConsumer<T>> C.DataSourceTableRefresh(user: User) {
 @Component
 fun TBODY.DataSource(dataSource: DataSource) {
     tr {
-        dataCell(dataSource.dsId)
-        dataCell(dataSource.code)
-        dataCell(dataSource.province)
-        dataCell(dataSource.country)
+        DataCell(dataSource.dsId)
+        DataCell(dataSource.code)
+        DataCell(dataSource.province)
+        DataCell(dataSource.country)
         td {
             i(classes = "fa-solid ${if (dataSource.provLevel) "fa-check" else "fa-x"}")
         }
-        dataCell(dataSource.reportingType)
-        dataCell(dataSource.assignedUser)
-        dataCell(dataSource.createdBy)
-        dataCell(dataSource.created)
-        dataCell(dataSource.updatedBy)
-        dataCell(dataSource.lastUpdated)
+        DataCell(dataSource.reportingType)
+        DataCell(dataSource.assignedUser)
+        DataCell(dataSource.createdBy)
+        DataCell(dataSource.created)
+        DataCell(dataSource.updatedBy)
+        DataCell(dataSource.lastUpdated)
         td {
             RowAction(
                 title = "View Data Source",

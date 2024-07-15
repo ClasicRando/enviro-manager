@@ -55,9 +55,9 @@ fun <T, C : TagConsumer<T>> C.UsersTable() {
 @Component
 fun TBODY.User(user: User) {
     tr {
-        dataCell(user.username)
-        dataCell(user.fullName)
-        dataCell(user.roles.joinToString())
+        DataCell(user.username)
+        DataCell(user.fullName)
+        DataCell(user.roles.joinToString())
         td {
             if (user.hasRole(Role.Admin)) {
                 return@td

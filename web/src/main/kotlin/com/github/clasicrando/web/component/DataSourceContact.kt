@@ -26,12 +26,12 @@ private const val NOTES_FIELD = "notes"
 @Component
 fun TBODY.DataSourceContact(contact: DataSourceContact) {
     tr {
-        dataCell(contact.contactId)
-        dataCell(contact.name)
-        dataCell(contact.email)
-        dataCell(contact.website)
-        dataCell(contact.type)
-        dataCell(contact.notes)
+        DataCell(contact.contactId)
+        DataCell(contact.name)
+        DataCell(contact.email)
+        DataCell(contact.website)
+        DataCell(contact.type)
+        DataCell(contact.notes)
         td {
             RowAction(
                 title = "Edit",
@@ -66,7 +66,6 @@ fun <T, C : TagConsumer<T>> C.CreateOrUpdateDataSourceContactModal(
         id = "createOrUpdateDataSourceContact",
         title = "${if (contact == null) "Create New" else "Update"} Data Source Contact",
         putUrl = apiV1Url("/data-sources/$dsId/contacts"),
-        target = NO_DISPLAY_ELEMENT_TARGET,
         extraValues = extraValues,
     ) {
         Row(classes = "mb-3") {

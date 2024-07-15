@@ -9,3 +9,8 @@ value class WorkflowId(
 ) {
     override fun toString(): String = value.toString()
 }
+
+@Serializable
+data class WorkflowIdJson(
+    val workflowId: WorkflowId,
+)

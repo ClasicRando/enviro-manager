@@ -1,5 +1,6 @@
 package com.github.clasicrando.web.component
 
+import com.github.clasicrando.web.NO_DISPLAY_ELEMENT_TARGET
 import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxInclude
 import com.github.clasicrando.web.htmx.hxPatch
@@ -57,7 +58,7 @@ inline fun <T, C : TagConsumer<T>> C.CreateOrUpdateModal(
     id: String,
     title: String,
     putUrl: String,
-    target: String,
+    target: String = NO_DISPLAY_ELEMENT_TARGET,
     modalSize: ModalSize = ModalSize.Default,
     extraValues: Map<String, JsonElement> = mapOf(),
     crossinline form: FORM.() -> Unit,

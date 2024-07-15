@@ -3,6 +3,7 @@ package com.github.clasicrando.web
 import com.github.clasicrando.datasources.data.DataSourceContactsDao
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
+import com.github.clasicrando.pipeline.data.PipelineStateDao
 import com.github.clasicrando.regions.data.RegionsDao
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
@@ -102,6 +103,17 @@ val PipelineContext<Unit, ApplicationCall>.dataSourceContactsDao
 val PipelineContext<Unit, ApplicationCall>.recordWarehouseTypesDao
     get(): RecordWarehouseTypesDao {
         val dao: RecordWarehouseTypesDao by closestDI().instance()
+        return dao
+    }
+
+/**
+ * Extension property of route handlers that resolves a [PipelineStateDao] using the [closestDI]
+ * method. If you need to use this property multiple times in a route handler, store the result of
+ * this property in a local variable to avoid having to resolve the dependency multiple times.
+ */
+val PipelineContext<Unit, ApplicationCall>.pipelineStatesDao
+    get(): PipelineStateDao {
+        val dao: PipelineStateDao by closestDI().instance()
         return dao
     }
 

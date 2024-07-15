@@ -7,9 +7,10 @@ import com.github.clasicrando.web.UserSession
 import com.github.clasicrando.web.adminUserOrRespondMaybeHtmxError
 import com.github.clasicrando.web.component.AdminDashboard
 import com.github.clasicrando.web.component.BasePage
-import com.github.clasicrando.web.component.DataSourceTableRefresh
+import com.github.clasicrando.web.component.DataSourceTable
 import com.github.clasicrando.web.component.DataSourceView
 import com.github.clasicrando.web.component.LoginForm
+import com.github.clasicrando.web.component.WorkflowTables
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.shouldRespondHtmx
 import com.github.clasicrando.web.userOrRedirect
@@ -25,7 +26,6 @@ import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.util.getOrFail
 import kotlinx.html.TagConsumer
-import kotlinx.html.h5
 import kotlinx.html.p
 
 suspend inline fun ApplicationCall.respondMaybeHtmxPage(
@@ -88,7 +88,7 @@ private fun Route.dataSources() =
     get("/data-sources") {
         val user = userOrRedirect() ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Data Sources") {
-            DataSourceTableRefresh(user)
+            DataSourceTable(user)
         }
     }
 
@@ -105,7 +105,7 @@ private fun Route.workflows() =
     get("/workflows") {
         val user = userWithRoleOrRespond(Role.Developer) ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Workflows") {
-            h5 { +"Workflows!" }
+            WorkflowTables()
         }
     }
 

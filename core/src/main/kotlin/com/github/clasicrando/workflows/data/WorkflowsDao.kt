@@ -7,4 +7,17 @@ interface WorkflowsDao {
     suspend fun getById(id: WorkflowId): Workflow?
 
     suspend fun getAll(): List<Workflow>
+
+    suspend fun createWorkflow(
+        name: String,
+        workflowDefinitionName: String,
+        pipelineState: String,
+    )
+
+    suspend fun updateWorkflow(
+        workflowId: WorkflowId,
+        name: String,
+        workflowDefinitionName: String,
+        pipelineState: String,
+    )
 }

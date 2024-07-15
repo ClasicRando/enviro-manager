@@ -22,7 +22,6 @@ import io.ktor.http.HttpMethod
 import kotlinx.html.BUTTON
 import kotlinx.html.ButtonType
 import kotlinx.html.FlowContent
-import kotlinx.html.HtmlTagMarker
 import kotlinx.html.InputType
 import kotlinx.html.TBODY
 import kotlinx.html.THEAD
@@ -43,8 +42,8 @@ import kotlinx.html.thead
 import kotlinx.html.title
 import kotlinx.html.tr
 
-@HtmlTagMarker
-fun TR.dataCell(value: Any?) {
+@Component
+fun TR.DataCell(value: Any?) {
     td {
         +value.displayValue()
     }
@@ -175,14 +174,13 @@ data class ExtraButton(
 inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
     id: String,
     title: String,
-    dataSource: String = "",
+    dataSource: String,
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
     extraContainerClasses: String? = null,
     crossinline header: THEAD.() -> Unit,
 ) {
     val bodyTarget = "#$id tbody"
-    val hasSearch = search && dataSource.isNotBlank()
     val containerClasses =
         if (extraContainerClasses.isNullOrBlank()) {
             "table-responsive-sm"
@@ -192,7 +190,7 @@ inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
     div(classes = containerClasses) {
         div(classes = "btn-toolbar mt-1") {
             role = "toolbar"
-            if (hasSearch) {
+            if (search) {
                 div(classes = "d-flex ms-auto") {
                     input(classes = "form-control me-2", type = InputType.search) {
                         placeholder = "Search"
@@ -207,22 +205,20 @@ inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
             }
             div(
                 classes =
-                    if (hasSearch) {
+                    if (search) {
                         "btn-group"
                     } else {
                         "btn-group ms-auto"
                     },
             ) {
-                if (dataSource.isNotBlank()) {
-                    button(type = ButtonType.button, classes = "btn btn-secondary") {
-                        this.title = "Refresh"
-                        hxGet = dataSource
-                        hxTrigger = "load, click"
-                        hxTarget = bodyTarget
-                        hxSwap(SwapType.OuterHtml)
-                        hxIndicator = ".htmx-indicator"
-                        i(classes = "fa-solid fa-refresh")
-                    }
+                button(type = ButtonType.button, classes = "btn btn-secondary") {
+                    this.title = "Refresh"
+                    hxGet = dataSource
+                    hxTrigger = "load, click"
+                    hxTarget = bodyTarget
+                    hxSwap(SwapType.OuterHtml)
+                    hxIndicator = ".htmx-indicator"
+                    i(classes = "fa-solid fa-refresh")
                 }
                 for (button in extraButtons) {
                     button(type = ButtonType.button, classes = "btn btn-secondary") {
