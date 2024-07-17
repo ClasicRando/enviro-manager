@@ -131,13 +131,15 @@ fun DIV.MainNav(user: User? = null) {
             }
             ul(classes = "navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll") {
                 style = "--bs-scroll-height: 100px"
-                NavItem(name = "Home", href = "/")
-                NavItem(name = "Data Sources", href = "/data-sources")
-                if (user?.hasRole(Role.Developer) == true) {
-                    NavItem(name = "Workflows", href = "/workflows")
-                }
-                if (user?.hasRole(Role.Admin) == true) {
-                    NavItem(name = "Admin Dashboard", href = "/admin-dashboard")
+                if (user != null) {
+                    NavItem(name = "Home", href = "/")
+                    NavItem(name = "Data Sources", href = "/data-sources")
+                    if (user.hasRole(Role.Developer)) {
+                        NavItem(name = "Workflows", href = "/workflows")
+                    }
+                    if (user.hasRole(Role.Admin)) {
+                        NavItem(name = "Admin Dashboard", href = "/admin-dashboard")
+                    }
                 }
             }
             ul(classes = "navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll align-items-center") {
