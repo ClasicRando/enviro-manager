@@ -23,7 +23,14 @@ data class User(
             .toList()
     }
 
-    fun hasRole(role: Role): Boolean = allRoles.any { it == Role.Admin || it == role }
+    fun hasRole(role: Role): Boolean = allRoles.any { it == role || it == Role.Admin }
+
+    fun hasAnyRole(roles: Array<Role>): Boolean {
+        if (roles.size == 1) {
+            return hasRole(roles[0])
+        }
+        return allRoles.any { roles.contains(it) || it == Role.Admin }
+    }
 
     companion object : RowParser<User> {
         override fun fromRow(row: DataRow): User =

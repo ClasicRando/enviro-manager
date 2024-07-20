@@ -126,6 +126,10 @@ suspend fun PipelineContext<Unit, ApplicationCall>.userOrRedirect(): User? =
 suspend fun PipelineContext<Unit, ApplicationCall>.userWithRoleOrRespond(role: Role): User? =
     call.userWithRoleOrRespond(dao = usersDao, role = role)
 
+suspend fun PipelineContext<Unit, ApplicationCall>.userWithRoleOrRespond(
+    roles: Array<Role>,
+): User? = call.userWithRoleOrRespond(dao = usersDao, roles = roles)
+
 suspend fun PipelineContext<Unit, ApplicationCall>.adminUserOrRespondMaybeHtmxError(): User? =
     call.adminUserOrRespondMaybeHtmxError(usersDao)
 
@@ -151,18 +155,27 @@ suspend fun ApplicationCall.userOrRedirect(dao: UsersDao): User? {
 suspend fun ApplicationCall.userWithRoleOrRespond(
     dao: UsersDao,
     role: Role,
+): User? = userWithRoleOrRespond(dao = dao, roles = arrayOf(role))
+
+suspend fun ApplicationCall.userWithRoleOrRespond(
+    dao: UsersDao,
+    roles: Array<Role>,
 ): User? {
     val user = userOrRedirect(dao) ?: return null
-    if (!user.hasRole(role)) {
+    if (!user.hasAnyRole(roles)) {
+        val missingRoles = roles.joinToString(separator = "/")
         if (shouldRespondHtmx) {
             respondHtmx {
-                addCreateToastEvent("User missing role: $role")
+                addCreateToastEvent("User missing role: $missingRoles")
             }
         } else {
             respondHtml {
                 BasePage(user = user, pageTitle = "Missing Role") {
                     p {
-                        +"You are missing the role, $role, that is required for accessing this page"
+                        +(
+                            "You are missing the role, $missingRoles, " +
+                                "that is required for accessing this page"
+                        )
                     }
                 }
             }
