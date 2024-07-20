@@ -19,19 +19,19 @@ create table if not exists pipeline.pipeline_runs (
     current_pipeline_state text not null references pipeline.pipeline_states (code) match simple
         on update cascade
         on delete set null,
-    collection_workflow_id uuid not null
+    collection_workflow_id uuid
         references pipeline.workflow_runs (conductor_workflow_id) match simple
             on update cascade
             on delete set null,
-    load_workflow_id uuid not null
+    load_workflow_id uuid
         references pipeline.workflow_runs (conductor_workflow_id) match simple
             on update cascade
             on delete set null,
-    check_workflow_id uuid not null
+    check_workflow_id uuid
         references pipeline.workflow_runs (conductor_workflow_id) match simple
             on update cascade
             on delete set null,
-    qa_workflow_id uuid not null
+    qa_workflow_id uuid
         references pipeline.workflow_runs (conductor_workflow_id) match simple
             on update cascade
             on delete set null,

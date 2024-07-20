@@ -58,4 +58,5 @@ fun Route.authenticatedApi() =
         regions()
         workflows()
         pipelineStates()
+        pipelineRuns()
     }

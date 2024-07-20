@@ -6,7 +6,9 @@ import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourceContactsDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourcesDao
 import com.github.clasicrando.datasources.data.postgres.PgRecordWarehouseTypeDao
+import com.github.clasicrando.pipeline.data.PipelineRunDao
 import com.github.clasicrando.pipeline.data.PipelineStateDao
+import com.github.clasicrando.pipeline.data.postgres.PgPipelineRunDao
 import com.github.clasicrando.pipeline.data.postgres.PgPipelineStateDao
 import com.github.clasicrando.regions.data.PgRegionsDao
 import com.github.clasicrando.regions.data.RegionsDao
@@ -72,6 +74,9 @@ fun DI.MainBuilder.bindDaoComponents() {
     }
     bindProvider<PipelineStateDao> {
         PgPipelineStateDao(di)
+    }
+    bindProvider<PipelineRunDao> {
+        PgPipelineRunDao(di)
     }
 }
 

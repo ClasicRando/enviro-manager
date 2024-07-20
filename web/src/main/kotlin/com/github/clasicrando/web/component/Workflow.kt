@@ -63,7 +63,7 @@ fun TBODY.Workflow(workflow: Workflow) {
 private const val NAME_ID = "name"
 private const val WORKFLOW_DEFINITION_NAME_ID = "workflowDefinitionName"
 private const val PIPELINE_STATE_ID = "pipelineState"
-private const val PIPELINE_STATES_URL = "/pipeline-states"
+private const val PIPELINE_STATES_URL = "/pipeline-states?includeDone=false"
 
 @Component
 fun <T, C : TagConsumer<T>> C.CreateOrUpdateWorkflowModal(workflow: Workflow?) {
@@ -102,7 +102,7 @@ fun <T, C : TagConsumer<T>> C.CreateOrUpdateWorkflowModal(workflow: Workflow?) {
                 if (workflow == null) {
                     apiV1Url(PIPELINE_STATES_URL)
                 } else {
-                    apiV1Url("$PIPELINE_STATES_URL?current=${workflow.pipelineState}")
+                    apiV1Url("${PIPELINE_STATES_URL}current=${workflow.pipelineState}")
                 }
             DataSelectionField(
                 fieldId = PIPELINE_STATE_ID,

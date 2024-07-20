@@ -15,7 +15,11 @@ fun Route.pipelineStates() =
 
 private fun Route.getPipelineStates() =
     get {
-        val pipelineStates = pipelineStatesDao.getAll()
+        val includeDone = call.parameters["includeDone"]?.toBoolean() ?: true
+        val pipelineStates =
+            pipelineStatesDao
+                .getAll()
+                .filter { includeDone || it.code != "done" }
         val selectedIndex =
             call.parameters["current"]
                 ?.let { current -> pipelineStates.indexOfFirst { it.name == current } }

@@ -10,6 +10,7 @@ import com.github.clasicrando.web.component.BasePage
 import com.github.clasicrando.web.component.DataSourceTable
 import com.github.clasicrando.web.component.DataSourceView
 import com.github.clasicrando.web.component.LoginForm
+import com.github.clasicrando.web.component.PipelineRuns
 import com.github.clasicrando.web.component.WorkflowTables
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.shouldRespondHtmx
@@ -73,6 +74,7 @@ fun Route.authenticatedPages() {
     dataSources()
     dataSource()
     workflows()
+    pipelineRuns()
     adminDashboard()
 }
 
@@ -106,6 +108,22 @@ private fun Route.workflows() =
         val user = userWithRoleOrRespond(Role.Developer) ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Workflows") {
             WorkflowTables()
+        }
+    }
+
+private val pipelineRunRoles =
+    arrayOf(
+        Role.PipelineCollection,
+        Role.PipelineLoad,
+        Role.PipelineCheck,
+        Role.PipelineQA,
+    )
+
+private fun Route.pipelineRuns() =
+    get("/pipeline-runs") {
+        val user = userWithRoleOrRespond(roles = pipelineRunRoles)
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Pipeline Runs") {
+            PipelineRuns()
         }
     }
 

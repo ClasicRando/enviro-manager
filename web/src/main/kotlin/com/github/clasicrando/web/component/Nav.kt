@@ -134,6 +134,7 @@ fun DIV.MainNav(user: User? = null) {
                 if (user != null) {
                     NavItem(name = "Home", href = "/")
                     NavItem(name = "Data Sources", href = "/data-sources")
+                    NavItem(name = "Pipeline Runs", href = "/pipeline-runs")
                     if (user.hasRole(Role.Developer)) {
                         NavItem(name = "Workflows", href = "/workflows")
                     }
