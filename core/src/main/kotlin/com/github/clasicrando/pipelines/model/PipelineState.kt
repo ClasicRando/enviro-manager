@@ -1,4 +1,4 @@
-package com.github.clasicrando.pipeline.model
+package com.github.clasicrando.pipelines.model
 
 import io.github.clasicrando.kdbc.core.query.RowParser
 import io.github.clasicrando.kdbc.core.result.DataRow

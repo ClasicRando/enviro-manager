@@ -2,6 +2,7 @@ package com.github.clasicrando.web
 
 import com.github.clasicrando.di.bindDaoComponents
 import com.github.clasicrando.di.cleanUpResources
+import com.github.clasicrando.di.registerTypes
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.web.api.authenticatedApi
@@ -110,6 +111,10 @@ fun Application.module() {
     di {
         bindDaoComponents()
         bindRedisSessionComponent()
+    }
+    runBlocking {
+        val di by closestDI()
+        di.registerTypes()
     }
     environment.monitor.subscribe(ApplicationStarted) {
         serverLogger.atInfo {

@@ -34,6 +34,23 @@ htmx.defineExtension('json-enc', {
 
   encodeParameters: function(xhr, parameters, elt) {
     xhr.overrideMimeType('text/json')
-    return (JSON.stringify(parameters))
+    return toStringAgg(parameters);
   }
-})
+});
+
+function toStringAgg(formData) {
+    const result = {};
+    for (const item of formData.entries()) {
+        const [key, value] = item;
+        if (!Object.hasOwn(result, key)) {
+            result[key] = value;
+            continue;
+        }
+        if (result[key] instanceof Array) {
+            result[key].push(value);
+            continue;
+        }
+        result[key] = new Array(result[key], value);
+    }
+    return JSON.stringify(result);
+}

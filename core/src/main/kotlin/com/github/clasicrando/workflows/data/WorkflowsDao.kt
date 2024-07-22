@@ -2,6 +2,7 @@ package com.github.clasicrando.workflows.data
 
 import com.github.clasicrando.workflows.model.Workflow
 import com.github.clasicrando.workflows.model.WorkflowId
+import com.github.clasicrando.workflows.model.WorkflowTaskComposite
 
 interface WorkflowsDao {
     suspend fun getById(id: WorkflowId): Workflow?
@@ -10,14 +11,12 @@ interface WorkflowsDao {
 
     suspend fun createWorkflow(
         name: String,
-        workflowDefinitionName: String,
-        pipelineState: String,
+        workflowTasks: List<WorkflowTaskComposite>,
     )
 
     suspend fun updateWorkflow(
         workflowId: WorkflowId,
         name: String,
-        workflowDefinitionName: String,
-        pipelineState: String,
+        workflowTasks: List<WorkflowTaskComposite>,
     )
 }

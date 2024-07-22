@@ -3,14 +3,16 @@ package com.github.clasicrando.web
 import com.github.clasicrando.datasources.data.DataSourceContactsDao
 import com.github.clasicrando.datasources.data.DataSourcesDao
 import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
-import com.github.clasicrando.pipeline.data.PipelineRunDao
-import com.github.clasicrando.pipeline.data.PipelineStateDao
+import com.github.clasicrando.pipelines.data.PipelineRunDao
+import com.github.clasicrando.pipelines.data.PipelineStateDao
 import com.github.clasicrando.regions.data.RegionsDao
 import com.github.clasicrando.users.data.UsersDao
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.component.BasePage
 import com.github.clasicrando.web.htmx.respondHtmx
+import com.github.clasicrando.workflows.data.TasksDao
+import com.github.clasicrando.workflows.data.WorkflowTasksDao
 import com.github.clasicrando.workflows.data.WorkflowsDao
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -126,6 +128,28 @@ val PipelineContext<Unit, ApplicationCall>.pipelineStatesDao
 val PipelineContext<Unit, ApplicationCall>.pipelineRunsDao
     get(): PipelineRunDao {
         val dao: PipelineRunDao by closestDI().instance()
+        return dao
+    }
+
+/**
+ * Extension property of route handlers that resolves a [TasksDao] using the [closestDI] method. If
+ * you need to use this property multiple times in a route handler, store the result of this
+ * property in a local variable to avoid having to resolve the dependency multiple times.
+ */
+val PipelineContext<Unit, ApplicationCall>.tasksDao
+    get(): TasksDao {
+        val dao: TasksDao by closestDI().instance()
+        return dao
+    }
+
+/**
+ * Extension property of route handlers that resolves a [WorkflowTasksDao] using the [closestDI]
+ * method. If you need to use this property multiple times in a route handler, store the result of
+ * this property in a local variable to avoid having to resolve the dependency multiple times.
+ */
+val PipelineContext<Unit, ApplicationCall>.workflowTasksDao
+    get(): WorkflowTasksDao {
+        val dao: WorkflowTasksDao by closestDI().instance()
         return dao
     }
 

@@ -1,40 +1,36 @@
 create table if not exists pipeline.pipeline_runs (
     run_id bigint primary key generated always as identity,
-    ds_id bigint not null references em.data_sources (ds_id) match simple
+    ds_id bigint not null references em.data_sources(ds_id) match simple
         on update cascade
         on delete cascade,
     record_date date not null,
-    collection_user_id uuid references em.users (user_id) match simple
+    collection_user_id uuid references em.users(user_id) match simple
         on update cascade
         on delete set null,
-    load_user_id uuid references em.users (user_id) match simple
+    load_user_id uuid references em.users(user_id) match simple
         on update cascade
         on delete set null,
-    check_user_id uuid references em.users (user_id) match simple
+    check_user_id uuid references em.users(user_id) match simple
         on update cascade
         on delete set null,
-    qa_user_id uuid references em.users (user_id) match simple
+    qa_user_id uuid references em.users(user_id) match simple
         on update cascade
         on delete set null,
-    current_pipeline_state text not null references pipeline.pipeline_states (code) match simple
+    current_pipeline_state text not null references pipeline.pipeline_states(code) match simple
         on update cascade
         on delete set null,
-    collection_workflow_id uuid
-        references pipeline.workflow_runs (conductor_workflow_id) match simple
-            on update cascade
-            on delete set null,
-    load_workflow_id uuid
-        references pipeline.workflow_runs (conductor_workflow_id) match simple
-            on update cascade
-            on delete set null,
-    check_workflow_id uuid
-        references pipeline.workflow_runs (conductor_workflow_id) match simple
-            on update cascade
-            on delete set null,
-    qa_workflow_id uuid
-        references pipeline.workflow_runs (conductor_workflow_id) match simple
-            on update cascade
-            on delete set null,
+    collection_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
+        on update cascade
+        on delete set null,
+    load_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
+        on update cascade
+        on delete set null,
+    check_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
+        on update cascade
+        on delete set null,
+    qa_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
+        on update cascade
+        on delete set null,
     is_active boolean not null default false,
     production_count int not null default 0 check(production_count >= 0),
     staging_count int not null default 0 check(staging_count >= 0),

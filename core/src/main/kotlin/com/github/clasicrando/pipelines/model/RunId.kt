@@ -1,4 +1,4 @@
-package com.github.clasicrando.pipeline.model
+package com.github.clasicrando.pipelines.model
 
 @JvmInline
 value class RunId(

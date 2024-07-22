@@ -10,9 +10,9 @@ create or replace view em.v_data_sources as
     left join em.users cu on ds.created_by = cu.user_id
     left join em.users uu on ds.updated_by = uu.user_id
     left join pipeline.record_warehouse_types wt on ds.record_warehouse_type = wt.id
-    left join pipeline.workflows cw1 on ds.collection_workflow = cw1.id
-    left join pipeline.workflows lw on ds.load_workflow = lw.id
-    left join pipeline.workflows cw2 on ds.check_workflow = cw2.id
-    left join pipeline.workflows qw on ds.qa_workflow = qw.id;
+    left join workflow_engine.workflows cw1 on ds.collection_workflow = cw1.workflow_id
+    left join workflow_engine.workflows lw on ds.load_workflow = lw.workflow_id
+    left join workflow_engine.workflows cw2 on ds.check_workflow = cw2.workflow_id
+    left join workflow_engine.workflows qw on ds.qa_workflow = qw.workflow_id;
 
 grant select on em.v_data_sources to em_web;

@@ -17,6 +17,10 @@
       "dependencies": []
     },
     {
+      "name": "schemas/workflow_engine",
+      "dependencies": []
+    },
+    {
       "name": "functions/audit.if_modified_func",
       "dependencies": [
         "tables/audit.logged_actions",
@@ -93,7 +97,7 @@
         "tables/em.countries",
         "tables/em.users",
         "tables/pipeline.record_warehouse_types",
-        "tables/pipeline.workflows"
+        "tables/workflow_engine.workflows"
       ]
     },
     {
@@ -165,7 +169,7 @@
         "tables/em.users",
         "tables/pipeline.pipeline_states",
         "types/pipeline.merge_type",
-        "tables/pipeline.workflow_runs"
+        "tables/workflow_engine.workflow_runs"
       ]
     },
     {
@@ -219,11 +223,10 @@
       ]
     },
     {
-      "name": "tables/pipeline.workflows",
+      "name": "tables/workflow_engine.workflows",
       "dependencies": [
         "functions/data_check.check_not_blank_or_empty",
-        "procedures/audit.audit_table",
-        "tables/pipeline.pipeline_states"
+        "procedures/audit.audit_table"
       ]
     },
     {
@@ -245,7 +248,7 @@
         "tables/em.provinces",
         "tables/em.users",
         "tables/pipeline.record_warehouse_types",
-        "tables/pipeline.workflows"
+        "tables/workflow_engine.workflows"
       ]
     },
     {
@@ -271,9 +274,12 @@
       ]
     },
     {
-      "name": "tables/pipeline.workflow_runs",
+      "name": "tables/workflow_engine.workflow_runs",
       "dependencies": [
-        "tables/pipeline.workflows"
+        "tables/workflow_engine.workflows",
+        "tables/workflow_engine.jobs",
+        "types/workflow_engine.workflow_run_status",
+        "procedures/audit.audit_table"
       ]
     },
     {
@@ -283,10 +289,82 @@
       ]
     },
     {
-      "name": "views/em.v_data_sources_with_contacts",
+      "name": "types/workflow_engine.workflow_run_status",
+      "dependencies": []
+    },
+    {
+      "name": "types/workflow_engine.job_type",
+      "dependencies": []
+    },
+    {
+      "name": "types/workflow_engine.schedule_entry",
+      "dependencies": []
+    },
+    {
+      "name": "types/workflow_engine.task_rule",
+      "dependencies": []
+    },
+    {
+      "name": "types/workflow_engine.task_status",
+      "dependencies": []
+    },
+    {
+      "name": "tables/workflow_engine.jobs",
       "dependencies": [
-        "views/em.v_data_sources",
-        "tables/em.data_source_contacts"
+        "procedures/audit.audit_table",
+        "tables/workflow_engine.workflows",
+        "types/workflow_engine.job_type",
+        "types/workflow_engine.schedule_entry",
+        "tables/workflow_engine.workflow_runs",
+        "functions/data_check.check_not_blank_or_empty"
+      ]
+    },
+    {
+      "name": "tables/workflow_engine.task_queue",
+      "dependencies": [
+        "procedures/audit.audit_table",
+        "tables/workflow_engine.task_queue_archive",
+        "tables/workflow_engine.workflow_runs",
+        "tables/workflow_engine.tasks",
+        "types/workflow_engine.task_status",
+        "types/workflow_engine.task_rule",
+        "functions/data_check.check_not_blank_or_empty"
+      ]
+    },
+    {
+      "name": "tables/workflow_engine.task_queue_archive",
+      "dependencies": [
+        "types/workflow_engine.task_status",
+        "types/workflow_engine.task_rule"
+      ]
+    },
+    {
+      "name": "tables/workflow_engine.tasks",
+      "dependencies": [
+        "procedures/audit.audit_table",
+        "functions/data_check.check_not_blank_or_empty"
+      ]
+    },
+    {
+      "name": "tables/workflow_engine.tasks",
+      "dependencies": [
+        "procedures/audit.audit_table",
+        "functions/data_check.check_not_blank_or_empty"
+      ]
+    },
+    {
+      "name": "tables/workflow_engine.workflow_tasks",
+      "dependencies": [
+        "procedures/audit.audit_table",
+        "tables/workflow_engine.workflows",
+        "tables/workflow_engine.tasks"
+      ]
+    },
+    {
+      "name": "views/workflow_engine.v_workflows",
+      "dependencies": [
+        "tables/workflow_engine.workflows",
+        "tables/workflow_engine.workflow_tasks"
       ]
     }
   ]

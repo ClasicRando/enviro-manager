@@ -11,6 +11,7 @@ val ktorVersion: String by project
 val kodeinVersion: String by project
 val kredsVersion: String by project
 val apacheCommonsDbcpVersion: String by project
+val kdbcVersion: String by project
 
 dependencies {
     implementation(project(":core"))
@@ -25,6 +26,8 @@ dependencies {
     implementation("io.github.crackthecodeabhi:kreds:$kredsVersion")
     // https://mvnrepository.com/artifact/org.kodein.di/kodein-di-jvm
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:$kodeinVersion")
+    // https://mvnrepository.com/artifact/io.github.clasicrando/kdbc-postgresql
+    implementation("io.github.clasicrando:kdbc-postgresql:$kdbcVersion")
 }
 
 application {

@@ -90,6 +90,12 @@ window.toggleDisplay = (element) => {
 };
 
 /** @type {(element: HTMLElement) => void} */
+window.removeElement = (currentElement, selector) => {
+    const element = currentElement.closest(selector);
+    element.remove();
+};
+
+/** @type {(element: HTMLElement) => void} */
 window.selectTab = (element) => {
     const tabList = element.parentElement.parentElement;
     tabList.querySelectorAll('button.nav-link.active').forEach(btn => {

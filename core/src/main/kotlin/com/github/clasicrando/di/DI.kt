@@ -6,17 +6,27 @@ import com.github.clasicrando.datasources.data.RecordWarehouseTypesDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourceContactsDao
 import com.github.clasicrando.datasources.data.postgres.PgDataSourcesDao
 import com.github.clasicrando.datasources.data.postgres.PgRecordWarehouseTypeDao
-import com.github.clasicrando.pipeline.data.PipelineRunDao
-import com.github.clasicrando.pipeline.data.PipelineStateDao
-import com.github.clasicrando.pipeline.data.postgres.PgPipelineRunDao
-import com.github.clasicrando.pipeline.data.postgres.PgPipelineStateDao
+import com.github.clasicrando.pipelines.data.PipelineRunDao
+import com.github.clasicrando.pipelines.data.PipelineStateDao
+import com.github.clasicrando.pipelines.data.postgres.PgPipelineRunDao
+import com.github.clasicrando.pipelines.data.postgres.PgPipelineStateDao
+import com.github.clasicrando.pipelines.model.MergeType
 import com.github.clasicrando.regions.data.PgRegionsDao
 import com.github.clasicrando.regions.data.RegionsDao
 import com.github.clasicrando.users.data.PgUsersDao
 import com.github.clasicrando.users.data.UsersDao
-import com.github.clasicrando.workflows.data.PgWorkflowsDao
+import com.github.clasicrando.workflows.data.TasksDao
+import com.github.clasicrando.workflows.data.WorkflowTasksDao
 import com.github.clasicrando.workflows.data.WorkflowsDao
+import com.github.clasicrando.workflows.data.postgres.PgTasksDao
+import com.github.clasicrando.workflows.data.postgres.PgWorkflowTasksDao
+import com.github.clasicrando.workflows.data.postgres.PgWorkflowsDao
+import com.github.clasicrando.workflows.model.ScheduleEntry
+import com.github.clasicrando.workflows.model.TaskRule
+import com.github.clasicrando.workflows.model.WorkflowRunStatus
+import com.github.clasicrando.workflows.model.WorkflowTaskComposite
 import io.github.clasicrando.kdbc.core.pool.PoolOptions
+import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.postgresql.connection.PgConnectOptions
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
 import org.kodein.di.DI
@@ -78,9 +88,27 @@ fun DI.MainBuilder.bindDaoComponents() {
     bindProvider<PipelineRunDao> {
         PgPipelineRunDao(di)
     }
+    bindProvider<TasksDao> {
+        PgTasksDao(di)
+    }
+    bindProvider<WorkflowTasksDao> {
+        PgWorkflowTasksDao(di)
+    }
 }
 
 suspend fun DI.cleanUpResources() {
     val connectionPool by this.instance<PgAsyncConnectionPool>()
     connectionPool.close()
+}
+
+suspend fun DI.registerTypes() {
+    val connectionPool by di.instance<PgAsyncConnectionPool>()
+    connectionPool.useConnection {
+        it.registerEnumType<MergeType>("pipeline.merge_type")
+//        it.registerEnumType<TaskStatus>("workflow_engine.task_status")
+        it.registerEnumType<WorkflowRunStatus>("workflow_engine.workflow_run_status")
+        it.registerCompositeType<ScheduleEntry>("workflow_engine.schedule_entry")
+        it.registerCompositeType<TaskRule>("workflow_engine.task_rule")
+        it.registerCompositeType<WorkflowTaskComposite>("workflow_engine.workflow_tasks")
+    }
 }

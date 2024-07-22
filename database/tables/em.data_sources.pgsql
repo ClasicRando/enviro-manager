@@ -1,45 +1,45 @@
 create table if not exists em.data_sources (
     ds_id bigint primary key generated always as identity,
-    code text not null check (data_check.check_not_blank_or_empty(code)) unique,
+    code text not null check(data_check.check_not_blank_or_empty(code)) unique,
     prov text,
     country text not null data_check.check_not_blank_or_empty(country),
-    description text not null check (data_check.check_not_blank_or_empty(description)),
-    files_location text not null check (data_check.check_not_blank_or_empty(files_location)),
+    description text not null check(data_check.check_not_blank_or_empty(description)),
+    files_location text not null check(data_check.check_not_blank_or_empty(files_location)),
     prov_level boolean not null,
-    comments text check (data_check.check_not_blank_or_empty(comments)),
-    assigned_user uuid not null references em.users (user_id) match simple
+    comments text check(data_check.check_not_blank_or_empty(comments)),
+    assigned_user uuid not null references em.users(user_id) match simple
         on update cascade
         on delete restrict,
-    created_by uuid not null references em.users (user_id) match simple
+    created_by uuid not null references em.users(user_id) match simple
         on update cascade
         on delete restrict,
     last_updated timestamp,
-    updated_by uuid references em.users (user_id) match simple
+    updated_by uuid references em.users(user_id) match simple
         on update cascade
         on delete restrict,
     search_radius double precision not null,
-    record_warehouse_type smallint not null references pipeline.record_warehouse_types (id) match simple
+    record_warehouse_type smallint not null references pipeline.record_warehouse_types(id) match simple
         on update cascade
         on delete restrict,
-    reporting_type text not null check (data_check.check_not_blank_or_empty(reporting_type)),
+    reporting_type text not null check(data_check.check_not_blank_or_empty(reporting_type)),
     created timestamp not null default timezone('utc'::text, now()),
-    collection_workflow bigint not null references pipeline.workflows (id) match simple
+    collection_workflow bigint not null references workflow_engine.workflows(workflow_id) match simple
         on update cascade
         on delete restrict,
-    load_workflow bigint not null references pipeline.workflows (id) match simple
+    load_workflow bigint not null references workflow_engine.workflows(workflow_id) match simple
         on update cascade
         on delete restrict,
-    check_workflow bigint not null references pipeline.workflows (id) match simple
+    check_workflow bigint not null references workflow_engine.workflows(workflow_id) match simple
         on update cascade
         on delete restrict,
-    qa_workflow bigint not null references pipeline.workflows (id) match simple
+    qa_workflow bigint not null references workflow_engine.workflows(workflow_id) match simple
         on update cascade
         on delete restrict,
-    check (case when prov_level then data_check.check_not_blank_or_empty(prov) else prov is null end),
-    foreign key (prov, country) references em.provinces (prov_code, country_code) match simple
+    check(case when prov_level then data_check.check_not_blank_or_empty(prov) else prov is null end),
+    foreign key (prov, country) references em.provinces(prov_code, country_code) match simple
         on update cascade
         on delete restrict,
-    foreign key (country) references em.countries (country_code) match simple
+    foreign key (country) references em.countries(country_code) match simple
         on update cascade
         on delete restrict
 );

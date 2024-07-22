@@ -1,6 +1,6 @@
 package com.github.clasicrando.web.component
 
-import com.github.clasicrando.pipeline.model.PipelineRunMin
+import com.github.clasicrando.pipelines.model.PipelineRunMin
 import com.github.clasicrando.web.api.apiV1Url
 import io.ktor.http.HttpMethod
 import kotlinx.html.TBODY

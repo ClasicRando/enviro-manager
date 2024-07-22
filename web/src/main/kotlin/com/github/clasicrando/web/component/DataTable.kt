@@ -113,49 +113,55 @@ inline fun <reified T : Any> FlowContent.RowActionWithValue(
     }
 }
 
-fun <T> TBODY.rowWithDetails(
+@Component
+inline fun TBODY.RowWithDetails(
     detailId: String,
     columnCount: Int,
-    details: List<T>,
-    detailsHeader: THEAD.() -> Unit,
-    detailsRowBuilder: TBODY.(T) -> Unit,
+    detailsUrl: String,
+    detailsHttpMethod: HttpMethod = HttpMethod.Get,
+    crossinline detailsHeader: THEAD.() -> Unit,
+    crossinline rowContents: TR.() -> Unit,
 ) {
     val escapedDetailsId = detailId.replace("'", "\\'")
     tr {
         td {
             button(classes = "btn btn-primary") {
                 this.hxOnClick = "toggleDisplay(document.getElementById('$escapedDetailsId'))"
+                setHxUrl(detailsHttpMethod, detailsUrl)
+                hxTrigger = "load"
+                hxTarget = "#$detailId table tbody"
+                hxIndicator = ".htmx-indicator"
+                hxSwap(swapType = SwapType.OuterHtml)
                 i(classes = "fa-solid fa-plus")
             }
         }
+        rowContents()
     }
-    detailsTable(
+    DetailsTable(
         detailId = detailId,
         columnCount = columnCount,
-        items = details,
         header = detailsHeader,
-        rowBuilder = detailsRowBuilder,
     )
 }
 
-inline fun <T> TBODY.detailsTable(
+@Component
+inline fun TBODY.DetailsTable(
     detailId: String,
     columnCount: Int,
-    items: List<T>,
     crossinline header: THEAD.() -> Unit,
-    crossinline rowBuilder: TBODY.(T) -> Unit,
 ) {
     tr(classes = "d-none") {
         id = detailId
         td {
             colSpan = columnCount.toString()
             table(classes = "table table-stripped") {
-                thead(block = header)
-                tbody {
-                    for (item in items) {
-                        rowBuilder(item)
+                caption {
+                    div(classes = "spinner-border htmx-indicator") {
+                        role = "status"
                     }
                 }
+                thead(block = header)
+                tbody()
             }
         }
     }

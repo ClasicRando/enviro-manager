@@ -7,5 +7,5 @@
   "pipeline.file_types.pgsql",
   "pipeline.pipeline_states.pgsql",
   "pipeline.record_warehouse_types.pgsql",
-  "pipeline.workflows.pgsql"
+  "workflow_engine.workflows.pgsql"
 ]

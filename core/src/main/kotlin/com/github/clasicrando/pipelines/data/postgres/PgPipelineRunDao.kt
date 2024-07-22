@@ -1,9 +1,9 @@
-package com.github.clasicrando.pipeline.data.postgres
+package com.github.clasicrando.pipelines.data.postgres
 
-import com.github.clasicrando.pipeline.data.PipelineRunDao
-import com.github.clasicrando.pipeline.model.PipelineRun
-import com.github.clasicrando.pipeline.model.PipelineRunMin
-import com.github.clasicrando.pipeline.model.RunId
+import com.github.clasicrando.pipelines.data.PipelineRunDao
+import com.github.clasicrando.pipelines.model.PipelineRun
+import com.github.clasicrando.pipelines.model.PipelineRunMin
+import com.github.clasicrando.pipelines.model.RunId
 import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.bind
 import io.github.clasicrando.kdbc.core.query.fetchAll

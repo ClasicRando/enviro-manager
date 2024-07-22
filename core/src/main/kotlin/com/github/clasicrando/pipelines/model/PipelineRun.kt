@@ -1,13 +1,14 @@
-package com.github.clasicrando.pipeline.model
+package com.github.clasicrando.pipelines.model
 
 import com.github.clasicrando.datasources.model.DsId
 import com.github.clasicrando.datasources.model.toDsId
+import com.github.clasicrando.workflows.model.WorkflowRunId
+import com.github.clasicrando.workflows.model.toWorkflowRunId
 import io.github.clasicrando.kdbc.core.query.RowParser
 import io.github.clasicrando.kdbc.core.result.DataRow
 import io.github.clasicrando.kdbc.core.result.getAsNonNull
 import io.github.clasicrando.kdbc.postgresql.type.PgJson
 import kotlinx.datetime.LocalDate
-import kotlinx.uuid.UUID
 
 data class PipelineRun(
     val runId: RunId,
@@ -19,10 +20,10 @@ data class PipelineRun(
     val checkUser: String,
     val qaUser: String,
     val currentPipelineState: String,
-    val collectionWorkflowRunId: UUID,
-    val loadWorkflowRunId: UUID,
-    val checkWorkflowRunId: UUID,
-    val qaWorkflowRunId: UUID,
+    val collectionWorkflowRunId: WorkflowRunId,
+    val loadWorkflowRunId: WorkflowRunId,
+    val checkWorkflowRunId: WorkflowRunId,
+    val qaWorkflowRunId: WorkflowRunId,
     val isActive: Boolean,
     val productionCount: Int,
     val stagingCount: Int,
@@ -43,10 +44,12 @@ data class PipelineRun(
                 checkUser = row.getAsNonNull("check_user"),
                 qaUser = row.getAsNonNull("qa_user"),
                 currentPipelineState = row.getAsNonNull("current_pipeline_state"),
-                collectionWorkflowRunId = row.getAsNonNull("collection_workflow_id"),
-                loadWorkflowRunId = row.getAsNonNull("load_workflow_id"),
-                checkWorkflowRunId = row.getAsNonNull("check_workflow_id"),
-                qaWorkflowRunId = row.getAsNonNull("qa_workflow_id"),
+                collectionWorkflowRunId = row
+                    .getAsNonNull<Long>("collection_workflow_id")
+                    .toWorkflowRunId(),
+                loadWorkflowRunId = row.getAsNonNull<Long>("load_workflow_id").toWorkflowRunId(),
+                checkWorkflowRunId = row.getAsNonNull<Long>("check_workflow_id").toWorkflowRunId(),
+                qaWorkflowRunId = row.getAsNonNull<Long>("qa_workflow_id").toWorkflowRunId(),
                 isActive = row.getAsNonNull("is_active"),
                 productionCount = row.getAsNonNull("production_count"),
                 stagingCount = row.getAsNonNull("staging_count"),

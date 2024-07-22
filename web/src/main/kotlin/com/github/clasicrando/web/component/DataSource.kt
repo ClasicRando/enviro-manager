@@ -201,28 +201,28 @@ fun <T, C : TagConsumer<T>> C.CreateDataSourceModal(collectionUsers: List<User>)
                         fieldId = "collectionWorkflowId",
                         label = "Collection",
                         columnWidth = 2,
-                        dataUrl = apiV1Url("/workflows/collection"),
+                        dataUrl = apiV1Url("/workflows/options"),
                         trigger = "load",
                     )
                     DataSelectionField(
                         fieldId = "loadWorkflowId",
                         label = "Load",
                         columnWidth = 2,
-                        dataUrl = apiV1Url("/workflows/load"),
+                        dataUrl = apiV1Url("/workflows/options"),
                         trigger = "load",
                     )
                     DataSelectionField(
                         fieldId = "checkWorkflowId",
                         label = "Check",
                         columnWidth = 2,
-                        dataUrl = apiV1Url("/workflows/check"),
+                        dataUrl = apiV1Url("/workflows/options"),
                         trigger = "load",
                     )
                     DataSelectionField(
                         fieldId = "qaWorkflowId",
                         label = "QA",
                         columnWidth = 2,
-                        dataUrl = apiV1Url("/workflows/qa"),
+                        dataUrl = apiV1Url("/workflows/options"),
                         trigger = "load",
                     )
                 }
@@ -350,7 +350,7 @@ fun FlowContent.DataSourceEdit(
                     columnWidth = 2,
                     dataUrl =
                         apiV1Url(
-                            "/workflows/collection?current=${dataSource.collectionWorkflow}",
+                            "/workflows/options?current=${dataSource.collectionWorkflow}",
                         ),
                     trigger = "load",
                 )
@@ -360,7 +360,7 @@ fun FlowContent.DataSourceEdit(
                     columnWidth = 2,
                     dataUrl =
                         apiV1Url(
-                            "/workflows/load?current=${dataSource.collectionWorkflow}",
+                            "/workflows/options?current=${dataSource.collectionWorkflow}",
                         ),
                     trigger = "load",
                 )
@@ -370,7 +370,7 @@ fun FlowContent.DataSourceEdit(
                     columnWidth = 2,
                     dataUrl =
                         apiV1Url(
-                            "/workflows/check?current=${dataSource.collectionWorkflow}",
+                            "/workflows/options?current=${dataSource.collectionWorkflow}",
                         ),
                     trigger = "load",
                 )
@@ -380,7 +380,7 @@ fun FlowContent.DataSourceEdit(
                     columnWidth = 2,
                     dataUrl =
                         apiV1Url(
-                            "/workflows/qa?current=${dataSource.collectionWorkflow}",
+                            "/workflows/options?current=${dataSource.collectionWorkflow}",
                         ),
                     trigger = "load",
                 )

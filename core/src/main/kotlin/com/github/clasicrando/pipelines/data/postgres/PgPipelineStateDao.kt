@@ -1,7 +1,7 @@
-package com.github.clasicrando.pipeline.data.postgres
+package com.github.clasicrando.pipelines.data.postgres
 
-import com.github.clasicrando.pipeline.data.PipelineStateDao
-import com.github.clasicrando.pipeline.model.PipelineState
+import com.github.clasicrando.pipelines.data.PipelineStateDao
+import com.github.clasicrando.pipelines.model.PipelineState
 import io.github.clasicrando.kdbc.core.pool.useConnection
 import io.github.clasicrando.kdbc.core.query.fetchAll
 import io.github.clasicrando.kdbc.postgresql.pool.PgAsyncConnectionPool
