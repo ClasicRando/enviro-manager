@@ -30,7 +30,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 
 @Component
-fun <T, C : TagConsumer<T>> C.WorkflowTables() {
+fun <T, C : TagConsumer<T>> C.WorkflowsTable() {
     DataTableRefresh(
         id = "workflows",
         title = "Workflows",
@@ -174,7 +174,7 @@ fun <T, C : TagConsumer<T>> C.WorkflowTaskRow(workflowTask: WorkflowTask?) {
                 label = "Task",
                 columnWidth = 5,
                 trigger = "load",
-                dataUrl = apiV1Url("/tasks?current=${workflowTask?.taskId}"),
+                dataUrl = apiV1Url("/tasks?table=false&current=${workflowTask?.taskId}"),
                 labelColumnWidth = 2,
             )
             Column(size = 2) {

@@ -11,7 +11,7 @@ import kotlinx.html.th
 import kotlinx.html.tr
 
 @Component
-fun <T, C : TagConsumer<T>> C.PipelineRuns() {
+fun <T, C : TagConsumer<T>> C.PipelineRunsTable() {
     DataTableRefresh(
         id = "pipelineRuns",
         title = "PipelineRuns",

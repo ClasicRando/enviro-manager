@@ -7,11 +7,12 @@ import com.github.clasicrando.web.UserSession
 import com.github.clasicrando.web.adminUserOrRespondMaybeHtmxError
 import com.github.clasicrando.web.component.AdminDashboard
 import com.github.clasicrando.web.component.BasePage
-import com.github.clasicrando.web.component.DataSourceTable
 import com.github.clasicrando.web.component.DataSourceView
+import com.github.clasicrando.web.component.DataSourcesTable
 import com.github.clasicrando.web.component.LoginForm
-import com.github.clasicrando.web.component.PipelineRuns
-import com.github.clasicrando.web.component.WorkflowTables
+import com.github.clasicrando.web.component.PipelineRunsTable
+import com.github.clasicrando.web.component.TasksTable
+import com.github.clasicrando.web.component.WorkflowsTable
 import com.github.clasicrando.web.htmx.respondHtmx
 import com.github.clasicrando.web.shouldRespondHtmx
 import com.github.clasicrando.web.userOrRedirect
@@ -74,6 +75,7 @@ fun Route.authenticatedPages() {
     dataSources()
     dataSource()
     workflows()
+    tasks()
     pipelineRuns()
     adminDashboard()
 }
@@ -90,7 +92,7 @@ private fun Route.dataSources() =
     get("/data-sources") {
         val user = userOrRedirect() ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Data Sources") {
-            DataSourceTable(user)
+            DataSourcesTable(user)
         }
     }
 
@@ -107,7 +109,15 @@ private fun Route.workflows() =
     get("/workflows") {
         val user = userWithRoleOrRespond(Role.Developer) ?: return@get
         call.respondMaybeHtmxPage(user = user, pageTitle = "Workflows") {
-            WorkflowTables()
+            WorkflowsTable()
+        }
+    }
+
+private fun Route.tasks() =
+    get("/tasks") {
+        val user = userWithRoleOrRespond(Role.Developer) ?: return@get
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Workflows") {
+            TasksTable()
         }
     }
 
@@ -123,7 +133,7 @@ private fun Route.pipelineRuns() =
     get("/pipeline-runs") {
         val user = userWithRoleOrRespond(roles = pipelineRunRoles)
         call.respondMaybeHtmxPage(user = user, pageTitle = "Pipeline Runs") {
-            PipelineRuns()
+            PipelineRunsTable()
         }
     }
 

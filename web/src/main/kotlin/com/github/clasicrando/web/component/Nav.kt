@@ -137,6 +137,7 @@ fun DIV.MainNav(user: User? = null) {
                     NavItem(name = "Pipeline Runs", href = "/pipeline-runs")
                     if (user.hasRole(Role.Developer)) {
                         NavItem(name = "Workflows", href = "/workflows")
+                        NavItem(name = "Tasks", href = "/tasks")
                     }
                     if (user.hasRole(Role.Admin)) {
                         NavItem(name = "Admin Dashboard", href = "/admin-dashboard")

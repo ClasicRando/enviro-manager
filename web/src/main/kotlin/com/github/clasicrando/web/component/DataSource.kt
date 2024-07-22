@@ -24,7 +24,7 @@ import kotlinx.html.tr
 const val DATA_SOURCES_TABLE = "dataSourcesTable"
 
 @Component
-fun <T, C : TagConsumer<T>> C.DataSourceTable(user: User) {
+fun <T, C : TagConsumer<T>> C.DataSourcesTable(user: User) {
     val extraButtons =
         if (user.hasRole(Role.CreateDataSource)) {
             listOf(
