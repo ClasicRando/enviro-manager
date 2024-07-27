@@ -50,7 +50,7 @@ inline fun FlowContent.Column(
     classes: String? = null,
     size: Int? = null,
     gridTier: GridTier = GridTier.ExtraSmall,
-    crossinline block: DIV.() -> Unit,
+    crossinline block: DIV.() -> Unit = {},
 ) {
     COLUMN(gridTier, classes, size, this.consumer).visitAndFinalize(this.consumer) { block() }
 }

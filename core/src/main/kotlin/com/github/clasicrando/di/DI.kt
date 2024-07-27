@@ -23,6 +23,7 @@ import com.github.clasicrando.workflows.data.postgres.PgWorkflowTasksDao
 import com.github.clasicrando.workflows.data.postgres.PgWorkflowsDao
 import com.github.clasicrando.workflows.model.ScheduleEntry
 import com.github.clasicrando.workflows.model.TaskRule
+import com.github.clasicrando.workflows.model.TaskStatus
 import com.github.clasicrando.workflows.model.WorkflowRunStatus
 import com.github.clasicrando.workflows.model.WorkflowTaskComposite
 import io.github.clasicrando.kdbc.core.pool.PoolOptions
@@ -105,7 +106,7 @@ suspend fun DI.registerTypes() {
     val connectionPool by di.instance<PgAsyncConnectionPool>()
     connectionPool.useConnection {
         it.registerEnumType<MergeType>("pipeline.merge_type")
-//        it.registerEnumType<TaskStatus>("workflow_engine.task_status")
+        it.registerEnumType<TaskStatus>("workflow_engine.task_status")
         it.registerEnumType<WorkflowRunStatus>("workflow_engine.workflow_run_status")
         it.registerCompositeType<ScheduleEntry>("workflow_engine.schedule_entry")
         it.registerCompositeType<TaskRule>("workflow_engine.task_rule")

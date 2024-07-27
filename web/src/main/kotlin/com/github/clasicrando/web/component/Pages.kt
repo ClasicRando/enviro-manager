@@ -37,7 +37,6 @@ inline fun HTML.BasePage(
         }
         script(src = "/assets/htmx.min.js") {}
         script(src = "/assets/json-enc.js") {}
-        script(src = "/assets/hyperscript.min.js") {}
         script(src = "/assets/sweetalert2.min.js") {}
         script(type = "module", src = "/assets/utils.js") {}
         script(src = "/assets/fontawesome/js/solid.js") {

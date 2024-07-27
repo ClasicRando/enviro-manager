@@ -8,6 +8,7 @@ import com.github.clasicrando.web.htmx.confirmAction
 import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxDelete
 import com.github.clasicrando.web.htmx.hxGet
+import com.github.clasicrando.web.htmx.hxInclude
 import com.github.clasicrando.web.htmx.hxIndicator
 import com.github.clasicrando.web.htmx.hxOnClick
 import com.github.clasicrando.web.htmx.hxPatch
@@ -184,6 +185,8 @@ inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
     search: Boolean = false,
     extraButtons: List<ExtraButton> = emptyList(),
     extraContainerClasses: String? = null,
+    refreshTrigger: String = "load, click",
+    hxInclude: String? = null,
     crossinline header: THEAD.() -> Unit,
 ) {
     val bodyTarget = "#$id tbody"
@@ -220,8 +223,11 @@ inline fun <T, C : TagConsumer<T>> C.DataTableRefresh(
                 button(type = ButtonType.button, classes = "btn btn-secondary") {
                     this.title = "Refresh"
                     hxGet = dataSource
-                    hxTrigger = "load, click"
+                    hxTrigger = refreshTrigger
                     hxTarget = bodyTarget
+                    if (!hxInclude.isNullOrBlank()) {
+                        this.hxInclude = hxInclude
+                    }
                     hxSwap(SwapType.OuterHtml)
                     hxIndicator = ".htmx-indicator"
                     i(classes = "fa-solid fa-refresh")

@@ -18,19 +18,7 @@ create table if not exists pipeline.pipeline_runs (
         on delete set null,
     current_pipeline_state text not null references pipeline.pipeline_states(code) match simple
         on update cascade
-        on delete set null,
-    collection_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
-        on update cascade
-        on delete set null,
-    load_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
-        on update cascade
-        on delete set null,
-    check_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
-        on update cascade
-        on delete set null,
-    qa_workflow_id bigint references workflow_engine.workflow_runs(workflow_run_id) match simple
-        on update cascade
-        on delete set null,
+        on delete restrict,
     is_active boolean not null default false,
     production_count int not null default 0 check(production_count >= 0),
     staging_count int not null default 0 check(staging_count >= 0),

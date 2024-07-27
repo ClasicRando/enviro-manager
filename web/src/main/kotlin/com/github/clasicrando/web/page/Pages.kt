@@ -1,6 +1,7 @@
 package com.github.clasicrando.web.page
 
 import com.github.clasicrando.datasources.model.toDsId
+import com.github.clasicrando.pipelines.model.toRunId
 import com.github.clasicrando.users.model.Role
 import com.github.clasicrando.users.model.User
 import com.github.clasicrando.web.UserSession
@@ -10,6 +11,7 @@ import com.github.clasicrando.web.component.BasePage
 import com.github.clasicrando.web.component.DataSourceView
 import com.github.clasicrando.web.component.DataSourcesTable
 import com.github.clasicrando.web.component.LoginForm
+import com.github.clasicrando.web.component.PipelineRunView
 import com.github.clasicrando.web.component.PipelineRunsTable
 import com.github.clasicrando.web.component.TasksTable
 import com.github.clasicrando.web.component.WorkflowsTable
@@ -77,6 +79,7 @@ fun Route.authenticatedPages() {
     workflows()
     tasks()
     pipelineRuns()
+    pipelineRun()
     adminDashboard()
 }
 
@@ -134,6 +137,15 @@ private fun Route.pipelineRuns() =
         val user = userWithRoleOrRespond(roles = pipelineRunRoles)
         call.respondMaybeHtmxPage(user = user, pageTitle = "Pipeline Runs") {
             PipelineRunsTable()
+        }
+    }
+
+private fun Route.pipelineRun() =
+    get("/pipeline-runs/{pipelineRunId}") {
+        val pipelineRunId = call.parameters.getOrFail<Long>("pipelineRunId").toRunId()
+        val user = userWithRoleOrRespond(roles = pipelineRunRoles)
+        call.respondMaybeHtmxPage(user = user, pageTitle = "Pipeline Run") {
+            PipelineRunView(pipelineRunId)
         }
     }
 

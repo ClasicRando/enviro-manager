@@ -4,8 +4,6 @@ create or replace view pipeline.v_pipeline_runs as
         u1.full_name as collection_user, u2.full_name as load_user,
         u3.full_name as check_user, u4.full_name as qa_user,
         ps.name as current_pipeline_state,
-        pr.collection_workflow_run_id, pr.load_workflow_run_id,
-        pr.check_workflow_run_id, pr.qa_workflow_run_id,
         pr.is_active, pr.production_count, pr.staging_count, pr.match_count, pr.new_count,
         pr.plotting_stats, pr.has_child_table, pr.merge_type
     from pipeline.pipeline_runs pr

@@ -1,6 +1,7 @@
 package com.github.clasicrando.web.component
 
 import com.github.clasicrando.web.MAIN_CONTENT_TARGET
+import com.github.clasicrando.web.element.Column
 import com.github.clasicrando.web.htmx.SwapType
 import com.github.clasicrando.web.htmx.htmxJsonEncoding
 import com.github.clasicrando.web.htmx.hxGet
@@ -129,7 +130,7 @@ inline fun FlowContent.DataSelectionField(
         +label
     }
     div(classes = "col-sm-$columnWidth") {
-        select(classes = "data-field form-control") {
+        select(classes = "text-center form-control") {
             id = fieldId
             name = fieldId
             hxTrigger = trigger
@@ -159,7 +160,7 @@ fun FlowContent.DataSelectionField(
         +label
     }
     div(classes = "col-sm-$columnWidth") {
-        select(classes = "data-field form-control") {
+        select(classes = "text-center form-control") {
             id = fieldId
             name = fieldId
             for ((i, pair) in selectionItems.withIndex()) {
@@ -182,18 +183,36 @@ fun FlowContent.DataDisplayArea(
     label: String,
     columnWidth: Int,
     data: String?,
+    height: Int = 200,
+    textStart: Boolean = true,
 ) {
     label(classes = "col-sm-1 col-form-label text-center") {
         htmlFor = fieldId
         +label
     }
     div(classes = "col-sm-$columnWidth") {
-        textArea(classes = "data-field form-control") {
+        textArea(classes = "${if (textStart) "text-start" else "text-center"} form-control") {
             readonly = true
             id = fieldId
-            style = "height: 200px"
+            style = "height: ${height}px"
             +(data ?: "")
         }
+    }
+}
+
+@Component
+fun FlowContent.DataIconField(
+    fieldId: String,
+    label: String,
+    columnWidth: Int,
+    icon: String,
+) {
+    Column(classes = "text-center", size = columnWidth) {
+        label(classes = "col-form-label me-3") {
+            htmlFor = fieldId
+            +label
+        }
+        i(classes = "fa-solid $icon")
     }
 }
 
@@ -203,13 +222,14 @@ fun FlowContent.DataDisplayField(
     label: String,
     columnWidth: Int,
     data: Any?,
+    labelColumnWidth: Int = 1,
 ) {
-    label(classes = "col-sm-1 col-form-label text-center") {
+    label(classes = "col-sm-$labelColumnWidth col-form-label text-center") {
         htmlFor = fieldId
         +label
     }
     div(classes = "col-sm-$columnWidth") {
-        input(classes = "data-field form-control") {
+        input(classes = "text-center form-control") {
             value = data.displayValue()
             readonly = true
             id = fieldId
